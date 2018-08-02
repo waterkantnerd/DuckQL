@@ -130,6 +130,8 @@ Public Class XMLFiles
                                                     End If
                                                 Case "Servertype"
                                                     Setting.Servertype = .Value
+                                                Case "SessionTimestampField"
+                                                    Setting.SessionTimeStampField = .Value
                                             End Select
                                         End While
                                         ENV.SQLServer.AddLast(Setting)
@@ -184,4 +186,92 @@ Public Class XMLFiles
         End Try
         ReadJobFile = ENV
     End Function
+
+    Public Sub WriteJobFile(Path As String, ENV As ENV)
+        Dim enc As New System.Text.UnicodeEncoding
+        Dim XMLobj As Xml.XmlTextWriter = New Xml.XmlTextWriter(Path, enc) With {
+            .Formatting = Xml.Formatting.Indented,
+            .Indentation = 4
+        }
+
+        XMLobj.WriteStartDocument()
+
+        With XMLobj
+            .WriteStartElement("Job")
+            .WriteAttributeString("Jobname", ENV.GetName)
+
+            .WriteStartElement("LoggingDirectory")
+            .WriteAttributeString("Adress", ENV.GetLogPath)
+            .WriteAttributeString("LogLevel", ENV.LogLevel)
+            .WriteEndElement()
+
+            Dim Source As New SQLServerSettings
+
+            For Each Setting In ENV.SQLServer
+                If Setting.Direction = "source" Then
+                    Source = Setting
+                End If
+            Next
+
+
+            .WriteStartElement("SQLServer")
+            .WriteAttributeString("Direction", "source")
+            .WriteAttributeString("SQL-Server-Adress", Source.Servername)
+            .WriteAttributeString("Database", Source.SQLDB)
+            .WriteAttributeString("Username", Source.User)
+            .WriteAttributeString("Password", Source.Password)
+            .WriteAttributeString("ConnMode", Source.ConnMode)
+            .WriteAttributeString("Table", Source.SQLTable)
+            .WriteAttributeString("IDColumn", Source.IDColumn)
+            .WriteAttributeString("FilterType", Source.Filtertype)
+            .WriteAttributeString("FilterColumn", Source.FilterColumn)
+            .WriteAttributeString("FilterValue", Source.FilterValue)
+            .WriteAttributeString("SQLFilter", Source.SQLFilter)
+            .WriteAttributeString("Servertype", Source.Servertype)
+            .WriteEndElement()
+
+            Dim Target As New SQLServerSettings
+
+            For Each Setting In ENV.SQLServer
+                If Setting.Direction = "target" Then
+                    Target = Setting
+                End If
+            Next
+
+            .WriteStartElement("SQLServer")
+            .WriteAttributeString("Direction", "target")
+            .WriteAttributeString("SQL-Server-Adress", Target.Servername)
+            .WriteAttributeString("Database", Target.SQLDB)
+            .WriteAttributeString("Username", Target.User)
+            .WriteAttributeString("Password", Target.Password)
+            .WriteAttributeString("ConnMode", Target.ConnMode)
+            .WriteAttributeString("Table", Target.SQLTable)
+            .WriteAttributeString("SessionTimestampField", Target.SessionTimestampField)
+            .WriteAttributeString("IDColumn", Target.IDColumn)
+            .WriteAttributeString("MapValue", Target.MapTargetIDColumnValue)
+            .WriteAttributeString("StringSeparator", Target.StringSeperator)
+            .WriteAttributeString("StringPart", Target.StringPart)
+            .WriteAttributeString("InsertAllowed", Target.InsertAllowed)
+            .WriteAttributeString("UpdateAllowed", Target.UpdateAllowed)
+            .WriteAttributeString("Servertype", Target.Servertype)
+            .WriteEndElement()
+
+            .WriteStartElement("Mappings")
+            For Each Mapping In ENV.Mappings
+                .WriteStartElement("Mapping")
+                .WriteAttributeString("SourceColumn", Mapping.Sourcename)
+                .WriteAttributeString("TargetColumn", Mapping.Targetname)
+                .WriteAttributeString("SourceType", Mapping.Sourcetype)
+                .WriteAttributeString("TargetType", Mapping.Targettype)
+                .WriteAttributeString("StringSeperator", Mapping.Separator)
+                .WriteAttributeString("StringPart", Mapping.SeperatorDirection)
+                .WriteEndElement()
+            Next
+            .WriteEndElement()
+
+            .WriteEndElement()
+            .Close()
+
+        End With
+    End Sub
 End Class

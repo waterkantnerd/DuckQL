@@ -20,9 +20,10 @@ Public Class SQL
     Protected RC As DataTable
     Public ENV As ENV
     Public SQLLog As LOG
-    Private MySQLCon As New MySqlConnection
+    Public MySQLCon As MySqlConnection
     Private MySQLcmd As New MySqlCommand
     Public Setting As SQLServerSettings
+    Public Testmode As Boolean = False
 
     '--------------------------------------------------Initializing the classe-------------------------------------------------
     Public Sub SetENV(ENV)
@@ -39,26 +40,28 @@ Public Class SQL
     ' I used https://www.connectionstrings.com/ to look up the connection strings for all supported products.
 
     '--------------------------------------------------MySQL-------------------------------------------------------------------
-    Public Sub ConnectMySQL(sServer As String, sDB As String, sUsername As String, Optional sPW As String = "")
+    Public Function ConnectMySQL(sServer As String, sDB As String, sUsername As String, Optional sPW As String = "") As MySqlConnection
         If sPW = "" Then
-            MySQLCon.ConnectionString = "Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";"
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";")
         Else
-            MySQLCon.ConnectionString = "Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";"
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";")
         End If
 
         Try
             MySQLCon.Open()
             Console.WriteLine("Connected with " & sServer & "\" & sDB)
             MySQLCon.Close()
+            ConnectMySQL = MySQLCon
         Catch ex As Exception
             Console.WriteLine(ex.Message)
+            ConnectMySQL = Nothing
         End Try
-    End Sub
+    End Function
     '-------------------------------------------------------------------------------------------------------------------------
 
     '--------------------------------------------------Microsoft SQL Server with Username and Password------------------------
     Private Function ConnectDBByUser(sServer As String, sUser As String, sPw As String, sDB As String) As SqlConnection
-        Dim SQLLog As LOG = Module1.Core.CurrentLog
+        'Dim SQLLog As LOG = Module1.Core.CurrentLog
         SQLLog.Write(1, "Connecting to SQL Server...")
         Try
             'Create a Connection object.
@@ -128,10 +131,26 @@ Public Class SQL
                 ' MySQL provides the option to not use a password for the DB User. So I've implemented two options:
                 ' Username and Password or just a User, assume that there is no Password for the User you want to use.
                 If IsNothing(Setting.Password) Or Setting.Password = "" Then
-                    ConnectMySQL(Setting.Servername, Setting.SQLDB, Setting.User)
+                    Me.MySQLCon = ConnectMySQL(Setting.Servername, Setting.SQLDB, Setting.User)
                 Else
-                    ConnectMySQL(Setting.Servername, Setting.SQLDB, Setting.User, Setting.Password)
+                    Me.MySQLCon = ConnectMySQL(Setting.Servername, Setting.SQLDB, Setting.User, Setting.Password)
                 End If
+            Case "MS-SQL"
+                Select Case Setting.ConnMode
+                    Case "Normal"
+                        Me.SQLCon = ConnectDBByUser(Setting.Servername, Setting.User, Setting.Password, Setting.SQLDB)
+                        Exit Sub
+
+                    Case "Trusted"
+                        Me.SQLCon = ConnectDBTrusted(Setting.Servername, Setting.SQLDB)
+                        Exit Sub
+
+                    Case Else
+                        ' Microsoft provides several different mehtods to connect to you sql server
+                        ' for the start I provided only two: Username & Password or Trusted
+                        SQLLog.Write(0, "Unkown Connection Method")
+                        Exit Sub
+                End Select
         End Select
 
     End Sub
@@ -148,6 +167,27 @@ Public Class SQL
         ' SQLrq is the query variable
         Select Case Setting.Servertype
             Case "MSSQL"
+                Dim dataadapter As New SqlDataAdapter(SQLrq, SQLCon)
+                Dim ds As New DataSet()
+                Try
+                    SQLCon.Open()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    CreateDataAdapter = Nothing
+                    Exit Function
+                End Try
+
+                Try
+                    dataadapter.Fill(ds, Module1.Core.CurrentENV.GetName())
+                    SQLCon.Close()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    CreateDataAdapter = Nothing
+                    Exit Function
+                End Try
+                dataadapter = Nothing
+                Return ds
+            Case "MS-SQL"
                 Dim dataadapter As New SqlDataAdapter(SQLrq, SQLCon)
                 Dim ds As New DataSet()
                 Try

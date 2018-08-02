@@ -5,7 +5,7 @@ Imports System.IO
 Public Class LOG
     Public Logpath As String = System.AppDomain.CurrentDomain.BaseDirectory()
     Public Logfile As String = "Undefinied.log"
-
+    Public Testmode As Boolean = False
     Private CurrENV As ENV
 
     Public Function CTOR() As Boolean
@@ -18,6 +18,10 @@ Public Class LOG
 
 
     Public Function Write(sCode As Integer, sMessage As String) As Boolean
+        If Me.Testmode = True Then
+            Write = True
+            Exit Function
+        End If
         Me.Logpath = Module1.Core.CurrentENV.GetLogPath
         Me.Logfile = Module1.Core.CurrentENV.GetName & ".log"
         Write = False

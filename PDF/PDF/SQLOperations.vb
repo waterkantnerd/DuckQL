@@ -101,17 +101,18 @@ Public Class SQLOperations
                             Reihe.Spalten.AddLast(Daten)
                         End If
                     Next
-                    If Target.TimestampField <> "" Then
+                    If Target.SessionTimestampField <> "" Then
                         Dim Daten As New Daten
+                        Daten.SetUp(SQL, TargetSQL)
                         Daten.IdentifierCol = Setting.IDColumn
                         Daten.IdentifierVal = ResultRow(Setting.IDColumn).ToString
-                        Daten.SourceKey = Target.TimestampField
+                        Daten.SourceKey = Target.SessionTimestampField
                         Daten.Wert = Module1.Core.TimeStamp
                         Dim Mapping As New Mapping
-                        Mapping.Sourcename = Target.TimestampField
+                        Mapping.Sourcename = Target.SessionTimestampField
                         Mapping.Sourcetype = "DateTime"
                         Mapping.Targettype = "DateTime"
-                        Mapping.Targetname = Target.TimestampField
+                        Mapping.Targetname = Target.SessionTimestampField
                         Daten.Mapping = Mapping
                         Reihe.Spalten.AddLast(Daten)
                     End If
@@ -183,8 +184,10 @@ Public Class SQLOperations
             Return Nothing
         End If
         For Each SQLobject In Module1.Core.SQLServer
-            If Setting.TargetID = SQLobject.Setting.ID Then
-                Return SQLobject.Setting
+            If SQLobject.Setting.Direction = "Target" Or SQLobject.Setting.Direction = "target" Then
+                If Setting.TargetID = SQLobject.Setting.ID Then
+                    Return SQLobject.Setting
+                End If
             End If
         Next
         Return Nothing
@@ -195,8 +198,10 @@ Public Class SQLOperations
             Return Nothing
         End If
         For Each SQLobject In Module1.Core.SQLServer
-            If Setting.TargetID = SQLobject.Setting.ID Then
-                Return SQLobject
+            If SQLobject.Setting.Direction = "Target" Or SQLobject.Setting.Direction = "target" Then
+                If Setting.TargetID = SQLobject.Setting.ID Then
+                    Return SQLobject
+                End If
             End If
         Next
         Return Nothing

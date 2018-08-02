@@ -18,11 +18,12 @@
 
     '-------------Jobsettings-----------------------------------------
     Public ID As String
-    Public TimestampField As String
     Public InsertAllowed As Boolean
     Public UpdateAllowed As Boolean
+    Public DeleteAllowed As Boolean 'Has to be implemented...
     Public Direction As String 'This Parameter defines if it is a target or source setting
     Public TargetID As String
+    Public SessionTimestampField As String
     '-----------------------------------------------------------------
 
     '------------Filtersettings---------------------------------------
@@ -37,7 +38,10 @@
     Public StringPart As String
     '-----------------------------------------------------------------
 
-
+    '-----------Config Info-------------------------------------------
+    Public Tested As Boolean = False
+    Public Worked As Boolean = False
+    '-----------------------------------------------------------------
 
 
 

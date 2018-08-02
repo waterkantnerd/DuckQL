@@ -23,14 +23,45 @@ Module Module1
         Dim ENVPath As String = ""
 
         If args.Length < 2 Then
-            System.Console.WriteLine("No Jobdirectory found!")
-            Exit Sub
+            ShowHelp()
+            If System.Console.In.ReadLine <> "" Then
+                Exit Sub
+            End If
         End If
         If IsNothing(args(0)) = True Then
             System.Console.WriteLine("No Jobdirectory found!")
             Exit Sub
         Else
-            Jobdir = args(1)
+            Select Case args(1)
+                Case "-c"
+                    Dim ConfigurationForm As New Konfiguration
+                    ConfigurationForm.ShowDialog()
+                    If Core.JobXMLPath <> "" Then
+                        System.Console.WriteLine("Found a Job File.")
+                        System.Console.WriteLine("Hit r if you want to run it.")
+                        System.Console.WriteLine("Type exit to end this program.")
+                        Select Case System.Console.In.ReadLine
+                            Case "r"
+                                Jobdir = Core.JobXMLPath
+                            Case "exit"
+                                Exit Sub
+                            Case Else
+
+                        End Select
+                    End If
+                Case "-h"
+                    ShowHelp()
+                    If System.Console.In.ReadLine <> "" Then
+                        Exit Sub
+                    End If
+                Case Else
+                    If System.IO.Directory.Exists(args(1)) = True Then
+                        Jobdir = args(1)
+                    Else
+                        System.Console.WriteLine("No valid Jobdirectory found!")
+                        Exit Sub
+                    End If
+            End Select
         End If
         '---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -92,7 +123,7 @@ Module Module1
                 Core.SQLServer.AddLast(SQL)
             Next
         Catch ex As Exception
-            MsgBox(ex.Message)
+            System.Console.WriteLine(ex.Message)
             Log.Write(0, ex.Message)
             Exit Sub
         End Try
@@ -157,7 +188,7 @@ Module Module1
         '-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
         For Each SQL In Core.SQLServer
-            If SQL.Setting.Direction = "Source" Then
+            If SQL.Setting.Direction = "Source" Or SQL.Setting.Direction = "source" Then
                 SQLop.Load(SQL)
             End If
         Next
@@ -171,9 +202,21 @@ Module Module1
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
         Dim SQLop As New SQLOperations
         For Each SQL In Core.SQLServer
-            If SQL.Setting.Direction = "Target" Then
+            If SQL.Setting.Direction = "Target" Or SQL.Setting.Direction = "target" Then
                 SQLop.Fire(SQL)
             End If
         Next
+    End Sub
+
+    Private Sub ShowHelp()
+        System.Console.WriteLine("Copies Data from one Database into another Database")
+        System.Console.WriteLine("i.E. MS-SQL Server to MySQL Server." & vbLf & vbLf)
+        System.Console.WriteLine("sqlduck.exe [-c] [PATH] [-h]" & vbLf)
+        System.Console.WriteLine("PATH" & vbTab & "Path to configuration files. This has to be a folder.")
+        System.Console.WriteLine("-c" & vbTab & "Opens configuration form.")
+        System.Console.WriteLine("-h" & vbTab & "Opens help." & vbLf & vbLf)
+        System.Console.WriteLine("Example to run with a config file:")
+        System.Console.WriteLine("sqlduck.exe " & Chr(34) & "C:\Users\waterkantnerd\config files\" & Chr(34) & vbLf & vbLf)
+        System.Console.WriteLine("Hit any key for exit...")
     End Sub
 End Module

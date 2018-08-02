@@ -8,6 +8,8 @@ Public Class Core
     Public Reihen As New LinkedList(Of Reihe)       ' List of Datarows
     Public SessionStamp As String = ""              ' Identifier for the session
     Public TimeStamp As String = Now()              ' Timestamp for the session
+    Public JobXMLPath As String = ""                ' If the config has written a job xml it is stored here for testing
+
 
     'Initializing the core
     Public Sub CoreStart(ENV As ENV, Log As LOG)

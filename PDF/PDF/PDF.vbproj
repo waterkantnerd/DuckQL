@@ -64,6 +64,8 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -83,6 +85,12 @@
     <Compile Include="Core.vb" />
     <Compile Include="Daten.vb" />
     <Compile Include="ENV.vb" />
+    <Compile Include="Konfiguration.Designer.vb">
+      <DependentUpon>Konfiguration.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Konfiguration.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="LOG.vb" />
     <Compile Include="Mapping.vb" />
     <Compile Include="Module1.vb" />
@@ -110,6 +118,9 @@
     <Compile Include="XMLFiles.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Konfiguration.resx">
+      <DependentUpon>Konfiguration.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
@@ -123,6 +134,8 @@
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
     </None>
+    <None Include="My Project\DataSources\Core.datasource" />
+    <None Include="My Project\DataSources\Mapping.datasource" />
     <None Include="My Project\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <CustomToolNamespace>My</CustomToolNamespace>
