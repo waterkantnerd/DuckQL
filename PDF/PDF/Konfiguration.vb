@@ -241,10 +241,13 @@
                     Case "PartOfSubstring"
                         Mapping.SeperatorDirection = MappingGrid.Item(Columns, Rows).Value
                     Case Else
-                        Mapping.Sourcename = "Fuck that error!"
+                        Mapping.Sourcename = "Error"
                 End Select
             Next
-            ENV.Mappings.AddLast(Mapping)
+            If Mapping.Sourcename = "" And Mapping.Targetname = "" And Mapping.Sourcetype = "" And Mapping.Targettype = "" Then
+            Else
+                ENV.Mappings.AddLast(Mapping)
+            End If
         Next
 
         Dim XMLFile As New XMLFiles

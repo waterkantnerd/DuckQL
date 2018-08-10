@@ -1,8 +1,8 @@
 ﻿'--------------------------------------------------Summary--------------------------------------------------
 ' This is my first projekt. It's primary for learning coding and algorithms. 
-' I develop this In my spare time And personally used it On some occasions in my work enviroment.
+' I develop this in my spare time and personally used it on some occasions in my work environment.
 ' I'LL GIVE NO WARRANTY!! YOU MAY USE IT AT YOUR OWN RISK!! 
-' This program reads data from one database And puts it into another.
+' This program reads data from one database and puts it into another.
 ' Common usecases: Migrating data into a new schema, sync data between two independent datasources.
 ' Development: I'll add some more data adapters from time to time and try to optimize performance.
 ' I'm looking forward to your addtions, comments or ideas :)
@@ -24,9 +24,10 @@ Module Module1
 
         If args.Length < 2 Then
             ShowHelp()
-            If System.Console.In.ReadLine <> "" Then
-                Exit Sub
-            End If
+            Select Case System.Console.In.ReadLine
+                Case Else
+                    Exit Sub
+            End Select
         End If
         If IsNothing(args(0)) = True Then
             System.Console.WriteLine("No Jobdirectory found!")

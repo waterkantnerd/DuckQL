@@ -228,28 +228,81 @@ Public Class SQL
 
     Public Function ExecuteQuery(SQLrq As String) As String
         Dim Res As String = ""
-        Try
-            If myConn.State = ConnectionState.Open Then
-                myConn.Close()
-            End If
-            myCmd.CommandText = SQLrq
-            myConn.Open()
-            myReader = myCmd.ExecuteReader()
-            Do While myReader.Read()
-                Res = myReader.GetString(0)
-            Loop
-            If IsDBNull(results) = True Then
-                SQLLog.Write(1, "Tabelle ist leer!")
-                results = ""
-            End If
-            myReader.Close()
-            myConn.Close()
-            ExecuteQuery = Res
-        Catch e As Exception
-            ExecuteQuery = Nothing
-            SQLLog.Write(0, e.Message)
-            Exit Function
-        End Try
+        Select Case Setting.Servertype
+            Case "MSSQL"
+                Try
+                    If myConn.State = ConnectionState.Open Then
+                        myConn.Close()
+                    End If
+                    myCmd.CommandText = SQLrq
+                    myConn.Open()
+                    myReader = myCmd.ExecuteReader()
+                    Do While myReader.Read()
+                        Res = myReader.GetString(0)
+                    Loop
+                    If IsDBNull(results) = True Then
+                        SQLLog.Write(1, "Tabelle ist leer!")
+                        results = ""
+                    End If
+                    myReader.Close()
+                    myConn.Close()
+                    ExecuteQuery = Res
+                Catch e As Exception
+                    ExecuteQuery = Nothing
+                    SQLLog.Write(0, e.Message)
+                    Exit Function
+                End Try
+            Case "MS-SQL"
+                Try
+                    If myConn.State = ConnectionState.Open Then
+                        myConn.Close()
+                    End If
+                    myCmd.CommandText = SQLrq
+                    myConn.Open()
+                    myReader = myCmd.ExecuteReader()
+                    Do While myReader.Read()
+                        Res = myReader.GetString(0)
+                    Loop
+                    If IsDBNull(results) = True Then
+                        SQLLog.Write(1, "Tabelle ist leer!")
+                        results = ""
+                    End If
+                    myReader.Close()
+                    myConn.Close()
+                    ExecuteQuery = Res
+                Catch e As Exception
+                    ExecuteQuery = Nothing
+                    SQLLog.Write(0, e.Message)
+                    Exit Function
+                End Try
+            Case "MySQL"
+                Try
+                    Dim mysqlReader As MySqlDataReader
+                    If MySQLCon.State = ConnectionState.Open Then
+                        MySQLCon.Close()
+                    End If
+                    MySQLcmd.CommandText = SQLrq
+                    MySQLCon.Open()
+                    MySQLcmd.Connection = MySQLCon
+                    mysqlReader = MySQLcmd.ExecuteReader()
+                    Do While mysqlReader.Read()
+                        Res = mysqlReader.GetString(0)
+                    Loop
+                    If IsDBNull(results) = True Then
+                        SQLLog.Write(1, "Tabelle ist leer!")
+                        results = ""
+                    End If
+                    mysqlReader.Close()
+                    MySQLCon.Close()
+                    ExecuteQuery = Res
+                Catch e As Exception
+                    ExecuteQuery = Nothing
+                    SQLLog.Write(0, e.Message)
+                    Exit Function
+                End Try
+            Case Else
+                ExecuteQuery = Nothing
+        End Select
     End Function
 
     Public Sub ExecuteStoredProcedure(Params As LinkedList(Of SQLParamter))

@@ -82,7 +82,7 @@ Public Class XMLFiles
                                     If .AttributeCount > 0 Then
                                         While .MoveToNextAttribute ' nächstes 
                                             Select Case .Name
-                                                Case "Adress"
+                                                Case "SQL-Server-Adress"
                                                     Setting.Servername = .Value
                                                 Case "Database"
                                                     Setting.SQLDB = .Value
@@ -117,13 +117,13 @@ Public Class XMLFiles
                                                 Case "StringPart"
                                                     Setting.StringPart = .Value
                                                 Case "InsertAllowed"
-                                                    If .Value = "YES" Then
+                                                    If .Value = "YES" Or .Value = "True" Then
                                                         Setting.InsertAllowed = True
                                                     Else
                                                         Setting.InsertAllowed = False
                                                     End If
                                                 Case "UpdateAllowed"
-                                                    If .Value = "YES" Then
+                                                    If .Value = "YES" Or .Value = "True" Then
                                                         Setting.UpdateAllowed = True
                                                     Else
                                                         Setting.UpdateAllowed = False
