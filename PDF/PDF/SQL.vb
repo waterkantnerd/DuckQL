@@ -229,6 +229,8 @@ Public Class SQL
     Public Function ExecuteQuery(SQLrq As String) As String
         Dim Res As String = ""
         Select Case Setting.Servertype
+        ' Of course diffenrent Products need differnt objects here as well.
+        ' SQLrq is the query variable
             Case "MSSQL"
                 Try
                     If myConn.State = ConnectionState.Open Then
