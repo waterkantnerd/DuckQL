@@ -4,11 +4,12 @@
 Public Class Core
     Public CurrentENV As ENV                        ' Environment Object
     Public CurrentLog As LOG                        ' Log Object 
-    Public SQLServer As New LinkedList(Of SQL)      ' List of all SQL Server Objects. At the moment you only need two (source and target), but I plan to extend this to multiple sources/targets
+    Public SQLServer As New LinkedList(Of MyDataConnector)      ' List of all SQL Server Objects. At the moment you only need two (source and target), but I plan to extend this to multiple sources/targets
     Public Reihen As New LinkedList(Of Reihe)       ' List of Datarows
     Public SessionStamp As String = ""              ' Identifier for the session
     Public TimeStamp As String = Now()              ' Timestamp for the session
     Public JobXMLPath As String = ""                ' If the config has written a job xml it is stored here for testing
+    Public SQLCommands As New LinkedList(Of String) ' List of SQL Commands that will be send to SQL Target Server at the end
 
 
     'Initializing the core

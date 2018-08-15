@@ -165,6 +165,12 @@
             ENV.LogLevel = "0"
         End If
 
+        If Me.C_Silent.Checked = True Then
+            ENV.LogSilent = True
+        Else
+            ENV.LogSilent = False
+        End If
+
         Dim SourceSettings As New SQLServerSettings With {
             .Direction = "source",
             .Servertype = Me.C_SourceType.Text,
@@ -647,7 +653,7 @@
                     .Testmode = True
                 }
                 Module1.Core.CurrentLog = Log
-                Dim SQL As New SQL With {
+                Dim SQL As New MyDataConnector With {
                     .Setting = SourceSettings,
                     .SQLLog = Log
                 }
@@ -686,7 +692,7 @@
                         .Testmode = True
                     }
                     Module1.Core.CurrentLog = Log
-                    Dim SQL As New SQL With {
+                    Dim SQL As New MyDataConnector With {
                         .Setting = SourceSettings,
                         .SQLLog = Log
                     }
@@ -740,7 +746,7 @@
                     .Testmode = True
                 }
                 Module1.Core.CurrentLog = Log
-                Dim SQL As New SQL With {
+                Dim SQL As New MyDataConnector With {
                     .Setting = TargetSettings,
                     .SQLLog = Log
                 }
@@ -778,7 +784,7 @@
                         .Testmode = True
                     }
                     Module1.Core.CurrentLog = Log
-                    Dim SQL As New SQL With {
+                    Dim SQL As New MyDataConnector With {
                         .Setting = TargetSettings,
                         .SQLLog = Log
                     }

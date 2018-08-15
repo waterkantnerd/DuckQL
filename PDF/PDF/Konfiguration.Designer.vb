@@ -94,6 +94,7 @@ Partial Class Konfiguration
         Me.PartOfSubstring = New System.Windows.Forms.DataGridViewComboBoxColumn()
         Me.B_Save = New System.Windows.Forms.Button()
         Me.C_DebugLog = New System.Windows.Forms.CheckBox()
+        Me.C_Silent = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -748,11 +749,22 @@ Partial Class Konfiguration
         Me.C_DebugLog.Text = "Enable Debug Logging"
         Me.C_DebugLog.UseVisualStyleBackColor = True
         '
+        'C_Silent
+        '
+        Me.C_Silent.AutoSize = True
+        Me.C_Silent.Location = New System.Drawing.Point(739, 36)
+        Me.C_Silent.Name = "C_Silent"
+        Me.C_Silent.Size = New System.Drawing.Size(141, 17)
+        Me.C_Silent.TabIndex = 46
+        Me.C_Silent.Text = "Enable Silent Running"
+        Me.C_Silent.UseVisualStyleBackColor = True
+        '
         'Konfiguration
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1219, 631)
+        Me.Controls.Add(Me.C_Silent)
         Me.Controls.Add(Me.C_DebugLog)
         Me.Controls.Add(Me.B_Save)
         Me.Controls.Add(Me.MappingGrid)
@@ -850,4 +862,5 @@ Partial Class Konfiguration
     Friend WithEvents Label4 As Windows.Forms.Label
     Friend WithEvents PB_Source As Windows.Forms.PictureBox
     Friend WithEvents PB_Target As Windows.Forms.PictureBox
+    Friend WithEvents C_Silent As Windows.Forms.CheckBox
 End Class

@@ -6,10 +6,12 @@
     Public Password As String
     Public SQLDB As String
     Public Servertype As String
+    Public FilePath As String
     '-----------------------------------------------------------------
 
     '-------------Tablesettings---------------------------------------
     Public IDColumn As String
+    Public IDColumnDataType As String
     Public SQLTable As String
     Public FilterColumn As String
     Public FilterValue As String

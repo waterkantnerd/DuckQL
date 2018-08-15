@@ -84,6 +84,8 @@ Public Class XMLFiles
                                             Select Case .Name
                                                 Case "SQL-Server-Adress"
                                                     Setting.Servername = .Value
+                                                Case "Filepath"
+                                                    Setting.FilePath = .Value
                                                 Case "Database"
                                                     Setting.SQLDB = .Value
                                                 Case "Username"
@@ -96,6 +98,8 @@ Public Class XMLFiles
                                                     Setting.SQLTable = .Value
                                                 Case "IDColumn"
                                                     Setting.IDColumn = .Value
+                                                Case "IDColumnDataType"
+                                                    Setting.IDColumnDataType = .Value
                                                 Case "FilterType"
                                                     Setting.Filtertype = .Value
                                                 Case "FilterColumn"
@@ -168,6 +172,10 @@ Public Class XMLFiles
                                                     ENV.SetLogFile(.Value)
                                                 Case "LogLevel"
                                                     ENV.LogLevel = .Value
+                                                Case "Silent"
+                                                    If .Value = "TRUE" Or .Value = "True" Or .Value = "true" Then
+                                                        ENV.LogSilent = True
+                                                    End If
                                             End Select
                                         End While
 
@@ -203,6 +211,7 @@ Public Class XMLFiles
             .WriteStartElement("LoggingDirectory")
             .WriteAttributeString("Adress", ENV.GetLogPath)
             .WriteAttributeString("LogLevel", ENV.LogLevel)
+            .WriteAttributeString("Silent", ENV.LogSilent.ToString)
             .WriteEndElement()
 
             Dim Source As New SQLServerSettings
