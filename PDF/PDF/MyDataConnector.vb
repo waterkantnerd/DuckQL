@@ -2,7 +2,6 @@
 ' This is the SQL Base Function Class. Here all generic SQL Handling is coded.
 '----------------------------------------------------------------------------------------------------------
 
-
 Imports System.Data.SqlClient
 Imports System.Collections
 Imports System

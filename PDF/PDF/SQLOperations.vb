@@ -82,6 +82,7 @@ Public Class SQLOperations
                     Reihe.IDValueDataType = Setting.IDColumnDataType
                     Log.Write(1, "Row " & i & " has ID value " & Reihe.IDValue)
                     ' Running throught the loaded columns
+                    '---------------------- This can be much faster, if we already know the mappings and match the columns in just one step -----------------------------------------------------
                     For Each Column In DS.Tables(0).Columns
                         Dim Daten As New Daten
                         Daten.SetUp(SQL, TargetSQL)
@@ -101,6 +102,11 @@ Public Class SQLOperations
                             Reihe.Spalten.AddLast(Daten)
                         End If
                     Next
+                    '------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    '------------------------------------------------------------------Let's give it a try-----------------------------------------------------------------------------------------
+
+                    '------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
                     If Target.SessionTimestampField <> "" Then
                         Dim Daten As New Daten
                         Daten.SetUp(SQL, TargetSQL)
