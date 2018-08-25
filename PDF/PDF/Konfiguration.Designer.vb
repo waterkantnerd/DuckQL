@@ -22,6 +22,8 @@ Partial Class Konfiguration
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Konfiguration))
         Me.T_Jobname = New System.Windows.Forms.TextBox()
         Me.L_Jobname = New System.Windows.Forms.Label()
         Me.SaveFileDialog1 = New System.Windows.Forms.SaveFileDialog()
@@ -42,7 +44,7 @@ Partial Class Konfiguration
         Me.Label3 = New System.Windows.Forms.Label()
         Me.T_SourceSQLFilter = New System.Windows.Forms.TextBox()
         Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.L_SourceServerAdress = New System.Windows.Forms.Label()
         Me.T_SourceFilterValue = New System.Windows.Forms.TextBox()
         Me.T_SourceFilterColumn = New System.Windows.Forms.TextBox()
         Me.C_SourceFilterType = New System.Windows.Forms.ComboBox()
@@ -82,7 +84,7 @@ Partial Class Konfiguration
         Me.T_TargetPassword = New System.Windows.Forms.TextBox()
         Me.Label18 = New System.Windows.Forms.Label()
         Me.C_TargetConnectionType = New System.Windows.Forms.ComboBox()
-        Me.Label19 = New System.Windows.Forms.Label()
+        Me.L_TargetServerAdress = New System.Windows.Forms.Label()
         Me.T_TargetTable = New System.Windows.Forms.TextBox()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
         Me.MappingGrid = New System.Windows.Forms.DataGridView()
@@ -95,6 +97,18 @@ Partial Class Konfiguration
         Me.B_Save = New System.Windows.Forms.Button()
         Me.C_DebugLog = New System.Windows.Forms.CheckBox()
         Me.C_Silent = New System.Windows.Forms.CheckBox()
+        Me.ToolTipKonfig = New System.Windows.Forms.ToolTip(Me.components)
+        Me.T_SourcePath = New System.Windows.Forms.TextBox()
+        Me.T_TargetPath = New System.Windows.Forms.TextBox()
+        Me.L_SourcePath = New System.Windows.Forms.Label()
+        Me.L_TargetPath = New System.Windows.Forms.Label()
+        Me.B_SourcePath = New System.Windows.Forms.Button()
+        Me.B_TargetPath = New System.Windows.Forms.Button()
+        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
+        Me.C_SourceIDDatatype = New System.Windows.Forms.ComboBox()
+        Me.C_TargetIDDatatype = New System.Windows.Forms.ComboBox()
+        Me.L_SourceIDDataType = New System.Windows.Forms.Label()
+        Me.L_TargetIDDatatype = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -108,6 +122,9 @@ Partial Class Konfiguration
         Me.T_Jobname.Name = "T_Jobname"
         Me.T_Jobname.Size = New System.Drawing.Size(396, 22)
         Me.T_Jobname.TabIndex = 0
+        Me.ToolTipKonfig.SetToolTip(Me.T_Jobname, "Jobname:" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "This defines the name of your job you're about to configure. Jobname wi" &
+        "ll be used in the logfiles. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Therefore a precise jobname may help, if something" &
+        " is not working as it should be.  ")
         '
         'L_Jobname
         '
@@ -124,6 +141,8 @@ Partial Class Konfiguration
         Me.T_LoggingDirectory.Name = "T_LoggingDirectory"
         Me.T_LoggingDirectory.Size = New System.Drawing.Size(501, 22)
         Me.T_LoggingDirectory.TabIndex = 1
+        Me.ToolTipKonfig.SetToolTip(Me.T_LoggingDirectory, "Logging Directory: Enter the path where logfiles should be stored. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You can use " &
+        "the button next to this field to chose the directory via gui. ")
         '
         'L_LoggingDirectory
         '
@@ -141,10 +160,16 @@ Partial Class Konfiguration
         Me.B_LoggingDirectory.Size = New System.Drawing.Size(50, 23)
         Me.B_LoggingDirectory.TabIndex = 2
         Me.B_LoggingDirectory.Text = "..."
+        Me.ToolTipKonfig.SetToolTip(Me.B_LoggingDirectory, "Click here to choose a logging directory")
         Me.B_LoggingDirectory.UseVisualStyleBackColor = True
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.L_SourceIDDataType)
+        Me.GroupBox1.Controls.Add(Me.C_SourceIDDatatype)
+        Me.GroupBox1.Controls.Add(Me.B_SourcePath)
+        Me.GroupBox1.Controls.Add(Me.L_SourcePath)
+        Me.GroupBox1.Controls.Add(Me.T_SourcePath)
         Me.GroupBox1.Controls.Add(Me.PB_Source)
         Me.GroupBox1.Controls.Add(Me.L_SQLFilterStatement)
         Me.GroupBox1.Controls.Add(Me.L_FilterValue)
@@ -158,7 +183,7 @@ Partial Class Konfiguration
         Me.GroupBox1.Controls.Add(Me.Label3)
         Me.GroupBox1.Controls.Add(Me.T_SourceSQLFilter)
         Me.GroupBox1.Controls.Add(Me.Label2)
-        Me.GroupBox1.Controls.Add(Me.Label1)
+        Me.GroupBox1.Controls.Add(Me.L_SourceServerAdress)
         Me.GroupBox1.Controls.Add(Me.T_SourceFilterValue)
         Me.GroupBox1.Controls.Add(Me.T_SourceFilterColumn)
         Me.GroupBox1.Controls.Add(Me.C_SourceFilterType)
@@ -185,6 +210,7 @@ Partial Class Konfiguration
         Me.PB_Source.Size = New System.Drawing.Size(16, 88)
         Me.PB_Source.TabIndex = 23
         Me.PB_Source.TabStop = False
+        Me.ToolTipKonfig.SetToolTip(Me.PB_Source, resources.GetString("PB_Source.ToolTip"))
         '
         'L_SQLFilterStatement
         '
@@ -300,14 +326,14 @@ Partial Class Konfiguration
         Me.Label2.TabIndex = 12
         Me.Label2.Text = "Server Type:"
         '
-        'Label1
+        'L_SourceServerAdress
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(277, 22)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(78, 13)
-        Me.Label1.TabIndex = 7
-        Me.Label1.Text = "Server Adress:"
+        Me.L_SourceServerAdress.AutoSize = True
+        Me.L_SourceServerAdress.Location = New System.Drawing.Point(277, 22)
+        Me.L_SourceServerAdress.Name = "L_SourceServerAdress"
+        Me.L_SourceServerAdress.Size = New System.Drawing.Size(78, 13)
+        Me.L_SourceServerAdress.TabIndex = 7
+        Me.L_SourceServerAdress.Text = "Server Adress:"
         '
         'T_SourceFilterValue
         '
@@ -333,13 +359,16 @@ Partial Class Konfiguration
         Me.C_SourceFilterType.Name = "C_SourceFilterType"
         Me.C_SourceFilterType.Size = New System.Drawing.Size(206, 21)
         Me.C_SourceFilterType.TabIndex = 12
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceFilterType, resources.GetString("C_SourceFilterType.ToolTip"))
         '
         'T_SourceIDColumn
         '
         Me.T_SourceIDColumn.Location = New System.Drawing.Point(80, 149)
         Me.T_SourceIDColumn.Name = "T_SourceIDColumn"
-        Me.T_SourceIDColumn.Size = New System.Drawing.Size(485, 22)
+        Me.T_SourceIDColumn.Size = New System.Drawing.Size(228, 22)
         Me.T_SourceIDColumn.TabIndex = 11
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourceIDColumn, "ID Column: The columns that is used as identifier, i.e. ID. At the moment only on" &
+        "e column is supported.")
         '
         'T_SourceTable
         '
@@ -347,6 +376,7 @@ Partial Class Konfiguration
         Me.T_SourceTable.Name = "T_SourceTable"
         Me.T_SourceTable.Size = New System.Drawing.Size(485, 22)
         Me.T_SourceTable.TabIndex = 10
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourceTable, "Table: The name of the table from your database you want to sync. ")
         '
         'C_SourceConnMode
         '
@@ -355,6 +385,7 @@ Partial Class Konfiguration
         Me.C_SourceConnMode.Name = "C_SourceConnMode"
         Me.C_SourceConnMode.Size = New System.Drawing.Size(191, 21)
         Me.C_SourceConnMode.TabIndex = 7
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceConnMode, resources.GetString("C_SourceConnMode.ToolTip"))
         Me.C_SourceConnMode.Visible = False
         '
         'T_SourcePassword
@@ -364,6 +395,8 @@ Partial Class Konfiguration
         Me.T_SourcePassword.PasswordChar = Global.Microsoft.VisualBasic.ChrW(42)
         Me.T_SourcePassword.Size = New System.Drawing.Size(206, 22)
         Me.T_SourcePassword.TabIndex = 9
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourcePassword, "Password: The corresponding password. Attention! Passwords are stored in clear te" &
+        "xt!")
         Me.T_SourcePassword.Visible = False
         '
         'T_SourceUsername
@@ -372,6 +405,7 @@ Partial Class Konfiguration
         Me.T_SourceUsername.Name = "T_SourceUsername"
         Me.T_SourceUsername.Size = New System.Drawing.Size(191, 22)
         Me.T_SourceUsername.TabIndex = 8
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourceUsername, resources.GetString("T_SourceUsername.ToolTip"))
         Me.T_SourceUsername.Visible = False
         '
         'T_SourceDB
@@ -380,15 +414,17 @@ Partial Class Konfiguration
         Me.T_SourceDB.Name = "T_SourceDB"
         Me.T_SourceDB.Size = New System.Drawing.Size(191, 22)
         Me.T_SourceDB.TabIndex = 6
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourceDB, "Database: The database you want to use.")
         '
         'C_SourceType
         '
         Me.C_SourceType.FormattingEnabled = True
-        Me.C_SourceType.Items.AddRange(New Object() {"MS-SQL", "MySQL"})
+        Me.C_SourceType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access"})
         Me.C_SourceType.Location = New System.Drawing.Point(80, 19)
         Me.C_SourceType.Name = "C_SourceType"
         Me.C_SourceType.Size = New System.Drawing.Size(191, 21)
         Me.C_SourceType.TabIndex = 4
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceType, "Server Type: Choose the type of you datasource.")
         '
         'T_SourceAdress
         '
@@ -396,9 +432,15 @@ Partial Class Konfiguration
         Me.T_SourceAdress.Name = "T_SourceAdress"
         Me.T_SourceAdress.Size = New System.Drawing.Size(206, 22)
         Me.T_SourceAdress.TabIndex = 5
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourceAdress, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.L_TargetIDDatatype)
+        Me.GroupBox2.Controls.Add(Me.C_TargetIDDatatype)
+        Me.GroupBox2.Controls.Add(Me.B_TargetPath)
+        Me.GroupBox2.Controls.Add(Me.L_TargetPath)
+        Me.GroupBox2.Controls.Add(Me.T_TargetPath)
         Me.GroupBox2.Controls.Add(Me.PB_Target)
         Me.GroupBox2.Controls.Add(Me.Label4)
         Me.GroupBox2.Controls.Add(Me.C_DeleteAllowed)
@@ -426,7 +468,7 @@ Partial Class Konfiguration
         Me.GroupBox2.Controls.Add(Me.T_TargetPassword)
         Me.GroupBox2.Controls.Add(Me.Label18)
         Me.GroupBox2.Controls.Add(Me.C_TargetConnectionType)
-        Me.GroupBox2.Controls.Add(Me.Label19)
+        Me.GroupBox2.Controls.Add(Me.L_TargetServerAdress)
         Me.GroupBox2.Controls.Add(Me.T_TargetTable)
         Me.GroupBox2.Location = New System.Drawing.Point(612, 65)
         Me.GroupBox2.Name = "GroupBox2"
@@ -442,6 +484,7 @@ Partial Class Konfiguration
         Me.PB_Target.Size = New System.Drawing.Size(16, 88)
         Me.PB_Target.TabIndex = 24
         Me.PB_Target.TabStop = False
+        Me.ToolTipKonfig.SetToolTip(Me.PB_Target, resources.GetString("PB_Target.ToolTip"))
         '
         'Label4
         '
@@ -459,6 +502,8 @@ Partial Class Konfiguration
         Me.C_DeleteAllowed.Size = New System.Drawing.Size(106, 17)
         Me.C_DeleteAllowed.TabIndex = 29
         Me.C_DeleteAllowed.Text = "DELETE allowed"
+        Me.ToolTipKonfig.SetToolTip(Me.C_DeleteAllowed, "DELETE allowed: Check if you want that rows, that not exists in you source will b" &
+        "e deleted.")
         Me.C_DeleteAllowed.UseVisualStyleBackColor = True
         '
         'C_UpdateAllowed
@@ -469,6 +514,7 @@ Partial Class Konfiguration
         Me.C_UpdateAllowed.Size = New System.Drawing.Size(109, 17)
         Me.C_UpdateAllowed.TabIndex = 28
         Me.C_UpdateAllowed.Text = "UPDATE allowed"
+        Me.ToolTipKonfig.SetToolTip(Me.C_UpdateAllowed, "UPDATE allowed: Check if you want existing rows to be updated")
         Me.C_UpdateAllowed.UseVisualStyleBackColor = True
         '
         'C_InsertAllowed
@@ -479,12 +525,13 @@ Partial Class Konfiguration
         Me.C_InsertAllowed.Size = New System.Drawing.Size(105, 17)
         Me.C_InsertAllowed.TabIndex = 27
         Me.C_InsertAllowed.Text = "INSERT allowed"
+        Me.ToolTipKonfig.SetToolTip(Me.C_InsertAllowed, "INSERT allowed: Check if you want new values to be added to your source.")
         Me.C_InsertAllowed.UseVisualStyleBackColor = True
         '
         'Label24
         '
         Me.Label24.AutoSize = True
-        Me.Label24.Location = New System.Drawing.Point(507, 178)
+        Me.Label24.Location = New System.Drawing.Point(507, 187)
         Me.Label24.Name = "Label24"
         Me.Label24.Size = New System.Drawing.Size(76, 26)
         Me.Label24.TabIndex = 44
@@ -493,7 +540,7 @@ Partial Class Konfiguration
         'Label23
         '
         Me.Label23.AutoSize = True
-        Me.Label23.Location = New System.Drawing.Point(310, 181)
+        Me.Label23.Location = New System.Drawing.Point(310, 190)
         Me.Label23.Name = "Label23"
         Me.Label23.Size = New System.Drawing.Size(26, 13)
         Me.Label23.TabIndex = 43
@@ -503,15 +550,18 @@ Partial Class Konfiguration
         '
         Me.C_TargetPartSubstring.FormattingEnabled = True
         Me.C_TargetPartSubstring.Items.AddRange(New Object() {"left", "right"})
-        Me.C_TargetPartSubstring.Location = New System.Drawing.Point(342, 178)
+        Me.C_TargetPartSubstring.Location = New System.Drawing.Point(342, 187)
         Me.C_TargetPartSubstring.Name = "C_TargetPartSubstring"
         Me.C_TargetPartSubstring.Size = New System.Drawing.Size(159, 21)
         Me.C_TargetPartSubstring.TabIndex = 25
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetPartSubstring, "Use ... part of the substring: You can choose if the program should you the left " &
+        "or the right side starting from" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "the seperator, i.e. of you cut 10-12345 to 1234" &
+        "5 you have to choose ""right"".")
         '
         'Label22
         '
         Me.Label22.AutoSize = True
-        Me.Label22.Location = New System.Drawing.Point(174, 181)
+        Me.Label22.Location = New System.Drawing.Point(170, 190)
         Me.Label22.Name = "Label22"
         Me.Label22.Size = New System.Drawing.Size(60, 13)
         Me.Label22.TabIndex = 41
@@ -519,19 +569,25 @@ Partial Class Konfiguration
         '
         'T_TargetSeperator
         '
-        Me.T_TargetSeperator.Location = New System.Drawing.Point(236, 178)
+        Me.T_TargetSeperator.Location = New System.Drawing.Point(236, 187)
         Me.T_TargetSeperator.Name = "T_TargetSeperator"
         Me.T_TargetSeperator.Size = New System.Drawing.Size(68, 22)
         Me.T_TargetSeperator.TabIndex = 24
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetSeperator, "Seperator: The char or string which should be used as the indicator to cut the ID" &
+        " Value, i.e. if you want have " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "10-12345 in your source db and need 12345 in you" &
+        "r target the seperator will be 10-.")
         '
         'C_MapIDValue
         '
         Me.C_MapIDValue.AutoSize = True
-        Me.C_MapIDValue.Location = New System.Drawing.Point(81, 180)
+        Me.C_MapIDValue.Location = New System.Drawing.Point(81, 189)
         Me.C_MapIDValue.Name = "C_MapIDValue"
         Me.C_MapIDValue.Size = New System.Drawing.Size(94, 17)
         Me.C_MapIDValue.TabIndex = 23
         Me.C_MapIDValue.Text = "Map ID Value"
+        Me.ToolTipKonfig.SetToolTip(Me.C_MapIDValue, "Map ID Value: Check this, if you need to match a substring of the source ID value" &
+        " with you target IDs, i.e. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "source ID value is 10-12345 and target values shoul" &
+        "d be only 12345.")
         Me.C_MapIDValue.UseVisualStyleBackColor = True
         '
         'Label21
@@ -549,6 +605,8 @@ Partial Class Konfiguration
         Me.T_TargetTimestampfield.Name = "T_TargetTimestampfield"
         Me.T_TargetTimestampfield.Size = New System.Drawing.Size(459, 22)
         Me.T_TargetTimestampfield.TabIndex = 26
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetTimestampfield, "Time Stamp Field: If you want to set a sync timestamp, to see when the row has sy" &
+        "nced, you can add the name")
         '
         'Label20
         '
@@ -572,17 +630,18 @@ Partial Class Konfiguration
         '
         Me.T_TargetIDColumn.Location = New System.Drawing.Point(81, 149)
         Me.T_TargetIDColumn.Name = "T_TargetIDColumn"
-        Me.T_TargetIDColumn.Size = New System.Drawing.Size(485, 22)
+        Me.T_TargetIDColumn.Size = New System.Drawing.Size(230, 22)
         Me.T_TargetIDColumn.TabIndex = 22
         '
         'C_TargetServerType
         '
         Me.C_TargetServerType.FormattingEnabled = True
-        Me.C_TargetServerType.Items.AddRange(New Object() {"MS-SQL", "MySQL"})
+        Me.C_TargetServerType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access"})
         Me.C_TargetServerType.Location = New System.Drawing.Point(81, 18)
         Me.C_TargetServerType.Name = "C_TargetServerType"
         Me.C_TargetServerType.Size = New System.Drawing.Size(191, 21)
         Me.C_TargetServerType.TabIndex = 15
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetServerType, "Server Type: Choose the type of you target datasource.")
         '
         'L_TargetConnectionType
         '
@@ -600,6 +659,7 @@ Partial Class Konfiguration
         Me.T_TargetServerAdress.Name = "T_TargetServerAdress"
         Me.T_TargetServerAdress.Size = New System.Drawing.Size(206, 22)
         Me.T_TargetServerAdress.TabIndex = 16
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetServerAdress, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
         '
         'L_TargetPassword
         '
@@ -617,6 +677,7 @@ Partial Class Konfiguration
         Me.T_TargetDB.Name = "T_TargetDB"
         Me.T_TargetDB.Size = New System.Drawing.Size(191, 22)
         Me.T_TargetDB.TabIndex = 17
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetDB, "Database: The database you want to use.")
         '
         'L_TargetUsername
         '
@@ -634,6 +695,7 @@ Partial Class Konfiguration
         Me.T_TargetUsername.Name = "T_TargetUsername"
         Me.T_TargetUsername.Size = New System.Drawing.Size(191, 22)
         Me.T_TargetUsername.TabIndex = 19
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetUsername, resources.GetString("T_TargetUsername.ToolTip"))
         Me.T_TargetUsername.Visible = False
         '
         'Label17
@@ -652,6 +714,8 @@ Partial Class Konfiguration
         Me.T_TargetPassword.PasswordChar = Global.Microsoft.VisualBasic.ChrW(42)
         Me.T_TargetPassword.Size = New System.Drawing.Size(206, 22)
         Me.T_TargetPassword.TabIndex = 20
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetPassword, "Password: The corresponding password. Attention! Passwords are stored in clear te" &
+        "xt!")
         Me.T_TargetPassword.Visible = False
         '
         'Label18
@@ -670,16 +734,17 @@ Partial Class Konfiguration
         Me.C_TargetConnectionType.Name = "C_TargetConnectionType"
         Me.C_TargetConnectionType.Size = New System.Drawing.Size(191, 21)
         Me.C_TargetConnectionType.TabIndex = 18
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetConnectionType, resources.GetString("C_TargetConnectionType.ToolTip"))
         Me.C_TargetConnectionType.Visible = False
         '
-        'Label19
+        'L_TargetServerAdress
         '
-        Me.Label19.AutoSize = True
-        Me.Label19.Location = New System.Drawing.Point(278, 21)
-        Me.Label19.Name = "Label19"
-        Me.Label19.Size = New System.Drawing.Size(78, 13)
-        Me.Label19.TabIndex = 30
-        Me.Label19.Text = "Server Adress:"
+        Me.L_TargetServerAdress.AutoSize = True
+        Me.L_TargetServerAdress.Location = New System.Drawing.Point(278, 21)
+        Me.L_TargetServerAdress.Name = "L_TargetServerAdress"
+        Me.L_TargetServerAdress.Size = New System.Drawing.Size(78, 13)
+        Me.L_TargetServerAdress.TabIndex = 30
+        Me.L_TargetServerAdress.Text = "Server Adress:"
         '
         'T_TargetTable
         '
@@ -687,6 +752,7 @@ Partial Class Konfiguration
         Me.T_TargetTable.Name = "T_TargetTable"
         Me.T_TargetTable.Size = New System.Drawing.Size(485, 22)
         Me.T_TargetTable.TabIndex = 21
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetTable, "Table: The name of the table from your database you want to sync. ")
         '
         'MappingGrid
         '
@@ -696,6 +762,7 @@ Partial Class Konfiguration
         Me.MappingGrid.Name = "MappingGrid"
         Me.MappingGrid.Size = New System.Drawing.Size(1185, 156)
         Me.MappingGrid.TabIndex = 30
+        Me.ToolTipKonfig.SetToolTip(Me.MappingGrid, "Enter the mappings between source and target tables")
         '
         'SourceColumn
         '
@@ -747,6 +814,8 @@ Partial Class Konfiguration
         Me.C_DebugLog.Size = New System.Drawing.Size(145, 17)
         Me.C_DebugLog.TabIndex = 3
         Me.C_DebugLog.Text = "Enable Debug Logging"
+        Me.ToolTipKonfig.SetToolTip(Me.C_DebugLog, "Enable Debug Logging: This is helpful in testing szenarios. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "CAUTION!! This crea" &
+        "tes a lot of noise. ")
         Me.C_DebugLog.UseVisualStyleBackColor = True
         '
         'C_Silent
@@ -757,7 +826,117 @@ Partial Class Konfiguration
         Me.C_Silent.Size = New System.Drawing.Size(141, 17)
         Me.C_Silent.TabIndex = 46
         Me.C_Silent.Text = "Enable Silent Running"
+        Me.ToolTipKonfig.SetToolTip(Me.C_Silent, "Enable Silent Running: This disables the prompt in the shell and adds a little bi" &
+        "t of extra" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "performance. Very useful in a productive environment.")
         Me.C_Silent.UseVisualStyleBackColor = True
+        '
+        'ToolTipKonfig
+        '
+        Me.ToolTipKonfig.ToolTipTitle = "Configuration"
+        '
+        'T_SourcePath
+        '
+        Me.T_SourcePath.Location = New System.Drawing.Point(314, 19)
+        Me.T_SourcePath.Name = "T_SourcePath"
+        Me.T_SourcePath.Size = New System.Drawing.Size(226, 22)
+        Me.T_SourcePath.TabIndex = 24
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourcePath, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
+        Me.T_SourcePath.Visible = False
+        '
+        'T_TargetPath
+        '
+        Me.T_TargetPath.Location = New System.Drawing.Point(317, 18)
+        Me.T_TargetPath.Name = "T_TargetPath"
+        Me.T_TargetPath.Size = New System.Drawing.Size(228, 22)
+        Me.T_TargetPath.TabIndex = 25
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetPath, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
+        Me.T_TargetPath.Visible = False
+        '
+        'L_SourcePath
+        '
+        Me.L_SourcePath.AutoSize = True
+        Me.L_SourcePath.Location = New System.Drawing.Point(275, 22)
+        Me.L_SourcePath.Name = "L_SourcePath"
+        Me.L_SourcePath.Size = New System.Drawing.Size(33, 13)
+        Me.L_SourcePath.TabIndex = 25
+        Me.L_SourcePath.Text = "Path:"
+        Me.L_SourcePath.Visible = False
+        '
+        'L_TargetPath
+        '
+        Me.L_TargetPath.AutoSize = True
+        Me.L_TargetPath.Location = New System.Drawing.Point(278, 21)
+        Me.L_TargetPath.Name = "L_TargetPath"
+        Me.L_TargetPath.Size = New System.Drawing.Size(33, 13)
+        Me.L_TargetPath.TabIndex = 26
+        Me.L_TargetPath.Text = "Path:"
+        Me.L_TargetPath.Visible = False
+        '
+        'B_SourcePath
+        '
+        Me.B_SourcePath.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.B_SourcePath.Location = New System.Drawing.Point(545, 18)
+        Me.B_SourcePath.Name = "B_SourcePath"
+        Me.B_SourcePath.Size = New System.Drawing.Size(22, 23)
+        Me.B_SourcePath.TabIndex = 47
+        Me.B_SourcePath.Text = "..."
+        Me.ToolTipKonfig.SetToolTip(Me.B_SourcePath, "Click here to choose a logging directory")
+        Me.B_SourcePath.UseVisualStyleBackColor = True
+        Me.B_SourcePath.Visible = False
+        '
+        'B_TargetPath
+        '
+        Me.B_TargetPath.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.B_TargetPath.Location = New System.Drawing.Point(547, 18)
+        Me.B_TargetPath.Name = "B_TargetPath"
+        Me.B_TargetPath.Size = New System.Drawing.Size(21, 23)
+        Me.B_TargetPath.TabIndex = 48
+        Me.B_TargetPath.Text = "..."
+        Me.ToolTipKonfig.SetToolTip(Me.B_TargetPath, "Click here to choose a logging directory")
+        Me.B_TargetPath.UseVisualStyleBackColor = True
+        Me.B_TargetPath.Visible = False
+        '
+        'OpenFileDialog1
+        '
+        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
+        '
+        'C_SourceIDDatatype
+        '
+        Me.C_SourceIDDatatype.FormattingEnabled = True
+        Me.C_SourceIDDatatype.Items.AddRange(New Object() {"uniqueidentifier", "int", "string", "datetime"})
+        Me.C_SourceIDDatatype.Location = New System.Drawing.Point(374, 149)
+        Me.C_SourceIDDatatype.Name = "C_SourceIDDatatype"
+        Me.C_SourceIDDatatype.Size = New System.Drawing.Size(191, 21)
+        Me.C_SourceIDDatatype.TabIndex = 48
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceIDDatatype, "Type: The datatype of your identifier column")
+        '
+        'C_TargetIDDatatype
+        '
+        Me.C_TargetIDDatatype.FormattingEnabled = True
+        Me.C_TargetIDDatatype.Items.AddRange(New Object() {"uniqueidentifier", "int", "string", "datetime"})
+        Me.C_TargetIDDatatype.Location = New System.Drawing.Point(375, 149)
+        Me.C_TargetIDDatatype.Name = "C_TargetIDDatatype"
+        Me.C_TargetIDDatatype.Size = New System.Drawing.Size(191, 21)
+        Me.C_TargetIDDatatype.TabIndex = 49
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetIDDatatype, "Type: The datatype of your identifier column")
+        '
+        'L_SourceIDDataType
+        '
+        Me.L_SourceIDDataType.AutoSize = True
+        Me.L_SourceIDDataType.Location = New System.Drawing.Point(336, 152)
+        Me.L_SourceIDDataType.Name = "L_SourceIDDataType"
+        Me.L_SourceIDDataType.Size = New System.Drawing.Size(32, 13)
+        Me.L_SourceIDDataType.TabIndex = 49
+        Me.L_SourceIDDataType.Text = "Type:"
+        '
+        'L_TargetIDDatatype
+        '
+        Me.L_TargetIDDatatype.AutoSize = True
+        Me.L_TargetIDDatatype.Location = New System.Drawing.Point(337, 152)
+        Me.L_TargetIDDatatype.Name = "L_TargetIDDatatype"
+        Me.L_TargetIDDatatype.Size = New System.Drawing.Size(32, 13)
+        Me.L_TargetIDDatatype.TabIndex = 50
+        Me.L_TargetIDDatatype.Text = "Type:"
         '
         'Konfiguration
         '
@@ -798,7 +977,7 @@ Partial Class Konfiguration
     Friend WithEvents B_LoggingDirectory As Windows.Forms.Button
     Friend WithEvents GroupBox1 As Windows.Forms.GroupBox
     Friend WithEvents Label2 As Windows.Forms.Label
-    Friend WithEvents Label1 As Windows.Forms.Label
+    Friend WithEvents L_SourceServerAdress As Windows.Forms.Label
     Friend WithEvents T_SourceSQLFilter As Windows.Forms.TextBox
     Friend WithEvents T_SourceFilterValue As Windows.Forms.TextBox
     Friend WithEvents T_SourceFilterColumn As Windows.Forms.TextBox
@@ -843,7 +1022,7 @@ Partial Class Konfiguration
     Friend WithEvents T_TargetPassword As Windows.Forms.TextBox
     Friend WithEvents Label18 As Windows.Forms.Label
     Friend WithEvents C_TargetConnectionType As Windows.Forms.ComboBox
-    Friend WithEvents Label19 As Windows.Forms.Label
+    Friend WithEvents L_TargetServerAdress As Windows.Forms.Label
     Friend WithEvents T_TargetTable As Windows.Forms.TextBox
     Friend WithEvents FolderBrowserDialog1 As Windows.Forms.FolderBrowserDialog
     Friend WithEvents C_DeleteAllowed As Windows.Forms.CheckBox
@@ -863,4 +1042,16 @@ Partial Class Konfiguration
     Friend WithEvents PB_Source As Windows.Forms.PictureBox
     Friend WithEvents PB_Target As Windows.Forms.PictureBox
     Friend WithEvents C_Silent As Windows.Forms.CheckBox
+    Friend WithEvents ToolTipKonfig As Windows.Forms.ToolTip
+    Friend WithEvents B_SourcePath As Windows.Forms.Button
+    Friend WithEvents L_SourcePath As Windows.Forms.Label
+    Friend WithEvents T_SourcePath As Windows.Forms.TextBox
+    Friend WithEvents B_TargetPath As Windows.Forms.Button
+    Friend WithEvents L_TargetPath As Windows.Forms.Label
+    Friend WithEvents T_TargetPath As Windows.Forms.TextBox
+    Friend WithEvents OpenFileDialog1 As Windows.Forms.OpenFileDialog
+    Friend WithEvents L_SourceIDDataType As Windows.Forms.Label
+    Friend WithEvents C_SourceIDDatatype As Windows.Forms.ComboBox
+    Friend WithEvents L_TargetIDDatatype As Windows.Forms.Label
+    Friend WithEvents C_TargetIDDatatype As Windows.Forms.ComboBox
 End Class

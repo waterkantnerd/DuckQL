@@ -113,7 +113,7 @@ Public Class MyDataConnector
 
     '--------------------------------------------------Microsoft Access------------------------------------------------------
     Private Function ConnectDBAccess(Path As String, sDB As String) As OleDb.OleDbConnection
-        ' This one restrictes the application to x86 CPUs (32 bit Application) 
+        ' This one restrictes the application to x86 Architecture (32 bit Application) 
         ' After some research it seems, that the Microsoft.ACE.OLEDB.12.0 is only availabe in a 32bit Version
         ' Found the solution in this blog post https://blogs.technet.microsoft.com/austria/2014/02/06/der-microsoft-ace-oledb-12-0-provider-fehlt/
         ' 
@@ -136,9 +136,6 @@ Public Class MyDataConnector
         Me.AccessCon.Close()
     End Function
     '------------------------------------------------------------------------------------------------------------------------
-
-
-
     Public Sub CreateSQLCon()
         Select Case Setting.Servertype
             Case "MSSQL"
@@ -184,6 +181,8 @@ Public Class MyDataConnector
             Case "Access"
                 Select Case Setting.ConnMode
                     Case "Normal"
+                        Me.AccessCon = ConnectDBAccess(Setting.FilePath, Setting.SQLDB)
+                    Case "Standard Security"
                         Me.AccessCon = ConnectDBAccess(Setting.FilePath, Setting.SQLDB)
                 End Select
         End Select

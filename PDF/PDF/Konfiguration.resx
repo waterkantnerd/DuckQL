@@ -117,9 +117,62 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="ToolTipKonfig.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>325, 17</value>
+  </metadata>
   <metadata name="SaveFileDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <metadata name="ToolTipKonfig.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>325, 17</value>
+  </metadata>
+  <data name="PB_Source.ToolTip" xml:space="preserve">
+    <value>This indicator shows if the program could connect to your db.
+Red: The program couldn't connect to you db.
+Green: The program has susccessfully connected to your db.
+
+Note: Red doesn't have to mean that your credentials aren't working. If you are not sure 
+what is the cause of the connection problem, test your configuration with the user and 
+credention on which the sync should run. If there are still issues check: Firewall, User limitations 
+(i.e. limited connection to a specific host), is the host up and running?...</value>
+  </data>
+  <data name="C_SourceFilterType.ToolTip" xml:space="preserve">
+    <value>Filter Type: If you don't want to filter all the data from your source table, you have the option of two filter mode.
+1. one column match: A simple one column filter, i.e. price &gt; 1000
+2. sql: If you want to filter with a more complex way i.e. price &gt; 1000 OR (age &gt;=10 AND zipcode &gt;= 50)  </value>
+  </data>
+  <data name="C_SourceConnMode.ToolTip" xml:space="preserve">
+    <value>Connection Type: The type of authentification you want to use. Be careful: Passwords are stored
+in clear text at the moment. 
+If you want to use the Trusted Authentification mode of MS-SQL Server, the program has to run under
+a user that has the neccessary privilege on your database.</value>
+  </data>
+  <data name="T_SourceUsername.ToolTip" xml:space="preserve">
+    <value>Username: Enter the username you want to connect to your database. Attention: If you choose MS-SQL Server,
+the server has to support SQL-Server authentification. A Windowsuser i.e. YOURDOMAIN\YOURNAME is not 
+supported here.</value>
+  </data>
+  <data name="PB_Target.ToolTip" xml:space="preserve">
+    <value>This indicator shows if the program could connect to your db.
+Red: The program couldn't connect to you db.
+Green: The program has susccessfully connected to your db.
+
+Note: Red doesn't have to mean that your credentials aren't working. If you are not sure 
+what is the cause of the connection problem, test your configuration with the user and 
+credention on which the sync should run. If there are still issues check: Firewall, User limitations 
+(i.e. limited connection to a specific host), is the host up and running?...</value>
+  </data>
+  <data name="T_TargetUsername.ToolTip" xml:space="preserve">
+    <value>Username: Enter the username you want to connect to your database. Attention: If you choose MS-SQL Server,
+the server has to support SQL-Server authentification. A Windowsuser i.e. YOURDOMAIN\YOURNAME is not 
+supported here.</value>
+  </data>
+  <data name="C_TargetConnectionType.ToolTip" xml:space="preserve">
+    <value>Connection Type: The type of authentification you want to use. Be careful: Passwords are stored
+in clear text at the moment. 
+If you want to use the Trusted Authentification mode of MS-SQL Server, the program has to run under
+a user that has the neccessary privilege on your database.</value>
+  </data>
   <metadata name="FolderBrowserDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>154, 17</value>
   </metadata>
@@ -140,5 +193,29 @@
   </metadata>
   <metadata name="PartOfSubstring.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
+  </metadata>
+  <metadata name="SourceColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="TargetColumn.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="SourceType.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="TargetType.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="Seperator.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="PartOfSubstring.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="OpenFileDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>453, 17</value>
+  </metadata>
+  <metadata name="ToolTipKonfig.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>325, 17</value>
   </metadata>
 </root>

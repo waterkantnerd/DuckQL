@@ -140,6 +140,9 @@ Public Class SQLOperations
         ' It creates INSERT and UPDATE Statements.
         ' The function checks if the user has defined the corrosponding rights 
         ' for INSERT Or UPDATE Statements And sends it To the target SQL-Server
+        ' For optimized performance querys are send every 12.000 rows to the server,
+        ' this is a compromize between performance -> one big query and timeouthandling 
+        ' of the several servers which the program can not influence.
         Me.SQL = SQL
         Me.Setting = SQL.Setting
 
@@ -157,7 +160,25 @@ Public Class SQLOperations
                 If Setting.InsertAllowed = True Then
                     Log.Write(1, "So far the Identifier didn't exist --> INSERT")
                     Reihe.MakeInsertString()
-                    Module1.Core.SQLCommands.AddLast(Reihe.InsertString)
+                    If SQL.Setting.Servertype = "Access" Then
+                        SQL.ExecuteQuery(Reihe.InsertString)
+                    Else
+                        Module1.Core.SQLCommands.AddLast(Reihe.InsertString)
+                        If Module1.Core.SQLCommands.Count > 12000 Then
+                            Log.Write(1, "Have more than 12.000 Commandlines --> Writing to Database")
+                            For Each Line In Module1.Core.SQLCommands
+                                If SQLrq = "" Then
+                                    SQLrq = Line & ";"
+                                Else
+                                    SQLrq = SQLrq & Line & ";"
+                                End If
+                            Next
+                            SQL.ExecuteQuery(SQLrq)
+                            Log.Write(1, "Clearing Command Cache...")
+                            Module1.Core.SQLCommands.Clear()
+                            SQLrq = ""
+                        End If
+                    End If
                 Else
                     Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
                 End If
@@ -166,7 +187,25 @@ Public Class SQLOperations
                     If Setting.InsertAllowed = True Then
                         Log.Write(1, "So far the Identifier didn't exist --> INSERT")
                         Reihe.MakeInsertString()
-                        Module1.Core.SQLCommands.AddLast(Reihe.InsertString)
+                        If SQL.Setting.Servertype = "Access" Then
+                            SQL.ExecuteQuery(Reihe.InsertString)
+                        Else
+                            Module1.Core.SQLCommands.AddLast(Reihe.InsertString)
+                            If Module1.Core.SQLCommands.Count > 12000 Then
+                                Log.Write(1, "Have more than 12.000 Commandlines --> Writing to Database")
+                                For Each Line In Module1.Core.SQLCommands
+                                    If SQLrq = "" Then
+                                        SQLrq = Line & ";"
+                                    Else
+                                        SQLrq = SQLrq & Line & ";"
+                                    End If
+                                Next
+                                SQL.ExecuteQuery(SQLrq)
+                                Log.Write(1, "Clearing Command Cache...")
+                                Module1.Core.SQLCommands.Clear()
+                                SQLrq = ""
+                            End If
+                        End If
                     Else
                         Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
                     End If
@@ -174,31 +213,46 @@ Public Class SQLOperations
                     If Setting.UpdateAllowed = True Then
                         Log.Write(1, "Identifier already exists --> UPDATE")
                         Reihe.MakeUpdateString()
-                        Module1.Core.SQLCommands.AddLast(Reihe.UpdateString)
+                        If SQL.Setting.Servertype = "Access" Then
+                            SQL.ExecuteQuery(Reihe.UpdateString)
+                        Else
+                            Module1.Core.SQLCommands.AddLast(Reihe.UpdateString)
+                            If Module1.Core.SQLCommands.Count > 12000 Then
+                                Log.Write(1, "Have more than 12.000 Commandlines --> Writing to Database")
+                                For Each Line In Module1.Core.SQLCommands
+                                    If SQLrq = "" Then
+                                        SQLrq = Line & ";"
+                                    Else
+                                        SQLrq = SQLrq & Line & ";"
+                                    End If
+                                Next
+                                SQL.ExecuteQuery(SQLrq)
+                                Log.Write(1, "Clearing Command Cache...")
+                                Module1.Core.SQLCommands.Clear()
+                                SQLrq = ""
+                            End If
+                        End If
                     Else
                         Log.Write(1, "Identifier already exists --> UPDATE not allowed!")
                     End If
                 End If
             End If
         Next
-        ' Different Handling for Access DBs vs. other DBMS. Access seems to can't handle batch requests.
-        If SQL.Setting.Servertype = "Access" Then
-            'So the Access Driver will execute the querys one by one...
-            For Each Line In Module1.Core.SQLCommands
-
-                SQL.ExecuteQuery(Line)
-            Next
-        Else
+        'Executing the last commands...
+        If Module1.Core.SQLCommands.Count > 0 Then
+            Log.Write(1, "Last iteration of command lines --> Writing to Database")
             For Each Line In Module1.Core.SQLCommands
                 If SQLrq = "" Then
-                    SQLrq = Line
+                    SQLrq = Line & ";"
                 Else
-                    SQLrq = SQLrq & ";" & Line
+                    SQLrq = SQLrq & Line & ";"
                 End If
             Next
             SQL.ExecuteQuery(SQLrq)
+            Log.Write(1, "Final clearing Command Cache...")
+            Module1.Core.SQLCommands.Clear()
+            SQLrq = ""
         End If
-        SQLrq = ""
     End Sub
 
     Private Function GetTargetSetting() As SQLServerSettings

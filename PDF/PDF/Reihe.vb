@@ -29,6 +29,7 @@ Public Class Reihe
             Case "left"
                 IDValue = IDValue.Substring(0, IDValue.IndexOf(Target.Setting.StringSeperator))
         End Select
+        Log.Write(1, "Mapped ID Value:" & IDValue)
     End Sub
     Public Sub MakeUpdateString()
         Log.Write(1, "Creating SQL UPDATE-string...")
