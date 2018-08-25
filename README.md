@@ -1,4 +1,4 @@
-# SQLDuck
+# DuckQL
 
 This is my first projekt. It's primary for learning coding and algorithms. 
 I develop this In my spare time and personally used it on some occasions in my work environment.
