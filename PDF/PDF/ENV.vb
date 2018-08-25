@@ -13,10 +13,13 @@ Public Class ENV
     Public SQLFilter As String
 
     Public Mappings As New LinkedList(Of Mapping)
+
     Protected LogPath As String
     Protected LogFile As String
     Public LogLevel As String
     Public Log As New LOG
+    Public LogSilent As Boolean = False
+
     Protected Timestamp As String
 
     Public Overridable Function GetENV() As ENV

@@ -4,12 +4,12 @@
 ' However the program specific logic is in the sql operations class. 
 '----------------------------------------------------------------------------------------------------------------------------------------------------------
 Public Class SQLOperations
-    Private SQL As SQL
+    Private SQL As MyDataConnector
     Private Log As LOG = Module1.Core.CurrentLog
     Private ReadOnly ENV As ENV = Module1.Core.CurrentENV
     Private Setting As SQLServerSettings
 
-    Public Sub Load(SQLEnvoirenment As SQL)
+    Public Sub Load(SQLEnvoirenment As MyDataConnector)
         ' Loads data from source database.
 
         ' Setting up the source db into the method
@@ -19,7 +19,7 @@ Public Class SQLOperations
         Dim SQLrq As String = ""
         Dim DS As New DataSet
         Dim Target As SQLServerSettings
-        Dim TargetSQL As SQL
+        Dim TargetSQL As MyDataConnector
 
         Target = GetTargetSetting()
         TargetSQL = GetTargetSQL()
@@ -79,9 +79,10 @@ Public Class SQLOperations
                     Else
                         Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
                     End If
-
+                    Reihe.IDValueDataType = Setting.IDColumnDataType
                     Log.Write(1, "Row " & i & " has ID value " & Reihe.IDValue)
                     ' Running throught the loaded columns
+                    '---------------------- This can be much faster, if we already know the mappings and match the columns in just one step -----------------------------------------------------
                     For Each Column In DS.Tables(0).Columns
                         Dim Daten As New Daten
                         Daten.SetUp(SQL, TargetSQL)
@@ -101,6 +102,11 @@ Public Class SQLOperations
                             Reihe.Spalten.AddLast(Daten)
                         End If
                     Next
+                    '------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                    '------------------------------------------------------------------Let's give it a try-----------------------------------------------------------------------------------------
+
+                    '------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
                     If Target.SessionTimestampField <> "" Then
                         Dim Daten As New Daten
                         Daten.SetUp(SQL, TargetSQL)
@@ -124,15 +130,19 @@ Public Class SQLOperations
         Catch ex As Exception
             Module1.Core.CurrentLog.Write(0, "Error while searching for ID: " & ex.Message)
         End Try
+        SQLrq = ""
     End Sub
 
-    Public Sub Fire(SQL As SQL)
+    Public Sub Fire(SQL As MyDataConnector)
         ' Writes the data into target database.
         ' Matches data by identifier column.
         ' Therefore first it looks up the identifier in the target database.
         ' It creates INSERT and UPDATE Statements.
         ' The function checks if the user has defined the corrosponding rights 
         ' for INSERT Or UPDATE Statements And sends it To the target SQL-Server
+        ' For optimized performance querys are send every 12.000 rows to the server,
+        ' this is a compromize between performance -> one big query and timeouthandling 
+        ' of the several servers which the program can not influence.
         Me.SQL = SQL
         Me.Setting = SQL.Setting
 
@@ -143,13 +153,32 @@ Public Class SQLOperations
         Dim i As Long = 0
 
         For Each Reihe In Module1.Core.Reihen
-            SQLrq = "SELECT * FROM " & Setting.SQLTable & " WHERE " & Setting.IDColumn & "=" & SQL.CSQL(Reihe.IDValue)
+            SQLrq = "SELECT * FROM " & Setting.SQLTable & " WHERE " & Setting.IDColumn & "=" & SQL.CSQL(Reihe.IDValue, Reihe.GetIDValueDataType)
             DS = SQL.CreateDataAdapter(SQLrq)
+            SQLrq = ""
             If IsNothing(DS) = True Then
                 If Setting.InsertAllowed = True Then
                     Log.Write(1, "So far the Identifier didn't exist --> INSERT")
                     Reihe.MakeInsertString()
-                    SQLrq = Reihe.InsertString
+                    If SQL.Setting.Servertype = "Access" Then
+                        SQL.ExecuteQuery(Reihe.InsertString)
+                    Else
+                        Module1.Core.SQLCommands.AddLast(Reihe.InsertString)
+                        If Module1.Core.SQLCommands.Count > 12000 Then
+                            Log.Write(1, "Have more than 12.000 Commandlines --> Writing to Database")
+                            For Each Line In Module1.Core.SQLCommands
+                                If SQLrq = "" Then
+                                    SQLrq = Line & ";"
+                                Else
+                                    SQLrq = SQLrq & Line & ";"
+                                End If
+                            Next
+                            SQL.ExecuteQuery(SQLrq)
+                            Log.Write(1, "Clearing Command Cache...")
+                            Module1.Core.SQLCommands.Clear()
+                            SQLrq = ""
+                        End If
+                    End If
                 Else
                     Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
                 End If
@@ -158,7 +187,25 @@ Public Class SQLOperations
                     If Setting.InsertAllowed = True Then
                         Log.Write(1, "So far the Identifier didn't exist --> INSERT")
                         Reihe.MakeInsertString()
-                        SQLrq = Reihe.InsertString
+                        If SQL.Setting.Servertype = "Access" Then
+                            SQL.ExecuteQuery(Reihe.InsertString)
+                        Else
+                            Module1.Core.SQLCommands.AddLast(Reihe.InsertString)
+                            If Module1.Core.SQLCommands.Count > 12000 Then
+                                Log.Write(1, "Have more than 12.000 Commandlines --> Writing to Database")
+                                For Each Line In Module1.Core.SQLCommands
+                                    If SQLrq = "" Then
+                                        SQLrq = Line & ";"
+                                    Else
+                                        SQLrq = SQLrq & Line & ";"
+                                    End If
+                                Next
+                                SQL.ExecuteQuery(SQLrq)
+                                Log.Write(1, "Clearing Command Cache...")
+                                Module1.Core.SQLCommands.Clear()
+                                SQLrq = ""
+                            End If
+                        End If
                     Else
                         Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
                     End If
@@ -166,17 +213,46 @@ Public Class SQLOperations
                     If Setting.UpdateAllowed = True Then
                         Log.Write(1, "Identifier already exists --> UPDATE")
                         Reihe.MakeUpdateString()
-                        SQLrq = Reihe.UpdateString
+                        If SQL.Setting.Servertype = "Access" Then
+                            SQL.ExecuteQuery(Reihe.UpdateString)
+                        Else
+                            Module1.Core.SQLCommands.AddLast(Reihe.UpdateString)
+                            If Module1.Core.SQLCommands.Count > 12000 Then
+                                Log.Write(1, "Have more than 12.000 Commandlines --> Writing to Database")
+                                For Each Line In Module1.Core.SQLCommands
+                                    If SQLrq = "" Then
+                                        SQLrq = Line & ";"
+                                    Else
+                                        SQLrq = SQLrq & Line & ";"
+                                    End If
+                                Next
+                                SQL.ExecuteQuery(SQLrq)
+                                Log.Write(1, "Clearing Command Cache...")
+                                Module1.Core.SQLCommands.Clear()
+                                SQLrq = ""
+                            End If
+                        End If
                     Else
                         Log.Write(1, "Identifier already exists --> UPDATE not allowed!")
                     End If
                 End If
             End If
-            If Setting.InsertAllowed = False And Setting.UpdateAllowed = False Then
-            Else
-                SQL.ExecuteQuery(SQLrq)
-            End If
         Next
+        'Executing the last commands...
+        If Module1.Core.SQLCommands.Count > 0 Then
+            Log.Write(1, "Last iteration of command lines --> Writing to Database")
+            For Each Line In Module1.Core.SQLCommands
+                If SQLrq = "" Then
+                    SQLrq = Line & ";"
+                Else
+                    SQLrq = SQLrq & Line & ";"
+                End If
+            Next
+            SQL.ExecuteQuery(SQLrq)
+            Log.Write(1, "Final clearing Command Cache...")
+            Module1.Core.SQLCommands.Clear()
+            SQLrq = ""
+        End If
     End Sub
 
     Private Function GetTargetSetting() As SQLServerSettings
@@ -193,7 +269,7 @@ Public Class SQLOperations
         Return Nothing
     End Function
 
-    Private Function GetTargetSQL() As SQL
+    Private Function GetTargetSQL() As MyDataConnector
         If IsNothing(Setting) = True Then
             Return Nothing
         End If
@@ -207,7 +283,7 @@ Public Class SQLOperations
         Return Nothing
     End Function
 
-    Private Function GetAnyTargetSQL() As SQL
+    Private Function GetAnyTargetSQL() As MyDataConnector
         For Each SQLobject In Module1.Core.SQLServer
             If SQLobject.Setting.Direction = "Target" Then
                 Return SQLobject

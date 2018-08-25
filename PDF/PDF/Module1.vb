@@ -116,7 +116,7 @@ Module Module1
         Try
             ' initilizes the sql object and tests the connection to the sql servers
             For Each SQLSetting In Core.CurrentENV.SQLServer
-                Dim SQL As New SQL
+                Dim SQL As New MyDataConnector
                 SQL.SetENV(Core.CurrentENV)
                 SQL.SQLLog = (Core.CurrentLog)
                 SQL.Setting = SQLSetting
@@ -188,9 +188,9 @@ Module Module1
         'End If
         '-----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        For Each SQL In Core.SQLServer
-            If SQL.Setting.Direction = "Source" Or SQL.Setting.Direction = "source" Then
-                SQLop.Load(SQL)
+        For Each Connector In Core.SQLServer
+            If Connector.Setting.Direction = "Source" Or Connector.Setting.Direction = "source" Then
+                SQLop.Load(Connector)
             End If
         Next
 
@@ -202,9 +202,9 @@ Module Module1
         ' This sub writes data from the program core to the target database
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
         Dim SQLop As New SQLOperations
-        For Each SQL In Core.SQLServer
-            If SQL.Setting.Direction = "Target" Or SQL.Setting.Direction = "target" Then
-                SQLop.Fire(SQL)
+        For Each Connector In Core.SQLServer
+            If Connector.Setting.Direction = "Target" Or Connector.Setting.Direction = "target" Then
+                SQLop.Fire(Connector)
             End If
         Next
     End Sub

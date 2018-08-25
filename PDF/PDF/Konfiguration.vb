@@ -39,17 +39,46 @@
     Private Sub SourceConnectionTypes()
         Select Case Me.C_SourceType.Text
             Case "MS-SQL"
+                Me.L_SourceServerAdress.Visible = True
+                Me.T_SourceAdress.Visible = True
+                Me.T_SourcePath.Visible = False
+                Me.L_SourcePath.Visible = False
+                Me.B_SourcePath.Visible = False
                 Me.C_SourceConnMode.Visible = True
                 Me.L_SourceConnectionType.Visible = True
                 Me.C_SourceConnMode.Items.Clear()
                 Me.C_SourceConnMode.Items.Add("Normal")
                 Me.C_SourceConnMode.Items.Add("Trusted")
             Case "MySQL"
+                Me.L_SourceServerAdress.Visible = True
+                Me.T_SourceAdress.Visible = True
+                Me.T_SourcePath.Visible = False
+                Me.L_SourcePath.Visible = False
+                Me.B_SourcePath.Visible = False
                 Me.C_SourceConnMode.Visible = True
                 Me.L_SourceConnectionType.Visible = True
                 Me.C_SourceConnMode.Items.Clear()
                 Me.C_SourceConnMode.Items.Add("Normal")
+            Case "Access"
+                Me.L_SourceServerAdress.Visible = False
+                Me.T_SourceAdress.Visible = False
+                Me.T_SourcePath.Visible = True
+                Me.L_SourcePath.Visible = True
+                Me.B_SourcePath.Visible = True
+                Me.C_SourceConnMode.Visible = True
+                Me.L_SourceConnectionType.Visible = True
+                Me.C_SourceConnMode.Items.Clear()
+                Me.C_SourceConnMode.Items.Add("Standard Security")
+                Me.T_SourceUsername.Visible = False
+                Me.T_SourcePassword.Visible = False
+                Me.T_SourcePassword.Text = "  "
+                Me.T_SourceUsername.Text = "  "
             Case Else
+                Me.L_SourceServerAdress.Visible = True
+                Me.T_SourceAdress.Visible = True
+                Me.T_SourcePath.Visible = False
+                Me.L_SourcePath.Visible = False
+                Me.B_SourcePath.Visible = False
                 Me.C_SourceConnMode.Visible = False
                 Me.L_SourceConnectionType.Visible = False
         End Select
@@ -58,19 +87,48 @@
     Private Sub TargetConnectionTypes()
         Select Case Me.C_TargetServerType.Text
             Case "MS-SQL"
+                Me.L_TargetServerAdress.Visible = True
+                Me.T_TargetServerAdress.Visible = True
+                Me.T_TargetPath.Visible = False
+                Me.L_TargetPath.Visible = False
+                Me.B_TargetPath.Visible = False
                 Me.C_TargetConnectionType.Visible = True
                 Me.L_TargetConnectionType.Visible = True
                 Me.C_TargetConnectionType.Items.Clear()
                 Me.C_TargetConnectionType.Items.Add("Normal")
                 Me.C_TargetConnectionType.Items.Add("Trusted")
             Case "MySQL"
+                Me.L_TargetServerAdress.Visible = True
+                Me.T_TargetServerAdress.Visible = True
+                Me.T_TargetPath.Visible = False
+                Me.L_TargetPath.Visible = False
+                Me.B_TargetPath.Visible = False
                 Me.C_TargetConnectionType.Visible = True
                 Me.L_TargetConnectionType.Visible = True
                 Me.C_TargetConnectionType.Items.Clear()
                 Me.C_TargetConnectionType.Items.Add("Normal")
+            Case "Access"
+                Me.L_TargetServerAdress.Visible = False
+                Me.T_TargetServerAdress.Visible = False
+                Me.T_TargetPath.Visible = True
+                Me.L_TargetPath.Visible = True
+                Me.B_TargetPath.Visible = True
+                Me.C_TargetConnectionType.Visible = True
+                Me.L_TargetConnectionType.Visible = True
+                Me.C_TargetConnectionType.Items.Clear()
+                Me.C_TargetConnectionType.Items.Add("Standard Security")
+                Me.T_TargetUsername.Visible = False
+                Me.T_TargetUsername.Text = "  "
+                Me.T_TargetPassword.Visible = False
+                Me.T_TargetPassword.Text = "  "
             Case Else
+                Me.L_TargetServerAdress.Visible = True
+                Me.T_TargetServerAdress.Visible = True
                 Me.C_TargetConnectionType.Visible = False
                 Me.L_TargetConnectionType.Visible = False
+                Me.T_TargetPath.Visible = False
+                Me.L_TargetPath.Visible = False
+                Me.B_TargetPath.Visible = False
         End Select
     End Sub
 
@@ -165,16 +223,24 @@
             ENV.LogLevel = "0"
         End If
 
+        If Me.C_Silent.Checked = True Then
+            ENV.LogSilent = True
+        Else
+            ENV.LogSilent = False
+        End If
+
         Dim SourceSettings As New SQLServerSettings With {
             .Direction = "source",
             .Servertype = Me.C_SourceType.Text,
             .Servername = Me.T_SourceAdress.Text,
+            .FilePath = Me.T_SourcePath.Text,
             .SQLDB = Me.T_SourceDB.Text,
             .ConnMode = Me.C_SourceConnMode.Text,
             .User = Me.T_SourceUsername.Text,
             .Password = Me.T_SourcePassword.Text,
             .SQLTable = Me.T_SourceTable.Text,
             .IDColumn = Me.T_SourceIDColumn.Text,
+            .IDColumnDataType = Me.C_SourceIDDatatype.Text,
             .Filtertype = Me.C_SourceFilterType.Text,
             .FilterColumn = Me.T_SourceFilterColumn.Text,
             .FilterValue = Me.T_SourceFilterValue.Text,
@@ -185,12 +251,14 @@
             .Direction = "target",
             .Servertype = Me.C_TargetServerType.Text,
             .Servername = Me.T_TargetServerAdress.Text,
+            .FilePath = Me.T_TargetPath.Text,
             .SQLDB = Me.T_TargetDB.Text,
             .ConnMode = Me.C_TargetConnectionType.Text,
             .User = Me.T_TargetUsername.Text,
             .Password = Me.T_TargetPassword.Text,
             .SQLTable = Me.T_TargetTable.Text,
-            .IDColumn = Me.T_TargetIDColumn.Text
+            .IDColumn = Me.T_TargetIDColumn.Text,
+            .IDColumnDataType = Me.C_TargetIDDatatype.Text
         }
 
         If Me.C_MapIDValue.Checked = True Then
@@ -318,12 +386,25 @@
             Exit Function
         End If
 
-        If IsNothing(Me.T_SourceAdress.Text) Or Me.T_SourceAdress.Text = "" Then
-            Me.T_SourceAdress.BackColor = Drawing.Color.Red
-            MsgBox("Please enter the adress of your datasource!")
-            ValidateUserInput = False
-            Exit Function
-        End If
+        Select Case Me.C_SourceType.Text
+            Case "Access"
+                If IsNothing(Me.T_SourcePath.Text) Or Me.T_SourcePath.Text = "" Then
+                    Me.T_SourcePath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path of your datasource!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
+            Case Else
+                If IsNothing(Me.T_SourceAdress.Text) Or Me.T_SourceAdress.Text = "" Then
+                    Me.T_SourceAdress.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the adress of your datasource!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+        End Select
+
+
 
         If IsNothing(Me.T_SourceDB.Text) Or Me.T_SourceDB.Text = "" Then
             Me.T_SourceDB.BackColor = Drawing.Color.Red
@@ -361,6 +442,13 @@
             Exit Function
         End If
 
+        If IsNothing(Me.C_SourceIDDatatype.Text) = True Then
+            Me.C_SourceIDDatatype.BackColor = Drawing.Color.Red
+            MsgBox("Please choose the datatype of you identifier field")
+            ValidateUserInput = False
+            Exit Function
+        End If
+
         If Me.C_SourceFilterType.Text = "one column match" And (IsNothing(Me.T_SourceFilterColumn.Text) = True Or Me.T_SourceFilterColumn.Text = "" Or IsNothing(Me.T_SourceFilterValue.Text) = True Or Me.T_SourceFilterValue.Text = "") Then
             Me.T_SourceFilterColumn.BackColor = Drawing.Color.Red
             Me.T_SourceFilterValue.BackColor = Drawing.Color.Red
@@ -383,12 +471,23 @@
             Exit Function
         End If
 
-        If IsNothing(Me.T_TargetServerAdress.Text) Or Me.T_TargetServerAdress.Text = "" Then
-            Me.T_TargetServerAdress.BackColor = Drawing.Color.Red
-            MsgBox("Please enter the adress of your datatarget!")
-            ValidateUserInput = False
-            Exit Function
-        End If
+        Select Case Me.C_TargetServerType.Text
+            Case "Access"
+                If IsNothing(Me.T_TargetPath.Text) Or Me.T_TargetPath.Text = "" Then
+                    Me.T_TargetPath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path of your datatarget!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+            Case Else
+                If IsNothing(Me.T_TargetServerAdress.Text) Or Me.T_TargetServerAdress.Text = "" Then
+                    Me.T_TargetServerAdress.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the adress of your datatarget!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+        End Select
+
 
         If IsNothing(Me.T_TargetDB.Text) Or Me.T_TargetDB.Text = "" Then
             Me.T_TargetDB.BackColor = Drawing.Color.Red
@@ -430,6 +529,13 @@
             Me.T_TargetSeperator.BackColor = Drawing.Color.Red
             Me.C_TargetPartSubstring.BackColor = Drawing.Color.Red
             MsgBox("You have not defined a seperator char/word or the part of the substring for mapping the ID value from source to target." & vbLf & "If you just want to let the program match the ID values, without reformatting, then uncheck the Map ID Value checkbox.")
+            ValidateUserInput = False
+            Exit Function
+        End If
+
+        If IsNothing(Me.C_TargetIDDatatype.Text) = True Then
+            Me.C_TargetIDDatatype.BackColor = Drawing.Color.Red
+            MsgBox("Please choose the datatype of your target identifier field")
             ValidateUserInput = False
             Exit Function
         End If
@@ -625,7 +731,7 @@
     End Sub
 
     Private Sub VerifyDatasourceConnection()
-        If Me.C_SourceType.Text <> "" And Me.T_SourceAdress.Text <> "" And Me.T_SourceDB.Text <> "" And Me.C_SourceType.Text <> "" Then
+        If Me.C_SourceType.Text <> "" And (Me.T_SourceAdress.Text <> "" Or Me.T_SourcePath.Text <> "") And Me.T_SourceDB.Text <> "" And Me.C_SourceType.Text <> "" Then
             If Me.C_SourceConnMode.Text = "Trusted" Then
                 Dim SourceSettings As New SQLServerSettings With {
                     .Direction = "source",
@@ -647,7 +753,7 @@
                     .Testmode = True
                 }
                 Module1.Core.CurrentLog = Log
-                Dim SQL As New SQL With {
+                Dim SQL As New MyDataConnector With {
                     .Setting = SourceSettings,
                     .SQLLog = Log
                 }
@@ -668,6 +774,7 @@
                         .Direction = "source",
                         .Servertype = Me.C_SourceType.Text,
                         .Servername = Me.T_SourceAdress.Text,
+                        .FilePath = Me.T_SourcePath.Text,
                         .SQLDB = Me.T_SourceDB.Text,
                         .ConnMode = Me.C_SourceConnMode.Text,
                         .User = Me.T_SourceUsername.Text,
@@ -676,7 +783,7 @@
 
                     If IsNothing(Me.TestedSourceSetting) = False Then
                         If Me.TestedSourceSetting.Tested = True Then
-                            If Me.TestedSourceSetting.Servername = SourceSettings.Servername And Me.TestedSourceSetting.Servertype = SourceSettings.Servertype And Me.TestedSourceSetting.ConnMode = SourceSettings.ConnMode And Me.TestedSourceSetting.User = SourceSettings.User And Me.TestedSourceSetting.Password = SourceSettings.Password Then
+                            If Me.TestedSourceSetting.SQLDB = SourceSettings.SQLDB And Me.TestedSourceSetting.FilePath = SourceSettings.FilePath And Me.TestedSourceSetting.Servername = SourceSettings.Servername And Me.TestedSourceSetting.Servertype = SourceSettings.Servertype And Me.TestedSourceSetting.ConnMode = SourceSettings.ConnMode And Me.TestedSourceSetting.User = SourceSettings.User And Me.TestedSourceSetting.Password = SourceSettings.Password Then
                                 Exit Sub
                             End If
                         End If
@@ -686,7 +793,7 @@
                         .Testmode = True
                     }
                     Module1.Core.CurrentLog = Log
-                    Dim SQL As New SQL With {
+                    Dim SQL As New MyDataConnector With {
                         .Setting = SourceSettings,
                         .SQLLog = Log
                     }
@@ -710,6 +817,13 @@
                                 PB_Source.BackColor = Drawing.Color.Green
                                 Me.TestedSourceSetting.Worked = True
                             End If
+                        Case "Access"
+                            If IsNothing(SQL.AccessCon) = True Then
+                                PB_Source.BackColor = Drawing.Color.Red
+                            Else
+                                PB_Source.BackColor = Drawing.Color.Green
+                                Me.TestedSourceSetting.Worked = True
+                            End If
                     End Select
 
                 End If
@@ -718,12 +832,13 @@
     End Sub
 
     Private Sub VerifyDataTargetConnection()
-        If Me.C_TargetServerType.Text <> "" And Me.T_TargetServerAdress.Text <> "" And Me.T_TargetDB.Text <> "" And Me.C_TargetConnectionType.Text <> "" Then
+        If Me.C_TargetServerType.Text <> "" And (Me.T_TargetServerAdress.Text <> "" Or Me.T_SourcePath.Text <> "") And Me.T_TargetDB.Text <> "" And Me.C_TargetConnectionType.Text <> "" Then
             If Me.C_TargetConnectionType.Text = "Trusted" Then
                 Dim TargetSettings As New SQLServerSettings With {
                 .Direction = "target",
                 .Servertype = Me.C_TargetServerType.Text,
                 .Servername = Me.T_TargetServerAdress.Text,
+                .FilePath = Me.T_TargetPath.Text,
                 .SQLDB = Me.T_TargetDB.Text,
                 .ConnMode = Me.C_TargetConnectionType.Text
                 }
@@ -740,7 +855,7 @@
                     .Testmode = True
                 }
                 Module1.Core.CurrentLog = Log
-                Dim SQL As New SQL With {
+                Dim SQL As New MyDataConnector With {
                     .Setting = TargetSettings,
                     .SQLLog = Log
                 }
@@ -768,7 +883,7 @@
 
                     If IsNothing(Me.TestedTargetSetting) = False Then
                         If Me.TestedTargetSetting.Tested = True Then
-                            If Me.TestedTargetSetting.Servername = TargetSettings.Servername And Me.TestedTargetSetting.Servertype = TargetSettings.Servertype And Me.TestedTargetSetting.ConnMode = TargetSettings.ConnMode And Me.TestedTargetSetting.User = TargetSettings.User And Me.TestedTargetSetting.Password = TargetSettings.Password Then
+                            If Me.TestedTargetSetting.SQLDB = TargetSettings.SQLDB And Me.TestedTargetSetting.FilePath = TargetSettings.FilePath And Me.TestedTargetSetting.Servername = TargetSettings.Servername And Me.TestedTargetSetting.Servertype = TargetSettings.Servertype And Me.TestedTargetSetting.ConnMode = TargetSettings.ConnMode And Me.TestedTargetSetting.User = TargetSettings.User And Me.TestedTargetSetting.Password = TargetSettings.Password Then
                                 Exit Sub
                             End If
                         End If
@@ -778,7 +893,7 @@
                         .Testmode = True
                     }
                     Module1.Core.CurrentLog = Log
-                    Dim SQL As New SQL With {
+                    Dim SQL As New MyDataConnector With {
                         .Setting = TargetSettings,
                         .SQLLog = Log
                     }
@@ -796,6 +911,13 @@
                             End If
                         Case "MySQL"
                             If IsNothing(SQL.MySQLCon) = True Then
+                                PB_Target.BackColor = Drawing.Color.Red
+                            Else
+                                PB_Target.BackColor = Drawing.Color.Green
+                                Me.TestedTargetSetting.Worked = True
+                            End If
+                        Case "Access"
+                            If IsNothing(SQL.AccessCon) = True Then
                                 PB_Target.BackColor = Drawing.Color.Red
                             Else
                                 PB_Target.BackColor = Drawing.Color.Green
@@ -857,5 +979,27 @@
 
     Private Sub T_TargetPassword_Leave(sender As Object, e As EventArgs) Handles T_TargetPassword.Leave
         VerifyConnections()
+    End Sub
+
+    Private Sub B_SourcePath_Click(sender As Object, e As EventArgs) Handles B_SourcePath.Click
+        Me.OpenFileDialog1.ShowDialog()
+        Me.T_SourcePath.Text = Me.OpenFileDialog1.FileName
+    End Sub
+
+    Private Sub B_TargetPath_Click(sender As Object, e As EventArgs) Handles B_TargetPath.Click
+        Me.OpenFileDialog1.ShowDialog()
+        Me.T_TargetPath.Text = Me.OpenFileDialog1.FileName
+    End Sub
+
+    Private Sub MappingGrid_CellContentClick(sender As Object, e As Windows.Forms.DataGridViewCellEventArgs) Handles MappingGrid.CellContentClick
+
+    End Sub
+
+    Private Sub C_SourceIDDatatype_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_SourceIDDatatype.SelectedValueChanged
+        Me.C_SourceIDDatatype.BackColor = Drawing.SystemColors.Window
+    End Sub
+
+    Private Sub C_TargetIDDatatype_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_TargetIDDatatype.SelectedValueChanged
+        Me.C_TargetIDDatatype.BackColor = Drawing.SystemColors.Window
     End Sub
 End Class

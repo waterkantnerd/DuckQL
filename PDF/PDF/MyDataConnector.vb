@@ -2,7 +2,6 @@
 ' This is the SQL Base Function Class. Here all generic SQL Handling is coded.
 '----------------------------------------------------------------------------------------------------------
 
-
 Imports System.Data.SqlClient
 Imports System.Collections
 Imports System
@@ -11,7 +10,7 @@ Imports MySql
 Imports MySql.Data
 Imports MySql.Data.MySqlClient
 
-Public Class SQL
+Public Class MyDataConnector
     Private myConn As SqlConnection
     Private myCmd As SqlCommand
     Private myReader As SqlDataReader
@@ -20,12 +19,17 @@ Public Class SQL
     Protected RC As DataTable
     Public ENV As ENV
     Public SQLLog As LOG
+
     Public MySQLCon As MySqlConnection
     Private MySQLcmd As New MySqlCommand
+
+    Public AccessCon As OleDb.OleDbConnection
+    Private AccessCmd As OleDb.OleDbCommand
+
     Public Setting As SQLServerSettings
     Public Testmode As Boolean = False
 
-    '--------------------------------------------------Initializing the classe-------------------------------------------------
+    '--------------------------------------------------Initializing the class-------------------------------------------------
     Public Sub SetENV(ENV)
         Me.ENV = ENV
     End Sub
@@ -49,11 +53,11 @@ Public Class SQL
 
         Try
             MySQLCon.Open()
-            Console.WriteLine("Connected with " & sServer & "\" & sDB)
+            SQLLog.Write(1, "Connected with " & sServer & "\" & sDB)
             MySQLCon.Close()
             ConnectMySQL = MySQLCon
         Catch ex As Exception
-            Console.WriteLine(ex.Message)
+            SQLLog.Write(0, ex.Message)
             ConnectMySQL = Nothing
         End Try
     End Function
@@ -99,7 +103,7 @@ Public Class SQL
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
             ConnectDBTrusted = myConn
         Catch ex As Exception
-            SQLLog.Write(0, "ERROR!: " & Err.Description)
+            SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBTrusted = Nothing
             Exit Function
         End Try
@@ -107,8 +111,31 @@ Public Class SQL
     End Function
     '------------------------------------------------------------------------------------------------------------------------
 
+    '--------------------------------------------------Microsoft Access------------------------------------------------------
+    Private Function ConnectDBAccess(Path As String, sDB As String) As OleDb.OleDbConnection
+        ' This one restrictes the application to x86 Architecture (32 bit Application) 
+        ' After some research it seems, that the Microsoft.ACE.OLEDB.12.0 is only availabe in a 32bit Version
+        ' Found the solution in this blog post https://blogs.technet.microsoft.com/austria/2014/02/06/der-microsoft-ace-oledb-12-0-provider-fehlt/
+        ' 
+        SQLLog.Write(1, "Connecting to Access DB...")
+        Try
+            'Create a Connection object.
+            Me.AccessCon = New OleDb.OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & Path & ";Persist Security Info=False;")
+            'Create a Command object.
+            Me.AccessCmd = Me.AccessCon.CreateCommand
+            Me.AccessCmd.CommandText = "USE " & sDB
 
-
+            Me.AccessCon.Open()
+            SQLLog.Write(1, "Established connection to:" & Path)
+            ConnectDBAccess = Me.AccessCon
+        Catch ex As Exception
+            SQLLog.Write(0, "ERROR!: " & ex.Message)
+            ConnectDBAccess = Nothing
+            Exit Function
+        End Try
+        Me.AccessCon.Close()
+    End Function
+    '------------------------------------------------------------------------------------------------------------------------
     Public Sub CreateSQLCon()
         Select Case Setting.Servertype
             Case "MSSQL"
@@ -150,6 +177,13 @@ Public Class SQL
                         ' for the start I provided only two: Username & Password or Trusted
                         SQLLog.Write(0, "Unkown Connection Method")
                         Exit Sub
+                End Select
+            Case "Access"
+                Select Case Setting.ConnMode
+                    Case "Normal"
+                        Me.AccessCon = ConnectDBAccess(Setting.FilePath, Setting.SQLDB)
+                    Case "Standard Security"
+                        Me.AccessCon = ConnectDBAccess(Setting.FilePath, Setting.SQLDB)
                 End Select
         End Select
 
@@ -221,13 +255,30 @@ Public Class SQL
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                 End Try
+            Case "Access"
+                Try
+                    If AccessCon.State = ConnectionState.Open Then
+                        AccessCon.Close()
+                    End If
+                    Dim dataadapter As New OleDb.OleDbDataAdapter(SQLrq, AccessCon)
+                    Dim ds As New DataSet
+                    dataadapter.Fill(ds)
+                    CreateDataAdapter = ds
+                    Exit Function
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                End Try
         End Select
 
         CreateDataAdapter = Nothing
     End Function
 
-    Public Function ExecuteQuery(SQLrq As String) As String
+    Public Function ExecuteQuery(SQLrq As String) As Boolean
         Dim Res As String = ""
+<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+        Dim RowsAffected As Integer = 0
+=======
+>>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
         Select Case Setting.Servertype
         ' Of course diffenrent Products need differnt objects here as well.
         ' SQLrq is the query variable
@@ -238,6 +289,15 @@ Public Class SQL
                     End If
                     myCmd.CommandText = SQLrq
                     myConn.Open()
+<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+                    RowsAffected = myCmd.ExecuteNonQuery
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    myConn.Close()
+                    ExecuteQuery = True
+                Catch e As Exception
+                    ExecuteQuery = False
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
+=======
                     myReader = myCmd.ExecuteReader()
                     Do While myReader.Read()
                         Res = myReader.GetString(0)
@@ -252,6 +312,7 @@ Public Class SQL
                 Catch e As Exception
                     ExecuteQuery = Nothing
                     SQLLog.Write(0, e.Message)
+>>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
                     Exit Function
                 End Try
             Case "MS-SQL"
@@ -261,6 +322,15 @@ Public Class SQL
                     End If
                     myCmd.CommandText = SQLrq
                     myConn.Open()
+<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+                    RowsAffected = myCmd.ExecuteNonQuery
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    myConn.Close()
+                    ExecuteQuery = True
+                Catch e As Exception
+                    ExecuteQuery = False
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
+=======
                     myReader = myCmd.ExecuteReader()
                     Do While myReader.Read()
                         Res = myReader.GetString(0)
@@ -275,17 +345,46 @@ Public Class SQL
                 Catch e As Exception
                     ExecuteQuery = Nothing
                     SQLLog.Write(0, e.Message)
+>>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
                     Exit Function
                 End Try
             Case "MySQL"
                 Try
+<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+=======
                     Dim mysqlReader As MySqlDataReader
+>>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
                     If MySQLCon.State = ConnectionState.Open Then
                         MySQLCon.Close()
                     End If
                     MySQLcmd.CommandText = SQLrq
                     MySQLCon.Open()
                     MySQLcmd.Connection = MySQLCon
+<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+                    RowsAffected = MySQLcmd.ExecuteNonQuery
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    MySQLCon.Close()
+                    ExecuteQuery = True
+                Catch e As Exception
+                    ExecuteQuery = False
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
+                    Exit Function
+                End Try
+            Case "Access"
+                Try
+                    If AccessCon.State = ConnectionState.Open Then
+                        AccessCon.Close()
+                    End If
+                    AccessCmd.CommandText = SQLrq
+                    AccessCon.Open()
+                    RowsAffected = AccessCmd.ExecuteNonQuery
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    AccessCon.Close()
+                    ExecuteQuery = True
+                Catch e As Exception
+                    ExecuteQuery = False
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
+=======
                     mysqlReader = MySQLcmd.ExecuteReader()
                     Do While mysqlReader.Read()
                         Res = mysqlReader.GetString(0)
@@ -300,11 +399,16 @@ Public Class SQL
                 Catch e As Exception
                     ExecuteQuery = Nothing
                     SQLLog.Write(0, e.Message)
+>>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
                     Exit Function
                 End Try
             Case Else
                 ExecuteQuery = Nothing
         End Select
+<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+        RowsAffected = 0
+=======
+>>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
     End Function
 
     Public Sub ExecuteStoredProcedure(Params As LinkedList(Of SQLParamter))

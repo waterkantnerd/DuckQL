@@ -12,10 +12,10 @@ Public Class Daten
     Public SourceKey As String
     Public SourceDatatype As String
     Public TargetDatatype As String
-    Public Source As SQL
-    Public Target As SQL
+    Public Source As MyDataConnector
+    Public Target As MyDataConnector
 
-    Public Sub SetUp(SourceSQL As SQL, TargetSQL As SQL)
+    Public Sub SetUp(SourceSQL As MyDataConnector, TargetSQL As MyDataConnector)
         Me.Source = SourceSQL
         Me.Target = TargetSQL
     End Sub

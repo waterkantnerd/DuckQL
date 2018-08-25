@@ -5,13 +5,14 @@
 Public Class Reihe
     Public Spalten As New LinkedList(Of Daten)
     Public IDValue As String = ""
+    Public IDValueDataType As String = ""
     Public UpdateString As String = ""
     Public InsertString As String = ""
     Public Log As LOG = Module1.Core.CurrentLog
-    Public Source As SQL
-    Public Target As SQL
+    Public Source As MyDataConnector
+    Public Target As MyDataConnector
 
-    Public Sub SetUp(SourceSQL As SQL, TargetSQL As SQL)
+    Public Sub SetUp(SourceSQL As MyDataConnector, TargetSQL As MyDataConnector)
         Me.Source = SourceSQL
         Me.Target = TargetSQL
     End Sub
@@ -28,10 +29,11 @@ Public Class Reihe
             Case "left"
                 IDValue = IDValue.Substring(0, IDValue.IndexOf(Target.Setting.StringSeperator))
         End Select
+        Log.Write(1, "Mapped ID Value:" & IDValue)
     End Sub
     Public Sub MakeUpdateString()
         Log.Write(1, "Creating SQL UPDATE-string...")
-        Dim SQL As SQL = Target
+        Dim SQL As MyDataConnector = Target
         Dim SQLrq As String = "UPDATE "
         Dim i As Integer = 0
         SQLrq = SQLrq & SQL.Setting.SQLTable & " SET "
@@ -42,7 +44,7 @@ Public Class Reihe
             Else
                 SQLrq = SQLrq & Spalte.Mapping.Targetname & "=" & SQL.CSQL(Spalte.Wert, GetColumnDataType(Spalte))
                 If i = Spalten.Count - 1 Then
-                    SQLrq = SQLrq & " WHERE " & SQL.Setting.IDColumn & "=" & SQL.CSQL(Me.IDValue)
+                    SQLrq = SQLrq & " WHERE " & SQL.Setting.IDColumn & "=" & SQL.CSQL(Me.IDValue, GetIDValueDataType)
                 Else
                     SQLrq = SQLrq & ","
                 End If
@@ -56,7 +58,7 @@ Public Class Reihe
 
     Public Sub MakeInsertString()
         Log.Write(1, "Creating SQL INSERT string...")
-        Dim SQL As SQL = Target
+        Dim SQL As MyDataConnector = Target
         Dim SQLrq As String = "INSERT INTO "
         Dim i As Integer = 0
         SQLrq = SQLrq & SQL.Setting.SQLTable & " ("
@@ -87,19 +89,50 @@ Public Class Reihe
         Log.Write(1, "INSERT STRING: " & Me.InsertString)
     End Sub
 
+    Public Function GetIDValueDataType() As String
+        Select Case Me.IDValueDataType.ToLower
+            Case "integer"
+                GetIDValueDataType = vbInteger
+            Case "int"
+                GetIDValueDataType = vbInteger
+            Case "datetime"
+                GetIDValueDataType = vbDate
+            Case "time"
+                GetIDValueDataType = vbShortTime
+            Case "date"
+                GetIDValueDataType = vbDate
+            Case "string"
+                GetIDValueDataType = vbString
+            Case "varchar"
+                GetIDValueDataType = vbString
+            Case "nvarchar"
+                GetIDValueDataType = vbString
+            Case "bit"
+                GetIDValueDataType = vbString
+            Case "timestamp"
+                GetIDValueDataType = vbString
+            Case "binary"
+                GetIDValueDataType = vbString
+            Case "binär"
+                GetIDValueDataType = vbString
+            Case Else
+                GetIDValueDataType = vbString
+        End Select
+    End Function
+
     Private Function GetColumnDataType(Spalte As Daten) As String
-        Select Case Spalte.Mapping.Targettype
-            Case "Integer"
+        Select Case Spalte.Mapping.Targettype.ToLower
+            Case "integer"
                 GetColumnDataType = vbInteger
-            Case "Int"
+            Case "int"
                 GetColumnDataType = vbInteger
-            Case "DateTime"
+            Case "datetime"
                 GetColumnDataType = vbDate
-            Case "Time"
+            Case "time"
                 GetColumnDataType = vbShortTime
-            Case "Date"
+            Case "date"
                 GetColumnDataType = vbDate
-            Case "String"
+            Case "string"
                 GetColumnDataType = vbString
             Case "varchar"
                 GetColumnDataType = vbString
@@ -107,11 +140,11 @@ Public Class Reihe
                 GetColumnDataType = vbString
             Case "bit"
                 GetColumnDataType = vbString
-            Case "Timestamp"
+            Case "timestamp"
                 GetColumnDataType = vbString
             Case "binary"
                 GetColumnDataType = vbString
-            Case "Binär"
+            Case "binär"
                 GetColumnDataType = vbString
             Case Else
                 GetColumnDataType = vbString

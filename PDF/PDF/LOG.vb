@@ -59,7 +59,10 @@ Public Class LOG
                         Exit Function
                     End Try
                 Else
-                    System.Console.WriteLine(Now & "-" & sMessage)
+                    If CurrENV.LogSilent = True Then
+                    Else
+                        System.Console.WriteLine(Now & "-" & sMessage)
+                    End If
                 End If
             Case 1
                 'Log Level 1 = Give me the complete debug --> caution this is a lot of noise.
@@ -67,7 +70,10 @@ Public Class LOG
                     Dim myWriter As New StreamWriter(Logpath & Logfile, True)
                     myWriter.WriteLine(sCode & " - " & Now & " - " & CurrENV.GetName & " - " & sMessage)
                     myWriter.Close()
-                    System.Console.WriteLine(Now & "-" & sMessage)
+                    If CurrENV.LogSilent = True Then
+                    Else
+                        System.Console.WriteLine(Now & "-" & sMessage)
+                    End If
                 Catch ex As Exception
                     System.Console.WriteLine(ex.Message)
                     System.Console.WriteLine(Now & "-" & sMessage)

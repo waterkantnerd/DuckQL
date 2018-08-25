@@ -84,6 +84,8 @@ Public Class XMLFiles
                                             Select Case .Name
                                                 Case "SQL-Server-Adress"
                                                     Setting.Servername = .Value
+                                                Case "Filepath"
+                                                    Setting.FilePath = .Value
                                                 Case "Database"
                                                     Setting.SQLDB = .Value
                                                 Case "Username"
@@ -96,6 +98,8 @@ Public Class XMLFiles
                                                     Setting.SQLTable = .Value
                                                 Case "IDColumn"
                                                     Setting.IDColumn = .Value
+                                                Case "IDColumnDataType"
+                                                    Setting.IDColumnDataType = .Value
                                                 Case "FilterType"
                                                     Setting.Filtertype = .Value
                                                 Case "FilterColumn"
@@ -168,6 +172,12 @@ Public Class XMLFiles
                                                     ENV.SetLogFile(.Value)
                                                 Case "LogLevel"
                                                     ENV.LogLevel = .Value
+                                                Case "Silent"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        ENV.LogSilent = True
+                                                    Else
+                                                        ENV.LogSilent = False
+                                                    End If
                                             End Select
                                         End While
 
@@ -203,6 +213,7 @@ Public Class XMLFiles
             .WriteStartElement("LoggingDirectory")
             .WriteAttributeString("Adress", ENV.GetLogPath)
             .WriteAttributeString("LogLevel", ENV.LogLevel)
+            .WriteAttributeString("Silent", ENV.LogSilent.ToString)
             .WriteEndElement()
 
             Dim Source As New SQLServerSettings
@@ -217,12 +228,14 @@ Public Class XMLFiles
             .WriteStartElement("SQLServer")
             .WriteAttributeString("Direction", "source")
             .WriteAttributeString("SQL-Server-Adress", Source.Servername)
+            .WriteAttributeString("Filepath", Source.FilePath)
             .WriteAttributeString("Database", Source.SQLDB)
             .WriteAttributeString("Username", Source.User)
             .WriteAttributeString("Password", Source.Password)
             .WriteAttributeString("ConnMode", Source.ConnMode)
             .WriteAttributeString("Table", Source.SQLTable)
             .WriteAttributeString("IDColumn", Source.IDColumn)
+            .WriteAttributeString("IDColumnDataType", Source.IDColumnDataType)
             .WriteAttributeString("FilterType", Source.Filtertype)
             .WriteAttributeString("FilterColumn", Source.FilterColumn)
             .WriteAttributeString("FilterValue", Source.FilterValue)
@@ -241,6 +254,7 @@ Public Class XMLFiles
             .WriteStartElement("SQLServer")
             .WriteAttributeString("Direction", "target")
             .WriteAttributeString("SQL-Server-Adress", Target.Servername)
+            .WriteAttributeString("Filepath", Target.FilePath)
             .WriteAttributeString("Database", Target.SQLDB)
             .WriteAttributeString("Username", Target.User)
             .WriteAttributeString("Password", Target.Password)
@@ -248,6 +262,7 @@ Public Class XMLFiles
             .WriteAttributeString("Table", Target.SQLTable)
             .WriteAttributeString("SessionTimestampField", Target.SessionTimestampField)
             .WriteAttributeString("IDColumn", Target.IDColumn)
+            .WriteAttributeString("IDColumnDataType", Target.IDColumnDataType)
             .WriteAttributeString("MapValue", Target.MapTargetIDColumnValue)
             .WriteAttributeString("StringSeparator", Target.StringSeperator)
             .WriteAttributeString("StringPart", Target.StringPart)
