@@ -147,12 +147,25 @@ Module Module1
 
         ' Initilizes the log object for this sub
         Dim Log As LOG = Core.CurrentLog
+        Dim mytime As Date = Now()
+        Log.Write(1, "Job started at " & mytime)
+        Core.JobStartTime = mytime
         ' loads data from the datasource
         LadeDatenVonQuelle()
         ' writes data to targed
         SchreibeDatenInZiel()
 
         Log.Write(1, "Batch done...")
+        mytime = Now()
+        Core.JobEndTime = mytime
+        Log.Write(1, "Job ended at " & mytime)
+
+        Dim Jobtime As Long = DateDiff(DateInterval.Second, Core.JobStartTime, Core.JobEndTime)
+        Dim Sekunden As Long = Jobtime Mod 60
+        Dim Minuten As Long = Jobtime / 60
+        Dim Stunden As Long = Minuten / 60
+        Dim Tage As Long = Stunden / 24
+        Log.Write(1, "Job took " & Tage & " days " & Stunden & " hours " & Minuten & " minutes " & Sekunden & " seconds.")
 
     End Sub
 
@@ -212,12 +225,12 @@ Module Module1
     Private Sub ShowHelp()
         System.Console.WriteLine("Copies Data from one Database into another Database")
         System.Console.WriteLine("i.E. MS-SQL Server to MySQL Server." & vbLf & vbLf)
-        System.Console.WriteLine("sqlduck.exe [-c] [PATH] [-h]" & vbLf)
+        System.Console.WriteLine("duckql.exe [-c] [PATH] [-h]" & vbLf)
         System.Console.WriteLine("PATH" & vbTab & "Path to configuration files. This has to be a folder.")
         System.Console.WriteLine("-c" & vbTab & "Opens configuration form.")
         System.Console.WriteLine("-h" & vbTab & "Opens help." & vbLf & vbLf)
         System.Console.WriteLine("Example to run with a config file:")
-        System.Console.WriteLine("sqlduck.exe " & Chr(34) & "C:\Users\waterkantnerd\config files\" & Chr(34) & vbLf & vbLf)
+        System.Console.WriteLine("duckql.exe " & Chr(34) & "C:\Users\waterkantnerd\config files\" & Chr(34) & vbLf & vbLf)
         System.Console.WriteLine("Hit any key for exit...")
     End Sub
 End Module

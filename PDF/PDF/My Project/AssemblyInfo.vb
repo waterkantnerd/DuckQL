@@ -8,10 +8,10 @@ Imports System.Runtime.InteropServices
 
 ' Werte der Assemblyattribute überprüfen
 
-<Assembly: AssemblyTitle("SQLDuck")>
+<Assembly: AssemblyTitle("DuckQL")>
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("SQLDuck")>
+<Assembly: AssemblyProduct("DuckQL")>
 <Assembly: AssemblyCopyright("Copyright ©  2018 by waterkantnerd")>
 <Assembly: AssemblyTrademark("")>
 
