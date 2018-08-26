@@ -6,9 +6,9 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{CE618D1D-7BD6-433B-8D9A-A8D93B38D7AF}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>SQLDuck.Module1</StartupObject>
-    <RootNamespace>SQLDuck</RootNamespace>
-    <AssemblyName>SQLDuck</AssemblyName>
+    <StartupObject>DuckQL.Module1</StartupObject>
+    <RootNamespace>DuckQL</RootNamespace>
+    <AssemblyName>DuckQL</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Console</MyType>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -24,7 +24,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>SQLDuck.xml</DocumentationFile>
+    <DocumentationFile>DuckQL.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
@@ -35,7 +35,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>SQLDuck.xml</DocumentationFile>
+    <DocumentationFile>DuckQL.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>

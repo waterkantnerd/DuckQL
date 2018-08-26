@@ -10,6 +10,8 @@ Public Class Core
     Public TimeStamp As String = Now()              ' Timestamp for the session
     Public JobXMLPath As String = ""                ' If the config has written a job xml it is stored here for testing
     Public SQLCommands As New LinkedList(Of String) ' List of SQL Commands that will be send to SQL Target Server at the end
+    Public JobStartTime As Date
+    Public JobEndTime As Date
 
 
     'Initializing the core

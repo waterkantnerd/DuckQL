@@ -22,6 +22,7 @@ Public Class MyDataConnector
 
     Public MySQLCon As MySqlConnection
     Private MySQLcmd As New MySqlCommand
+    Private mySQLReader As MySqlDataReader
 
     Public AccessCon As OleDb.OleDbConnection
     Private AccessCmd As OleDb.OleDbCommand
@@ -275,10 +276,9 @@ Public Class MyDataConnector
 
     Public Function ExecuteQuery(SQLrq As String) As Boolean
         Dim Res As String = ""
-<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+
         Dim RowsAffected As Integer = 0
-=======
->>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
+
         Select Case Setting.Servertype
         ' Of course diffenrent Products need differnt objects here as well.
         ' SQLrq is the query variable
@@ -289,7 +289,6 @@ Public Class MyDataConnector
                     End If
                     myCmd.CommandText = SQLrq
                     myConn.Open()
-<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
                     RowsAffected = myCmd.ExecuteNonQuery
                     SQLLog.Write(1, RowsAffected & " Row(s) affected.")
                     myConn.Close()
@@ -297,22 +296,7 @@ Public Class MyDataConnector
                 Catch e As Exception
                     ExecuteQuery = False
                     SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
-=======
-                    myReader = myCmd.ExecuteReader()
-                    Do While myReader.Read()
-                        Res = myReader.GetString(0)
-                    Loop
-                    If IsDBNull(results) = True Then
-                        SQLLog.Write(1, "Tabelle ist leer!")
-                        results = ""
-                    End If
-                    myReader.Close()
                     myConn.Close()
-                    ExecuteQuery = Res
-                Catch e As Exception
-                    ExecuteQuery = Nothing
-                    SQLLog.Write(0, e.Message)
->>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
                     Exit Function
                 End Try
             Case "MS-SQL"
@@ -322,7 +306,7 @@ Public Class MyDataConnector
                     End If
                     myCmd.CommandText = SQLrq
                     myConn.Open()
-<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
+
                     RowsAffected = myCmd.ExecuteNonQuery
                     SQLLog.Write(1, RowsAffected & " Row(s) affected.")
                     myConn.Close()
@@ -330,37 +314,17 @@ Public Class MyDataConnector
                 Catch e As Exception
                     ExecuteQuery = False
                     SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
-=======
-                    myReader = myCmd.ExecuteReader()
-                    Do While myReader.Read()
-                        Res = myReader.GetString(0)
-                    Loop
-                    If IsDBNull(results) = True Then
-                        SQLLog.Write(1, "Tabelle ist leer!")
-                        results = ""
-                    End If
-                    myReader.Close()
                     myConn.Close()
-                    ExecuteQuery = Res
-                Catch e As Exception
-                    ExecuteQuery = Nothing
-                    SQLLog.Write(0, e.Message)
->>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
                     Exit Function
                 End Try
             Case "MySQL"
                 Try
-<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
-=======
-                    Dim mysqlReader As MySqlDataReader
->>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
                     If MySQLCon.State = ConnectionState.Open Then
                         MySQLCon.Close()
                     End If
                     MySQLcmd.CommandText = SQLrq
                     MySQLCon.Open()
                     MySQLcmd.Connection = MySQLCon
-<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
                     RowsAffected = MySQLcmd.ExecuteNonQuery
                     SQLLog.Write(1, RowsAffected & " Row(s) affected.")
                     MySQLCon.Close()
@@ -368,6 +332,7 @@ Public Class MyDataConnector
                 Catch e As Exception
                     ExecuteQuery = False
                     SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
+                    MySQLCon.Close()
                     Exit Function
                 End Try
             Case "Access"
@@ -384,31 +349,13 @@ Public Class MyDataConnector
                 Catch e As Exception
                     ExecuteQuery = False
                     SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
-=======
-                    mysqlReader = MySQLcmd.ExecuteReader()
-                    Do While mysqlReader.Read()
-                        Res = mysqlReader.GetString(0)
-                    Loop
-                    If IsDBNull(results) = True Then
-                        SQLLog.Write(1, "Tabelle ist leer!")
-                        results = ""
-                    End If
-                    mysqlReader.Close()
-                    MySQLCon.Close()
-                    ExecuteQuery = Res
-                Catch e As Exception
-                    ExecuteQuery = Nothing
-                    SQLLog.Write(0, e.Message)
->>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
+                    AccessCon.Close()
                     Exit Function
                 End Try
             Case Else
                 ExecuteQuery = Nothing
         End Select
-<<<<<<< HEAD:PDF/PDF/MyDataConnector.vb
         RowsAffected = 0
-=======
->>>>>>> 34d3b88b618987d595a327440335bbf9941c1e7c:PDF/PDF/SQL.vb
     End Function
 
     Public Sub ExecuteStoredProcedure(Params As LinkedList(Of SQLParamter))
