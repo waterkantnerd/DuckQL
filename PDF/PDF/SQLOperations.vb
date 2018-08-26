@@ -48,7 +48,7 @@ Public Class SQLOperations
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
             Case "Simple" ' Per default the sql filter is just a simple statement e.g. columnvalue > 5 
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
-            Case "SQL" ' For more complex statements you can set up a sql filter setting on your own.
+            Case "SQL Filter" ' For more complex statements you can set up a sql filter setting on your own.
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.SQLFilter
             Case Else ' If nothing has been defined, the program just loads the whole table.
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable

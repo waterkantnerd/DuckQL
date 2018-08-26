@@ -1,6 +1,9 @@
 ﻿Public Class Konfiguration
     Private TestedSourceSetting As SQLServerSettings
     Private TestedTargetSetting As SQLServerSettings
+    Private SourceSQL As MyDataConnector
+    Private TargetSQL As MyDataConnector
+
 
     Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
 
@@ -136,28 +139,28 @@
         Select Case Me.C_SourceFilterType.Text
             Case "one column match"
                 Me.T_SourceSQLFilter.Visible = False
-                Me.T_SourceFilterColumn.Visible = True
+                Me.C_SourceFilterColumn.Visible = True
                 Me.T_SourceFilterValue.Visible = True
                 Me.L_FilterColumn.Visible = True
                 Me.L_FilterValue.Visible = True
                 Me.L_SQLFilterStatement.Visible = False
             Case "SQL Filter"
                 Me.T_SourceSQLFilter.Visible = True
-                Me.T_SourceFilterColumn.Visible = False
+                Me.C_SourceFilterColumn.Visible = False
                 Me.T_SourceFilterValue.Visible = False
                 Me.L_FilterColumn.Visible = False
                 Me.L_FilterValue.Visible = False
                 Me.L_SQLFilterStatement.Visible = True
             Case "none"
                 Me.T_SourceSQLFilter.Visible = False
-                Me.T_SourceFilterColumn.Visible = False
+                Me.C_SourceFilterColumn.Visible = False
                 Me.T_SourceFilterValue.Visible = False
                 Me.L_FilterColumn.Visible = False
                 Me.L_FilterValue.Visible = False
                 Me.L_SQLFilterStatement.Visible = False
             Case Else
                 Me.T_SourceSQLFilter.Visible = False
-                Me.T_SourceFilterColumn.Visible = False
+                Me.C_SourceFilterColumn.Visible = False
                 Me.T_SourceFilterValue.Visible = False
                 Me.L_FilterColumn.Visible = False
                 Me.L_FilterValue.Visible = False
@@ -238,11 +241,11 @@
             .ConnMode = Me.C_SourceConnMode.Text,
             .User = Me.T_SourceUsername.Text,
             .Password = Me.T_SourcePassword.Text,
-            .SQLTable = Me.T_SourceTable.Text,
-            .IDColumn = Me.T_SourceIDColumn.Text,
+            .SQLTable = Me.C_SourceTable.Text,
+            .IDColumn = Me.C_SourceIDColumn.Text,
             .IDColumnDataType = Me.C_SourceIDDatatype.Text,
             .Filtertype = Me.C_SourceFilterType.Text,
-            .FilterColumn = Me.T_SourceFilterColumn.Text,
+            .FilterColumn = Me.C_SourceFilterColumn.Text,
             .FilterValue = Me.T_SourceFilterValue.Text,
             .SQLFilter = Me.T_SourceSQLFilter.Text
         }
@@ -256,8 +259,8 @@
             .ConnMode = Me.C_TargetConnectionType.Text,
             .User = Me.T_TargetUsername.Text,
             .Password = Me.T_TargetPassword.Text,
-            .SQLTable = Me.T_TargetTable.Text,
-            .IDColumn = Me.T_TargetIDColumn.Text,
+            .SQLTable = Me.C_TargetTable.Text,
+            .IDColumn = Me.C_TargetIDColumn.Text,
             .IDColumnDataType = Me.C_TargetIDDatatype.Text
         }
 
@@ -269,7 +272,7 @@
         TargetSettings.StringSeperator = Me.T_TargetSeperator.Text
         TargetSettings.StringPart = Me.C_TargetPartSubstring.Text
 
-        TargetSettings.SessionTimestampField = Me.T_TargetTimestampfield.Text
+        TargetSettings.SessionTimestampField = Me.C_TargetTimestampfield.Text
 
         If Me.C_InsertAllowed.Checked = True Then
             TargetSettings.InsertAllowed = True
@@ -428,15 +431,15 @@
             Exit Function
         End If
 
-        If IsNothing(Me.T_SourceTable.Text) Or Me.T_SourceTable.Text = "" Then
-            Me.T_SourceTable.BackColor = Drawing.Color.Red
+        If IsNothing(Me.C_SourceTable.Text) Or Me.C_SourceTable.Text = "" Then
+            Me.C_SourceTable.BackColor = Drawing.Color.Red
             MsgBox("Please choose a table of your source database!")
             ValidateUserInput = False
             Exit Function
         End If
 
-        If IsNothing(Me.T_SourceIDColumn.Text) Or Me.T_SourceIDColumn.Text = "" Then
-            Me.T_SourceIDColumn.BackColor = Drawing.Color.Red
+        If IsNothing(Me.C_SourceIDColumn.Text) Or Me.C_SourceIDColumn.Text = "" Then
+            Me.C_SourceIDColumn.BackColor = Drawing.Color.Red
             MsgBox("Please enter the identifier column!")
             ValidateUserInput = False
             Exit Function
@@ -449,8 +452,8 @@
             Exit Function
         End If
 
-        If Me.C_SourceFilterType.Text = "one column match" And (IsNothing(Me.T_SourceFilterColumn.Text) = True Or Me.T_SourceFilterColumn.Text = "" Or IsNothing(Me.T_SourceFilterValue.Text) = True Or Me.T_SourceFilterValue.Text = "") Then
-            Me.T_SourceFilterColumn.BackColor = Drawing.Color.Red
+        If Me.C_SourceFilterType.Text = "one column match" And (IsNothing(Me.C_SourceFilterColumn.Text) = True Or Me.C_SourceFilterColumn.Text = "" Or IsNothing(Me.T_SourceFilterValue.Text) = True Or Me.T_SourceFilterValue.Text = "") Then
+            Me.C_SourceFilterColumn.BackColor = Drawing.Color.Red
             Me.T_SourceFilterValue.BackColor = Drawing.Color.Red
             MsgBox("Please enter the column you want to use for your filter and the corrosponding value." & vbLf & "If you don't want to filter your data choose" & Chr(34) & "none" & Chr(34) & "in the Filter Type dropdown menu.")
             ValidateUserInput = False
@@ -511,15 +514,15 @@
             Exit Function
         End If
 
-        If IsNothing(Me.T_TargetTable.Text) Or Me.T_TargetTable.Text = "" Then
-            Me.T_TargetTable.BackColor = Drawing.Color.Red
+        If IsNothing(Me.C_TargetTable.Text) Or Me.C_TargetTable.Text = "" Then
+            Me.C_TargetTable.BackColor = Drawing.Color.Red
             MsgBox("Please choose a table of your target database!")
             ValidateUserInput = False
             Exit Function
         End If
 
-        If IsNothing(Me.T_TargetIDColumn.Text) Or Me.T_TargetIDColumn.Text = "" Then
-            Me.T_TargetIDColumn.BackColor = Drawing.Color.Red
+        If IsNothing(Me.C_TargetIDColumn.Text) Or Me.C_TargetIDColumn.Text = "" Then
+            Me.C_TargetIDColumn.BackColor = Drawing.Color.Red
             MsgBox("Please enter the identifier column!")
             ValidateUserInput = False
             Exit Function
@@ -554,7 +557,7 @@
             ValidateUserInput = False
             Exit Function
         End If
-
+        RefreshMappingGridDataTypes()
         Dim ErrorInGrid As Boolean = False
         Dim ErrorMessages As New LinkedList(Of String)
         Dim EmptyRowsInGrid As Integer = 0
@@ -656,16 +659,16 @@
         Me.T_SourceDB.BackColor = Drawing.SystemColors.Window
     End Sub
 
-    Private Sub T_SourceTable_TextChanged(sender As Object, e As EventArgs) Handles T_SourceTable.TextChanged
-        Me.T_SourceTable.BackColor = Drawing.SystemColors.Window
+    Private Sub C_SourceTable_TextChanged(sender As Object, e As EventArgs) Handles C_SourceTable.TextChanged
+        Me.C_SourceTable.BackColor = Drawing.SystemColors.Window
     End Sub
 
-    Private Sub T_SourceIDColumn_TextChanged(sender As Object, e As EventArgs) Handles T_SourceIDColumn.TextChanged
-        Me.T_SourceIDColumn.BackColor = Drawing.SystemColors.Window
+    Private Sub C_SourceIDColumn_TextChanged(sender As Object, e As EventArgs) Handles C_SourceIDColumn.TextChanged
+        Me.C_SourceIDColumn.BackColor = Drawing.SystemColors.Window
     End Sub
 
-    Private Sub T_SourceFilterColumn_TextChanged(sender As Object, e As EventArgs) Handles T_SourceFilterColumn.TextChanged
-        Me.T_SourceFilterColumn.BackColor = Drawing.SystemColors.Window
+    Private Sub C_SourceFilterColumn_TextChanged(sender As Object, e As EventArgs) Handles C_SourceFilterColumn.TextChanged
+        Me.C_SourceFilterColumn.BackColor = Drawing.SystemColors.Window
     End Sub
 
     Private Sub T_SourceSQLFilter_TextChanged(sender As Object, e As EventArgs) Handles T_SourceSQLFilter.TextChanged
@@ -692,13 +695,13 @@
         Me.T_TargetPassword.BackColor = Drawing.SystemColors.Window
     End Sub
 
-    Private Sub T_TargetTable_TextChanged(sender As Object, e As EventArgs) Handles T_TargetTable.TextChanged
+    Private Sub C_TargetTable_TextChanged(sender As Object, e As EventArgs) Handles C_TargetTable.TextChanged
+        Me.C_TargetTable.BackColor = Drawing.SystemColors.Window
 
-        Me.T_TargetTable.BackColor = Drawing.SystemColors.Window
     End Sub
 
-    Private Sub T_TargetIDColumn_TextChanged(sender As Object, e As EventArgs) Handles T_TargetIDColumn.TextChanged
-        Me.T_TargetIDColumn.BackColor = Drawing.SystemColors.Window
+    Private Sub C_TargetIDColumn_TextChanged(sender As Object, e As EventArgs) Handles C_TargetIDColumn.TextChanged
+        Me.C_TargetIDColumn.BackColor = Drawing.SystemColors.Window
     End Sub
 
     Private Sub T_TargetSeperator_TextChanged(sender As Object, e As EventArgs) Handles T_TargetSeperator.TextChanged
@@ -722,11 +725,32 @@
     End Sub
 
     Private Sub VerifyConnections()
-
+        Me.C_SourceTable.Items.Clear()
         VerifyDatasourceConnection()
+        If IsNothing(SourceSQL) = True Then
+        Else
+            If SourceSQL.Setting.Worked = True Then
+                SourceSQL.Tables.Clear()
+                SourceSQL.GetTableNamesFromDatabase()
+                For Each Table In SourceSQL.Tables
+                    Me.C_SourceTable.Items.Add(Table.TableName)
+                Next
+            End If
+        End If
         Me.Refresh()
 
+        Me.C_TargetTable.Items.Clear()
         VerifyDataTargetConnection()
+        If IsNothing(TargetSQL) = True Then
+        Else
+            TargetSQL.Tables.Clear()
+            TargetSQL.GetTableNamesFromDatabase()
+            If TargetSQL.Setting.Worked = True Then
+                For Each Table In TargetSQL.Tables
+                    Me.C_TargetTable.Items.Add(Table.TableName)
+                Next
+            End If
+        End If
         Me.Refresh()
     End Sub
 
@@ -767,6 +791,7 @@
                 Else
                     PB_Source.BackColor = Drawing.Color.Green
                     Me.TestedSourceSetting.Worked = True
+                    Me.SourceSQL = SQL
                 End If
             Else
                 If Me.T_SourceUsername.Text <> "" And Me.T_SourcePassword.Text <> "" Then
@@ -809,6 +834,7 @@
                             Else
                                 PB_Source.BackColor = Drawing.Color.Green
                                 Me.TestedSourceSetting.Worked = True
+                                Me.SourceSQL = SQL
                             End If
                         Case "MySQL"
                             If IsNothing(SQL.MySQLCon) = True Then
@@ -816,6 +842,7 @@
                             Else
                                 PB_Source.BackColor = Drawing.Color.Green
                                 Me.TestedSourceSetting.Worked = True
+                                Me.SourceSQL = SQL
                             End If
                         Case "Access"
                             If IsNothing(SQL.AccessCon) = True Then
@@ -823,6 +850,7 @@
                             Else
                                 PB_Source.BackColor = Drawing.Color.Green
                                 Me.TestedSourceSetting.Worked = True
+                                Me.SourceSQL = SQL
                             End If
                     End Select
 
@@ -832,7 +860,7 @@
     End Sub
 
     Private Sub VerifyDataTargetConnection()
-        If Me.C_TargetServerType.Text <> "" And (Me.T_TargetServerAdress.Text <> "" Or Me.T_SourcePath.Text <> "") And Me.T_TargetDB.Text <> "" And Me.C_TargetConnectionType.Text <> "" Then
+        If Me.C_TargetServerType.Text <> "" And (Me.T_TargetServerAdress.Text <> "" Or Me.T_TargetPath.Text <> "") And Me.T_TargetDB.Text <> "" And Me.C_TargetConnectionType.Text <> "" Then
             If Me.C_TargetConnectionType.Text = "Trusted" Then
                 Dim TargetSettings As New SQLServerSettings With {
                 .Direction = "target",
@@ -869,12 +897,14 @@
                 Else
                     PB_Target.BackColor = Drawing.Color.Green
                     Me.TestedTargetSetting.Worked = True
+                    Me.TargetSQL = SQL
                 End If
             Else
                 If Me.T_TargetUsername.Text <> "" And Me.T_TargetPassword.Text <> "" Then
                     Dim TargetSettings As New SQLServerSettings With {
                     .Servertype = Me.C_TargetServerType.Text,
                     .Servername = Me.T_TargetServerAdress.Text,
+                    .FilePath = Me.T_TargetPath.Text,
                     .SQLDB = Me.T_TargetDB.Text,
                     .ConnMode = Me.C_TargetConnectionType.Text,
                     .User = Me.T_TargetUsername.Text,
@@ -908,6 +938,7 @@
                             Else
                                 PB_Target.BackColor = Drawing.Color.Green
                                 Me.TestedTargetSetting.Worked = True
+                                Me.TargetSQL = SQL
                             End If
                         Case "MySQL"
                             If IsNothing(SQL.MySQLCon) = True Then
@@ -915,6 +946,7 @@
                             Else
                                 PB_Target.BackColor = Drawing.Color.Green
                                 Me.TestedTargetSetting.Worked = True
+                                Me.TargetSQL = SQL
                             End If
                         Case "Access"
                             If IsNothing(SQL.AccessCon) = True Then
@@ -922,6 +954,7 @@
                             Else
                                 PB_Target.BackColor = Drawing.Color.Green
                                 Me.TestedTargetSetting.Worked = True
+                                Me.TargetSQL = SQL
                             End If
                     End Select
                 End If
@@ -1001,5 +1034,95 @@
 
     Private Sub C_TargetIDDatatype_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_TargetIDDatatype.SelectedValueChanged
         Me.C_TargetIDDatatype.BackColor = Drawing.SystemColors.Window
+    End Sub
+
+    Private Sub LoadTableSchemas()
+        VerifyConnections()
+        If Me.PB_Source.BackColor = Drawing.Color.Green Then
+            If Me.C_SourceTable.Text <> "" Then
+                SourceSQL.Setting.SQLTable = Me.C_SourceTable.Text
+                Dim SourceColCombobox As System.Windows.Forms.DataGridViewComboBoxColumn = MappingGrid.Columns(0)
+                SourceSQL.GetTableColumnNames()
+                SourceColCombobox.Items.Clear()
+                C_SourceIDColumn.Items.Clear()
+                C_SourceFilterColumn.Items.Clear()
+                For Each Column In SourceSQL.TableSchema.Columns
+                    SourceColCombobox.Items.Add(Column.Name)
+                    C_SourceIDColumn.Items.Add(Column.Name)
+                    C_SourceFilterColumn.Items.Add(Column.Name)
+                Next
+            End If
+
+        End If
+
+        If Me.PB_Target.BackColor = Drawing.Color.Green Then
+            If Me.C_TargetTable.Text <> "" Then
+                TargetSQL.Setting.SQLTable = Me.C_TargetTable.Text
+                Dim TargetColCombobox As System.Windows.Forms.DataGridViewComboBoxColumn = MappingGrid.Columns(1)
+                TargetSQL.GetTableColumnNames()
+                TargetColCombobox.Items.Clear()
+                C_TargetIDColumn.Items.Clear()
+                C_TargetTimestampfield.Items.Clear()
+                For Each Column In TargetSQL.TableSchema.Columns
+                    TargetColCombobox.Items.Add(Column.Name)
+                    C_TargetIDColumn.Items.Add(Column.Name)
+                    C_TargetTimestampfield.Items.Add(Column.Name)
+                Next
+            End If
+        End If
+    End Sub
+
+    Private Sub C_TargetTable_Leave(sender As Object, e As EventArgs) Handles C_TargetTable.Leave
+        LoadTableSchemas()
+    End Sub
+
+    Private Sub C_SourceTable_Leave(sender As Object, e As EventArgs) Handles C_SourceTable.Leave
+        LoadTableSchemas()
+    End Sub
+
+    Private Function GetDataTypeForColumn(Columnname As String, Connector As MyDataConnector) As String
+        For Each Column In Connector.TableSchema.Columns
+            If Column.Name = Columnname Then
+                GetDataTypeForColumn = Column.DataType
+                Exit Function
+            End If
+        Next
+        GetDataTypeForColumn = ""
+    End Function
+
+    Private Sub C_SourceIDColumn_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_SourceIDColumn.SelectedValueChanged
+        Me.C_SourceIDDatatype.Text = GetDataTypeForColumn(Me.C_SourceIDColumn.Text, Me.SourceSQL)
+    End Sub
+    Private Sub MappingGrid_CellMouseClick(sender As Object, e As Windows.Forms.DataGridViewCellMouseEventArgs) Handles MappingGrid.CellMouseClick
+        RefreshMappingGridDataTypes()
+    End Sub
+
+    Private Sub RefreshMappingGridDataTypes()
+        Dim Rows As Integer = 0
+        For Rows = 0 To MappingGrid.RowCount - 1
+            If IsEmptyRowInGrid(Rows) = True Then
+                If Rows < MappingGrid.RowCount - 1 Or Rows = 0 Then
+                End If
+            Else
+                For Columns = 0 To MappingGrid.ColumnCount - 1
+                    Select Case MappingGrid.Columns.Item(Columns).Name
+                        Case "SourceColumn"
+                            If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                            Else
+                                MappingGrid.Item(2, Rows).Value = GetDataTypeForColumn(MappingGrid(Columns, Rows).Value, Me.SourceSQL)
+                            End If
+                        Case "TargetColumn"
+                            If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                            Else
+                                MappingGrid.Item(3, Rows).Value = GetDataTypeForColumn(MappingGrid(Columns, Rows).Value, Me.TargetSQL)
+                            End If
+                    End Select
+                Next
+            End If
+        Next
+    End Sub
+
+    Private Sub C_TargetIDColumn_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_TargetIDColumn.SelectedValueChanged
+        Me.C_TargetIDDatatype.Text = GetDataTypeForColumn(Me.C_TargetIDColumn.Text, Me.TargetSQL)
     End Sub
 End Class

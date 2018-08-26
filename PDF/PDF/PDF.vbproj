@@ -82,6 +82,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColumnSchema.vb" />
     <Compile Include="Core.vb" />
     <Compile Include="Daten.vb" />
     <Compile Include="ENV.vb" />
@@ -115,6 +116,7 @@
     <Compile Include="SQLOperations.vb" />
     <Compile Include="SQLParamter.vb" />
     <Compile Include="SQLServerSettings.vb" />
+    <Compile Include="TableSchema.vb" />
     <Compile Include="XMLFiles.vb" />
   </ItemGroup>
   <ItemGroup>

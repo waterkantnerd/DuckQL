@@ -31,6 +31,12 @@ Partial Class Konfiguration
         Me.L_LoggingDirectory = New System.Windows.Forms.Label()
         Me.B_LoggingDirectory = New System.Windows.Forms.Button()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.C_SourceTable = New System.Windows.Forms.ComboBox()
+        Me.L_SourceIDDataType = New System.Windows.Forms.Label()
+        Me.C_SourceIDDatatype = New System.Windows.Forms.ComboBox()
+        Me.B_SourcePath = New System.Windows.Forms.Button()
+        Me.L_SourcePath = New System.Windows.Forms.Label()
+        Me.T_SourcePath = New System.Windows.Forms.TextBox()
         Me.PB_Source = New System.Windows.Forms.PictureBox()
         Me.L_SQLFilterStatement = New System.Windows.Forms.Label()
         Me.L_FilterValue = New System.Windows.Forms.Label()
@@ -46,17 +52,23 @@ Partial Class Konfiguration
         Me.Label2 = New System.Windows.Forms.Label()
         Me.L_SourceServerAdress = New System.Windows.Forms.Label()
         Me.T_SourceFilterValue = New System.Windows.Forms.TextBox()
-        Me.T_SourceFilterColumn = New System.Windows.Forms.TextBox()
+        Me.C_SourceFilterColumn = New System.Windows.Forms.ComboBox()
         Me.C_SourceFilterType = New System.Windows.Forms.ComboBox()
-        Me.T_SourceIDColumn = New System.Windows.Forms.TextBox()
-        Me.T_SourceTable = New System.Windows.Forms.TextBox()
+        Me.C_SourceIDColumn = New System.Windows.Forms.ComboBox()
         Me.C_SourceConnMode = New System.Windows.Forms.ComboBox()
         Me.T_SourcePassword = New System.Windows.Forms.TextBox()
         Me.T_SourceUsername = New System.Windows.Forms.TextBox()
         Me.T_SourceDB = New System.Windows.Forms.TextBox()
         Me.C_SourceType = New System.Windows.Forms.ComboBox()
         Me.T_SourceAdress = New System.Windows.Forms.TextBox()
+        Me.T_SourceIDColumn = New System.Windows.Forms.TextBox()
+        Me.T_SourceFilterColumn = New System.Windows.Forms.TextBox()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.L_TargetIDDatatype = New System.Windows.Forms.Label()
+        Me.C_TargetIDDatatype = New System.Windows.Forms.ComboBox()
+        Me.B_TargetPath = New System.Windows.Forms.Button()
+        Me.L_TargetPath = New System.Windows.Forms.Label()
+        Me.T_TargetPath = New System.Windows.Forms.TextBox()
         Me.PB_Target = New System.Windows.Forms.PictureBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.C_DeleteAllowed = New System.Windows.Forms.CheckBox()
@@ -69,10 +81,10 @@ Partial Class Konfiguration
         Me.T_TargetSeperator = New System.Windows.Forms.TextBox()
         Me.C_MapIDValue = New System.Windows.Forms.CheckBox()
         Me.Label21 = New System.Windows.Forms.Label()
-        Me.T_TargetTimestampfield = New System.Windows.Forms.TextBox()
+        Me.C_TargetTimestampfield = New System.Windows.Forms.ComboBox()
         Me.Label20 = New System.Windows.Forms.Label()
         Me.Label13 = New System.Windows.Forms.Label()
-        Me.T_TargetIDColumn = New System.Windows.Forms.TextBox()
+        Me.C_TargetIDColumn = New System.Windows.Forms.ComboBox()
         Me.C_TargetServerType = New System.Windows.Forms.ComboBox()
         Me.L_TargetConnectionType = New System.Windows.Forms.Label()
         Me.T_TargetServerAdress = New System.Windows.Forms.TextBox()
@@ -85,30 +97,23 @@ Partial Class Konfiguration
         Me.Label18 = New System.Windows.Forms.Label()
         Me.C_TargetConnectionType = New System.Windows.Forms.ComboBox()
         Me.L_TargetServerAdress = New System.Windows.Forms.Label()
+        Me.C_TargetTable = New System.Windows.Forms.ComboBox()
+        Me.T_TargetIDColumn = New System.Windows.Forms.TextBox()
+        Me.T_TargetTimestampfield = New System.Windows.Forms.TextBox()
         Me.T_TargetTable = New System.Windows.Forms.TextBox()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
         Me.MappingGrid = New System.Windows.Forms.DataGridView()
-        Me.SourceColumn = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.TargetColumn = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.SourceType = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.TargetType = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.SourceColumn = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.TargetColumn = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.SourceType = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.TargetType = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Seperator = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PartOfSubstring = New System.Windows.Forms.DataGridViewComboBoxColumn()
         Me.B_Save = New System.Windows.Forms.Button()
         Me.C_DebugLog = New System.Windows.Forms.CheckBox()
         Me.C_Silent = New System.Windows.Forms.CheckBox()
         Me.ToolTipKonfig = New System.Windows.Forms.ToolTip(Me.components)
-        Me.T_SourcePath = New System.Windows.Forms.TextBox()
-        Me.T_TargetPath = New System.Windows.Forms.TextBox()
-        Me.L_SourcePath = New System.Windows.Forms.Label()
-        Me.L_TargetPath = New System.Windows.Forms.Label()
-        Me.B_SourcePath = New System.Windows.Forms.Button()
-        Me.B_TargetPath = New System.Windows.Forms.Button()
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
-        Me.C_SourceIDDatatype = New System.Windows.Forms.ComboBox()
-        Me.C_TargetIDDatatype = New System.Windows.Forms.ComboBox()
-        Me.L_SourceIDDataType = New System.Windows.Forms.Label()
-        Me.L_TargetIDDatatype = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -165,6 +170,7 @@ Partial Class Konfiguration
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.C_SourceTable)
         Me.GroupBox1.Controls.Add(Me.L_SourceIDDataType)
         Me.GroupBox1.Controls.Add(Me.C_SourceIDDatatype)
         Me.GroupBox1.Controls.Add(Me.B_SourcePath)
@@ -185,10 +191,9 @@ Partial Class Konfiguration
         Me.GroupBox1.Controls.Add(Me.Label2)
         Me.GroupBox1.Controls.Add(Me.L_SourceServerAdress)
         Me.GroupBox1.Controls.Add(Me.T_SourceFilterValue)
-        Me.GroupBox1.Controls.Add(Me.T_SourceFilterColumn)
+        Me.GroupBox1.Controls.Add(Me.C_SourceFilterColumn)
         Me.GroupBox1.Controls.Add(Me.C_SourceFilterType)
-        Me.GroupBox1.Controls.Add(Me.T_SourceIDColumn)
-        Me.GroupBox1.Controls.Add(Me.T_SourceTable)
+        Me.GroupBox1.Controls.Add(Me.C_SourceIDColumn)
         Me.GroupBox1.Controls.Add(Me.C_SourceConnMode)
         Me.GroupBox1.Controls.Add(Me.T_SourcePassword)
         Me.GroupBox1.Controls.Add(Me.T_SourceUsername)
@@ -201,6 +206,65 @@ Partial Class Konfiguration
         Me.GroupBox1.TabIndex = 5
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Source"
+        '
+        'C_SourceTable
+        '
+        Me.C_SourceTable.FormattingEnabled = True
+        Me.C_SourceTable.Location = New System.Drawing.Point(80, 123)
+        Me.C_SourceTable.Name = "C_SourceTable"
+        Me.C_SourceTable.Size = New System.Drawing.Size(228, 21)
+        Me.C_SourceTable.TabIndex = 51
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceTable, "Type: The datatype of your identifier column")
+        '
+        'L_SourceIDDataType
+        '
+        Me.L_SourceIDDataType.AutoSize = True
+        Me.L_SourceIDDataType.Location = New System.Drawing.Point(336, 152)
+        Me.L_SourceIDDataType.Name = "L_SourceIDDataType"
+        Me.L_SourceIDDataType.Size = New System.Drawing.Size(32, 13)
+        Me.L_SourceIDDataType.TabIndex = 49
+        Me.L_SourceIDDataType.Text = "Type:"
+        '
+        'C_SourceIDDatatype
+        '
+        Me.C_SourceIDDatatype.FormattingEnabled = True
+        Me.C_SourceIDDatatype.Items.AddRange(New Object() {"uniqueidentifier", "int", "string", "datetime"})
+        Me.C_SourceIDDatatype.Location = New System.Drawing.Point(374, 149)
+        Me.C_SourceIDDatatype.Name = "C_SourceIDDatatype"
+        Me.C_SourceIDDatatype.Size = New System.Drawing.Size(191, 21)
+        Me.C_SourceIDDatatype.TabIndex = 48
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceIDDatatype, "Type: The datatype of your identifier column")
+        '
+        'B_SourcePath
+        '
+        Me.B_SourcePath.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.B_SourcePath.Location = New System.Drawing.Point(545, 18)
+        Me.B_SourcePath.Name = "B_SourcePath"
+        Me.B_SourcePath.Size = New System.Drawing.Size(22, 23)
+        Me.B_SourcePath.TabIndex = 47
+        Me.B_SourcePath.Text = "..."
+        Me.ToolTipKonfig.SetToolTip(Me.B_SourcePath, "Click here to choose a logging directory")
+        Me.B_SourcePath.UseVisualStyleBackColor = True
+        Me.B_SourcePath.Visible = False
+        '
+        'L_SourcePath
+        '
+        Me.L_SourcePath.AutoSize = True
+        Me.L_SourcePath.Location = New System.Drawing.Point(275, 22)
+        Me.L_SourcePath.Name = "L_SourcePath"
+        Me.L_SourcePath.Size = New System.Drawing.Size(33, 13)
+        Me.L_SourcePath.TabIndex = 25
+        Me.L_SourcePath.Text = "Path:"
+        Me.L_SourcePath.Visible = False
+        '
+        'T_SourcePath
+        '
+        Me.T_SourcePath.Location = New System.Drawing.Point(314, 19)
+        Me.T_SourcePath.Name = "T_SourcePath"
+        Me.T_SourcePath.Size = New System.Drawing.Size(226, 22)
+        Me.T_SourcePath.TabIndex = 24
+        Me.ToolTipKonfig.SetToolTip(Me.T_SourcePath, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
+        Me.T_SourcePath.Visible = False
         '
         'PB_Source
         '
@@ -343,13 +407,15 @@ Partial Class Konfiguration
         Me.T_SourceFilterValue.TabIndex = 14
         Me.T_SourceFilterValue.Visible = False
         '
-        'T_SourceFilterColumn
+        'C_SourceFilterColumn
         '
-        Me.T_SourceFilterColumn.Location = New System.Drawing.Point(80, 225)
-        Me.T_SourceFilterColumn.Name = "T_SourceFilterColumn"
-        Me.T_SourceFilterColumn.Size = New System.Drawing.Size(206, 22)
-        Me.T_SourceFilterColumn.TabIndex = 13
-        Me.T_SourceFilterColumn.Visible = False
+        Me.C_SourceFilterColumn.FormattingEnabled = True
+        Me.C_SourceFilterColumn.Location = New System.Drawing.Point(80, 224)
+        Me.C_SourceFilterColumn.Name = "C_SourceFilterColumn"
+        Me.C_SourceFilterColumn.Size = New System.Drawing.Size(206, 21)
+        Me.C_SourceFilterColumn.TabIndex = 52
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceFilterColumn, "Type: The datatype of your identifier column")
+        Me.C_SourceFilterColumn.Visible = False
         '
         'C_SourceFilterType
         '
@@ -361,22 +427,15 @@ Partial Class Konfiguration
         Me.C_SourceFilterType.TabIndex = 12
         Me.ToolTipKonfig.SetToolTip(Me.C_SourceFilterType, resources.GetString("C_SourceFilterType.ToolTip"))
         '
-        'T_SourceIDColumn
+        'C_SourceIDColumn
         '
-        Me.T_SourceIDColumn.Location = New System.Drawing.Point(80, 149)
-        Me.T_SourceIDColumn.Name = "T_SourceIDColumn"
-        Me.T_SourceIDColumn.Size = New System.Drawing.Size(228, 22)
-        Me.T_SourceIDColumn.TabIndex = 11
-        Me.ToolTipKonfig.SetToolTip(Me.T_SourceIDColumn, "ID Column: The columns that is used as identifier, i.e. ID. At the moment only on" &
+        Me.C_SourceIDColumn.FormattingEnabled = True
+        Me.C_SourceIDColumn.Location = New System.Drawing.Point(80, 149)
+        Me.C_SourceIDColumn.Name = "C_SourceIDColumn"
+        Me.C_SourceIDColumn.Size = New System.Drawing.Size(228, 21)
+        Me.C_SourceIDColumn.TabIndex = 11
+        Me.ToolTipKonfig.SetToolTip(Me.C_SourceIDColumn, "ID Column: The columns that is used as identifier, i.e. ID. At the moment only on" &
         "e column is supported.")
-        '
-        'T_SourceTable
-        '
-        Me.T_SourceTable.Location = New System.Drawing.Point(80, 123)
-        Me.T_SourceTable.Name = "T_SourceTable"
-        Me.T_SourceTable.Size = New System.Drawing.Size(485, 22)
-        Me.T_SourceTable.TabIndex = 10
-        Me.ToolTipKonfig.SetToolTip(Me.T_SourceTable, "Table: The name of the table from your database you want to sync. ")
         '
         'C_SourceConnMode
         '
@@ -434,6 +493,20 @@ Partial Class Konfiguration
         Me.T_SourceAdress.TabIndex = 5
         Me.ToolTipKonfig.SetToolTip(Me.T_SourceAdress, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
         '
+        'T_SourceIDColumn
+        '
+        Me.T_SourceIDColumn.Location = New System.Drawing.Point(0, 0)
+        Me.T_SourceIDColumn.Name = "T_SourceIDColumn"
+        Me.T_SourceIDColumn.Size = New System.Drawing.Size(100, 20)
+        Me.T_SourceIDColumn.TabIndex = 0
+        '
+        'T_SourceFilterColumn
+        '
+        Me.T_SourceFilterColumn.Location = New System.Drawing.Point(0, 0)
+        Me.T_SourceFilterColumn.Name = "T_SourceFilterColumn"
+        Me.T_SourceFilterColumn.Size = New System.Drawing.Size(100, 20)
+        Me.T_SourceFilterColumn.TabIndex = 0
+        '
         'GroupBox2
         '
         Me.GroupBox2.Controls.Add(Me.L_TargetIDDatatype)
@@ -453,10 +526,10 @@ Partial Class Konfiguration
         Me.GroupBox2.Controls.Add(Me.T_TargetSeperator)
         Me.GroupBox2.Controls.Add(Me.C_MapIDValue)
         Me.GroupBox2.Controls.Add(Me.Label21)
-        Me.GroupBox2.Controls.Add(Me.T_TargetTimestampfield)
+        Me.GroupBox2.Controls.Add(Me.C_TargetTimestampfield)
         Me.GroupBox2.Controls.Add(Me.Label20)
         Me.GroupBox2.Controls.Add(Me.Label13)
-        Me.GroupBox2.Controls.Add(Me.T_TargetIDColumn)
+        Me.GroupBox2.Controls.Add(Me.C_TargetIDColumn)
         Me.GroupBox2.Controls.Add(Me.C_TargetServerType)
         Me.GroupBox2.Controls.Add(Me.L_TargetConnectionType)
         Me.GroupBox2.Controls.Add(Me.T_TargetServerAdress)
@@ -469,13 +542,63 @@ Partial Class Konfiguration
         Me.GroupBox2.Controls.Add(Me.Label18)
         Me.GroupBox2.Controls.Add(Me.C_TargetConnectionType)
         Me.GroupBox2.Controls.Add(Me.L_TargetServerAdress)
-        Me.GroupBox2.Controls.Add(Me.T_TargetTable)
+        Me.GroupBox2.Controls.Add(Me.C_TargetTable)
         Me.GroupBox2.Location = New System.Drawing.Point(612, 65)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(590, 359)
         Me.GroupBox2.TabIndex = 6
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Target"
+        '
+        'L_TargetIDDatatype
+        '
+        Me.L_TargetIDDatatype.AutoSize = True
+        Me.L_TargetIDDatatype.Location = New System.Drawing.Point(337, 152)
+        Me.L_TargetIDDatatype.Name = "L_TargetIDDatatype"
+        Me.L_TargetIDDatatype.Size = New System.Drawing.Size(32, 13)
+        Me.L_TargetIDDatatype.TabIndex = 50
+        Me.L_TargetIDDatatype.Text = "Type:"
+        '
+        'C_TargetIDDatatype
+        '
+        Me.C_TargetIDDatatype.FormattingEnabled = True
+        Me.C_TargetIDDatatype.Items.AddRange(New Object() {"uniqueidentifier", "int", "string", "datetime"})
+        Me.C_TargetIDDatatype.Location = New System.Drawing.Point(375, 149)
+        Me.C_TargetIDDatatype.Name = "C_TargetIDDatatype"
+        Me.C_TargetIDDatatype.Size = New System.Drawing.Size(191, 21)
+        Me.C_TargetIDDatatype.TabIndex = 49
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetIDDatatype, "Type: The datatype of your identifier column")
+        '
+        'B_TargetPath
+        '
+        Me.B_TargetPath.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.B_TargetPath.Location = New System.Drawing.Point(547, 18)
+        Me.B_TargetPath.Name = "B_TargetPath"
+        Me.B_TargetPath.Size = New System.Drawing.Size(21, 23)
+        Me.B_TargetPath.TabIndex = 48
+        Me.B_TargetPath.Text = "..."
+        Me.ToolTipKonfig.SetToolTip(Me.B_TargetPath, "Click here to choose a logging directory")
+        Me.B_TargetPath.UseVisualStyleBackColor = True
+        Me.B_TargetPath.Visible = False
+        '
+        'L_TargetPath
+        '
+        Me.L_TargetPath.AutoSize = True
+        Me.L_TargetPath.Location = New System.Drawing.Point(278, 21)
+        Me.L_TargetPath.Name = "L_TargetPath"
+        Me.L_TargetPath.Size = New System.Drawing.Size(33, 13)
+        Me.L_TargetPath.TabIndex = 26
+        Me.L_TargetPath.Text = "Path:"
+        Me.L_TargetPath.Visible = False
+        '
+        'T_TargetPath
+        '
+        Me.T_TargetPath.Location = New System.Drawing.Point(317, 18)
+        Me.T_TargetPath.Name = "T_TargetPath"
+        Me.T_TargetPath.Size = New System.Drawing.Size(228, 22)
+        Me.T_TargetPath.TabIndex = 25
+        Me.ToolTipKonfig.SetToolTip(Me.T_TargetPath, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
+        Me.T_TargetPath.Visible = False
         '
         'PB_Target
         '
@@ -599,13 +722,14 @@ Partial Class Konfiguration
         Me.Label21.TabIndex = 38
         Me.Label21.Text = "Time Stamp Field:"
         '
-        'T_TargetTimestampfield
+        'C_TargetTimestampfield
         '
-        Me.T_TargetTimestampfield.Location = New System.Drawing.Point(107, 228)
-        Me.T_TargetTimestampfield.Name = "T_TargetTimestampfield"
-        Me.T_TargetTimestampfield.Size = New System.Drawing.Size(459, 22)
-        Me.T_TargetTimestampfield.TabIndex = 26
-        Me.ToolTipKonfig.SetToolTip(Me.T_TargetTimestampfield, "Time Stamp Field: If you want to set a sync timestamp, to see when the row has sy" &
+        Me.C_TargetTimestampfield.FormattingEnabled = True
+        Me.C_TargetTimestampfield.Location = New System.Drawing.Point(107, 228)
+        Me.C_TargetTimestampfield.Name = "C_TargetTimestampfield"
+        Me.C_TargetTimestampfield.Size = New System.Drawing.Size(459, 21)
+        Me.C_TargetTimestampfield.TabIndex = 26
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetTimestampfield, "Time Stamp Field: If you want to set a sync timestamp, to see when the row has sy" &
         "nced, you can add the name")
         '
         'Label20
@@ -626,12 +750,14 @@ Partial Class Konfiguration
         Me.Label13.TabIndex = 36
         Me.Label13.Text = "Table:"
         '
-        'T_TargetIDColumn
+        'C_TargetIDColumn
         '
-        Me.T_TargetIDColumn.Location = New System.Drawing.Point(81, 149)
-        Me.T_TargetIDColumn.Name = "T_TargetIDColumn"
-        Me.T_TargetIDColumn.Size = New System.Drawing.Size(230, 22)
-        Me.T_TargetIDColumn.TabIndex = 22
+        Me.C_TargetIDColumn.FormattingEnabled = True
+        Me.C_TargetIDColumn.Location = New System.Drawing.Point(81, 149)
+        Me.C_TargetIDColumn.Name = "C_TargetIDColumn"
+        Me.C_TargetIDColumn.Size = New System.Drawing.Size(230, 21)
+        Me.C_TargetIDColumn.TabIndex = 22
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetIDColumn, "Type: The datatype of your identifier column")
         '
         'C_TargetServerType
         '
@@ -746,13 +872,35 @@ Partial Class Konfiguration
         Me.L_TargetServerAdress.TabIndex = 30
         Me.L_TargetServerAdress.Text = "Server Adress:"
         '
+        'C_TargetTable
+        '
+        Me.C_TargetTable.FormattingEnabled = True
+        Me.C_TargetTable.Location = New System.Drawing.Point(80, 122)
+        Me.C_TargetTable.Name = "C_TargetTable"
+        Me.C_TargetTable.Size = New System.Drawing.Size(231, 21)
+        Me.C_TargetTable.TabIndex = 52
+        Me.ToolTipKonfig.SetToolTip(Me.C_TargetTable, "Type: The datatype of your identifier column")
+        '
+        'T_TargetIDColumn
+        '
+        Me.T_TargetIDColumn.Location = New System.Drawing.Point(0, 0)
+        Me.T_TargetIDColumn.Name = "T_TargetIDColumn"
+        Me.T_TargetIDColumn.Size = New System.Drawing.Size(100, 20)
+        Me.T_TargetIDColumn.TabIndex = 0
+        '
+        'T_TargetTimestampfield
+        '
+        Me.T_TargetTimestampfield.Location = New System.Drawing.Point(0, 0)
+        Me.T_TargetTimestampfield.Name = "T_TargetTimestampfield"
+        Me.T_TargetTimestampfield.Size = New System.Drawing.Size(100, 20)
+        Me.T_TargetTimestampfield.TabIndex = 0
+        '
         'T_TargetTable
         '
-        Me.T_TargetTable.Location = New System.Drawing.Point(81, 122)
+        Me.T_TargetTable.Location = New System.Drawing.Point(0, 0)
         Me.T_TargetTable.Name = "T_TargetTable"
-        Me.T_TargetTable.Size = New System.Drawing.Size(485, 22)
-        Me.T_TargetTable.TabIndex = 21
-        Me.ToolTipKonfig.SetToolTip(Me.T_TargetTable, "Table: The name of the table from your database you want to sync. ")
+        Me.T_TargetTable.Size = New System.Drawing.Size(100, 20)
+        Me.T_TargetTable.TabIndex = 0
         '
         'MappingGrid
         '
@@ -768,23 +916,29 @@ Partial Class Konfiguration
         '
         Me.SourceColumn.HeaderText = "Source Column"
         Me.SourceColumn.Name = "SourceColumn"
+        Me.SourceColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.SourceColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'TargetColumn
         '
         Me.TargetColumn.HeaderText = "Target Column"
         Me.TargetColumn.Name = "TargetColumn"
+        Me.TargetColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.TargetColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
         '
         'SourceType
         '
         Me.SourceType.HeaderText = "Source Type"
-        Me.SourceType.Items.AddRange(New Object() {"string", "int", "datetime", "timestamp"})
         Me.SourceType.Name = "SourceType"
+        Me.SourceType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.SourceType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         '
         'TargetType
         '
         Me.TargetType.HeaderText = "Target Type"
-        Me.TargetType.Items.AddRange(New Object() {"string", "int", "datetime", "timestamp"})
         Me.TargetType.Name = "TargetType"
+        Me.TargetType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.TargetType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
         '
         'Seperator
         '
@@ -834,109 +988,9 @@ Partial Class Konfiguration
         '
         Me.ToolTipKonfig.ToolTipTitle = "Configuration"
         '
-        'T_SourcePath
-        '
-        Me.T_SourcePath.Location = New System.Drawing.Point(314, 19)
-        Me.T_SourcePath.Name = "T_SourcePath"
-        Me.T_SourcePath.Size = New System.Drawing.Size(226, 22)
-        Me.T_SourcePath.TabIndex = 24
-        Me.ToolTipKonfig.SetToolTip(Me.T_SourcePath, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
-        Me.T_SourcePath.Visible = False
-        '
-        'T_TargetPath
-        '
-        Me.T_TargetPath.Location = New System.Drawing.Point(317, 18)
-        Me.T_TargetPath.Name = "T_TargetPath"
-        Me.T_TargetPath.Size = New System.Drawing.Size(228, 22)
-        Me.T_TargetPath.TabIndex = 25
-        Me.ToolTipKonfig.SetToolTip(Me.T_TargetPath, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
-        Me.T_TargetPath.Visible = False
-        '
-        'L_SourcePath
-        '
-        Me.L_SourcePath.AutoSize = True
-        Me.L_SourcePath.Location = New System.Drawing.Point(275, 22)
-        Me.L_SourcePath.Name = "L_SourcePath"
-        Me.L_SourcePath.Size = New System.Drawing.Size(33, 13)
-        Me.L_SourcePath.TabIndex = 25
-        Me.L_SourcePath.Text = "Path:"
-        Me.L_SourcePath.Visible = False
-        '
-        'L_TargetPath
-        '
-        Me.L_TargetPath.AutoSize = True
-        Me.L_TargetPath.Location = New System.Drawing.Point(278, 21)
-        Me.L_TargetPath.Name = "L_TargetPath"
-        Me.L_TargetPath.Size = New System.Drawing.Size(33, 13)
-        Me.L_TargetPath.TabIndex = 26
-        Me.L_TargetPath.Text = "Path:"
-        Me.L_TargetPath.Visible = False
-        '
-        'B_SourcePath
-        '
-        Me.B_SourcePath.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.B_SourcePath.Location = New System.Drawing.Point(545, 18)
-        Me.B_SourcePath.Name = "B_SourcePath"
-        Me.B_SourcePath.Size = New System.Drawing.Size(22, 23)
-        Me.B_SourcePath.TabIndex = 47
-        Me.B_SourcePath.Text = "..."
-        Me.ToolTipKonfig.SetToolTip(Me.B_SourcePath, "Click here to choose a logging directory")
-        Me.B_SourcePath.UseVisualStyleBackColor = True
-        Me.B_SourcePath.Visible = False
-        '
-        'B_TargetPath
-        '
-        Me.B_TargetPath.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.B_TargetPath.Location = New System.Drawing.Point(547, 18)
-        Me.B_TargetPath.Name = "B_TargetPath"
-        Me.B_TargetPath.Size = New System.Drawing.Size(21, 23)
-        Me.B_TargetPath.TabIndex = 48
-        Me.B_TargetPath.Text = "..."
-        Me.ToolTipKonfig.SetToolTip(Me.B_TargetPath, "Click here to choose a logging directory")
-        Me.B_TargetPath.UseVisualStyleBackColor = True
-        Me.B_TargetPath.Visible = False
-        '
         'OpenFileDialog1
         '
         Me.OpenFileDialog1.FileName = "OpenFileDialog1"
-        '
-        'C_SourceIDDatatype
-        '
-        Me.C_SourceIDDatatype.FormattingEnabled = True
-        Me.C_SourceIDDatatype.Items.AddRange(New Object() {"uniqueidentifier", "int", "string", "datetime"})
-        Me.C_SourceIDDatatype.Location = New System.Drawing.Point(374, 149)
-        Me.C_SourceIDDatatype.Name = "C_SourceIDDatatype"
-        Me.C_SourceIDDatatype.Size = New System.Drawing.Size(191, 21)
-        Me.C_SourceIDDatatype.TabIndex = 48
-        Me.ToolTipKonfig.SetToolTip(Me.C_SourceIDDatatype, "Type: The datatype of your identifier column")
-        '
-        'C_TargetIDDatatype
-        '
-        Me.C_TargetIDDatatype.FormattingEnabled = True
-        Me.C_TargetIDDatatype.Items.AddRange(New Object() {"uniqueidentifier", "int", "string", "datetime"})
-        Me.C_TargetIDDatatype.Location = New System.Drawing.Point(375, 149)
-        Me.C_TargetIDDatatype.Name = "C_TargetIDDatatype"
-        Me.C_TargetIDDatatype.Size = New System.Drawing.Size(191, 21)
-        Me.C_TargetIDDatatype.TabIndex = 49
-        Me.ToolTipKonfig.SetToolTip(Me.C_TargetIDDatatype, "Type: The datatype of your identifier column")
-        '
-        'L_SourceIDDataType
-        '
-        Me.L_SourceIDDataType.AutoSize = True
-        Me.L_SourceIDDataType.Location = New System.Drawing.Point(336, 152)
-        Me.L_SourceIDDataType.Name = "L_SourceIDDataType"
-        Me.L_SourceIDDataType.Size = New System.Drawing.Size(32, 13)
-        Me.L_SourceIDDataType.TabIndex = 49
-        Me.L_SourceIDDataType.Text = "Type:"
-        '
-        'L_TargetIDDatatype
-        '
-        Me.L_TargetIDDatatype.AutoSize = True
-        Me.L_TargetIDDatatype.Location = New System.Drawing.Point(337, 152)
-        Me.L_TargetIDDatatype.Name = "L_TargetIDDatatype"
-        Me.L_TargetIDDatatype.Size = New System.Drawing.Size(32, 13)
-        Me.L_TargetIDDatatype.TabIndex = 50
-        Me.L_TargetIDDatatype.Text = "Type:"
         '
         'Konfiguration
         '
@@ -983,7 +1037,6 @@ Partial Class Konfiguration
     Friend WithEvents T_SourceFilterColumn As Windows.Forms.TextBox
     Friend WithEvents C_SourceFilterType As Windows.Forms.ComboBox
     Friend WithEvents T_SourceIDColumn As Windows.Forms.TextBox
-    Friend WithEvents T_SourceTable As Windows.Forms.TextBox
     Friend WithEvents C_SourceConnMode As Windows.Forms.ComboBox
     Friend WithEvents T_SourcePassword As Windows.Forms.TextBox
     Friend WithEvents T_SourceUsername As Windows.Forms.TextBox
@@ -1030,12 +1083,6 @@ Partial Class Konfiguration
     Friend WithEvents C_InsertAllowed As Windows.Forms.CheckBox
     Friend WithEvents Label24 As Windows.Forms.Label
     Friend WithEvents MappingGrid As Windows.Forms.DataGridView
-    Friend WithEvents SourceColumn As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents TargetColumn As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents SourceType As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents TargetType As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents B_Save As Windows.Forms.Button
     Friend WithEvents C_DebugLog As Windows.Forms.CheckBox
     Friend WithEvents Label4 As Windows.Forms.Label
@@ -1054,4 +1101,16 @@ Partial Class Konfiguration
     Friend WithEvents C_SourceIDDatatype As Windows.Forms.ComboBox
     Friend WithEvents L_TargetIDDatatype As Windows.Forms.Label
     Friend WithEvents C_TargetIDDatatype As Windows.Forms.ComboBox
+    Friend WithEvents C_SourceTable As Windows.Forms.ComboBox
+    Friend WithEvents C_SourceIDColumn As Windows.Forms.ComboBox
+    Friend WithEvents C_TargetTable As Windows.Forms.ComboBox
+    Friend WithEvents C_TargetIDColumn As Windows.Forms.ComboBox
+    Friend WithEvents SourceColumn As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents TargetColumn As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents SourceType As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents TargetType As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents C_SourceFilterColumn As Windows.Forms.ComboBox
+    Friend WithEvents C_TargetTimestampfield As Windows.Forms.ComboBox
 End Class
