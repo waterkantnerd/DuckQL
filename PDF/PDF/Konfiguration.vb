@@ -199,6 +199,7 @@
 
         ENV.CreateName(Me.T_Jobname.Text)
         ENV.SetLogPath(Me.T_LoggingDirectory.Text)
+        ENV.OrderID = Me.T_OrderID.Text
 
         If Me.C_DebugLog.Checked = True Then
             ENV.LogLevel = "1"
@@ -245,9 +246,9 @@
         }
 
         If Me.C_MapIDValue.Checked = True Then
-            TargetSettings.MapTargetIDColumnValue = "YES"
+            TargetSettings.MapTargetIDColumnValue = True
         Else
-            TargetSettings.MapTargetIDColumnValue = "NO"
+            TargetSettings.MapTargetIDColumnValue = False
         End If
         TargetSettings.StringSeperator = Me.T_TargetSeperator.Text
         TargetSettings.StringPart = Me.C_TargetPartSubstring.Text
@@ -351,6 +352,13 @@
         If IsNothing(Me.T_Jobname.Text) Or Me.T_Jobname.Text = "" Then
             Me.T_Jobname.BackColor = Drawing.Color.Red
             MsgBox("You have to enter a Jobname!")
+            ValidateUserInput = False
+            Exit Function
+        End If
+
+        If IsNumeric(Me.T_OrderID.Text) = False And Not (IsNothing(Me.T_OrderID.Text) = True Or Me.T_OrderID.Text="") Then
+            Me.T_OrderID.BackColor = Drawing.Color.Red
+            MsgBox("Please enter a numeric value to OrderID")
             ValidateUserInput = False
             Exit Function
         End If
@@ -1104,5 +1112,86 @@
 
     Private Sub C_TargetIDColumn_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_TargetIDColumn.SelectedValueChanged
         Me.C_TargetIDDatatype.Text = GetDataTypeForColumn(Me.C_TargetIDColumn.Text, Me.TargetSQL)
+    End Sub
+
+    Private Sub T_OrderID_TextChanged(sender As Object, e As EventArgs) Handles T_OrderID.TextChanged
+        Me.T_OrderID.BackColor = Drawing.SystemColors.Window
+    End Sub
+
+    Private Sub B_Load_Click(sender As Object, e As EventArgs) Handles B_Load.Click
+        Dim StrFile As String = ""
+        Dim OpenENV As ENV
+        Dim XMLFile As New XMLFiles
+        Me.OpenFileDialog1.ShowDialog()
+        Me.OpenFileDialog1.OpenFile()
+        StrFile = Me.OpenFileDialog1.FileName
+        If StrFile <> "" Then
+            OpenENV = XMLFile.ReadJobFile(StrFile)
+        Else
+            Exit Sub
+        End If
+
+        If IsNothing(OpenENV) = False Then
+            Me.T_Jobname.Text = OpenENV.GetName()
+            Me.T_OrderID.Text = OpenENV.OrderID
+            Me.T_LoggingDirectory.Text = OpenENV.GetLogPath
+            Me.C_Silent.Checked = OpenENV.LogSilent
+            Me.C_DebugLog.Checked = OpenENV.LogLevel
+
+            For Each Setting In OpenENV.SQLServer
+                Select Case Setting.Direction.ToLower
+                    Case "source"
+                        Me.C_SourceType.Text = Setting.Servertype
+                        Me.T_SourceAdress.Text = Setting.Servername
+                        Me.T_SourcePath.Text = Setting.FilePath
+                        Me.T_SourceDB.Text = Setting.SQLDB
+                        Me.C_SourceConnMode.Text = Setting.ConnMode
+                        Me.T_SourceUsername.Text = Setting.User
+                        Me.T_SourcePassword.Text = Setting.Password
+                        Me.C_SourceTable.Text = Setting.SQLTable
+                        Me.C_SourceIDColumn.Text = Setting.IDColumn
+                        Me.C_SourceIDDatatype.Text = Setting.IDColumnDataType
+                        Me.C_SourceFilterType.Text = Setting.Filtertype
+                        Me.T_SourceFilterColumn.Text = Setting.FilterColumn
+                        Me.T_SourceSQLFilter.Text = Setting.SQLFilter
+
+                    Case "target"
+                        Me.C_TargetServerType.Text = Setting.Servertype
+                        Me.T_TargetServerAdress.Text = Setting.Servername
+                        Me.T_TargetPath.Text = Setting.FilePath
+                        Me.T_TargetDB.Text = Setting.SQLDB
+                        Me.C_TargetConnectionType.Text = Setting.ConnMode
+                        Me.T_TargetUsername.Text = Setting.User
+                        Me.T_TargetPassword.Text = Setting.Password
+                        Me.C_TargetTable.Text = Setting.SQLTable
+                        Me.C_TargetIDColumn.Text = Setting.IDColumn
+                        Me.C_TargetIDDatatype.Text = Setting.IDColumnDataType
+                        Me.C_MapIDValue.Checked = Setting.MapTargetIDColumnValue
+                        Me.T_TargetSeperator.Text = Setting.StringSeperator
+                        Me.C_TargetPartSubstring.Text = Setting.StringPart
+                        Me.C_TargetTimestampfield.Text = Setting.SessionTimestampField
+                        Me.C_InsertAllowed.Checked = Setting.InsertAllowed
+                        Me.C_UpdateAllowed.Checked = Setting.UpdateAllowed
+                        Me.C_DeleteAllowed.Checked = Setting.DeleteAllowed
+                End Select
+            Next
+
+
+            LoadTableSchemas()
+            Dim i As Integer = 0
+            For Each Mapping In OpenENV.Mappings
+                Me.MappingGrid.Rows.Add()
+                Me.MappingGrid.Rows(i).Cells(0).Value = Mapping.Sourcename
+                Me.MappingGrid.Rows(i).Cells(1).Value = Mapping.Targetname
+                Me.MappingGrid.Rows(i).Cells(2).Value = Mapping.Sourcetype
+                Me.MappingGrid.Rows(i).Cells(3).Value = Mapping.Targettype
+                Me.MappingGrid.Rows(i).Cells(4).Value = Mapping.Separator
+                Me.MappingGrid.Rows(i).Cells(5).Value = Mapping.SeperatorDirection
+                i = i + 1
+            Next
+            Me.MappingGrid.Refresh()
+            Me.Refresh()
+        End If
+        Me.OpenFileDialog1.OpenFile.Close()
     End Sub
 End Class

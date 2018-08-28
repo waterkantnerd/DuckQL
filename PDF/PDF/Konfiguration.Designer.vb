@@ -112,6 +112,9 @@ Partial Class Konfiguration
         Me.C_Silent = New System.Windows.Forms.CheckBox()
         Me.ToolTipKonfig = New System.Windows.Forms.ToolTip(Me.components)
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
+        Me.T_OrderID = New System.Windows.Forms.TextBox()
+        Me.L_OrderID = New System.Windows.Forms.Label()
+        Me.B_Load = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -490,7 +493,6 @@ Partial Class Konfiguration
         Me.T_SourceAdress.Size = New System.Drawing.Size(206, 22)
         Me.T_SourceAdress.TabIndex = 5
         Me.ToolTipKonfig.SetToolTip(Me.T_SourceAdress, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
-        '
         '
         'T_SourceFilterColumn
         '
@@ -873,7 +875,6 @@ Partial Class Konfiguration
         Me.C_TargetTable.TabIndex = 52
         Me.ToolTipKonfig.SetToolTip(Me.C_TargetTable, "Type: The datatype of your identifier column")
         '
-        '
         'T_TargetTimestampfield
         '
         Me.T_TargetTimestampfield.Location = New System.Drawing.Point(0, 0)
@@ -894,7 +895,7 @@ Partial Class Konfiguration
         Me.MappingGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceColumn, Me.TargetColumn, Me.SourceType, Me.TargetType, Me.Seperator, Me.PartOfSubstring})
         Me.MappingGrid.Location = New System.Drawing.Point(16, 430)
         Me.MappingGrid.Name = "MappingGrid"
-        Me.MappingGrid.Size = New System.Drawing.Size(1185, 156)
+        Me.MappingGrid.Size = New System.Drawing.Size(1185, 406)
         Me.MappingGrid.TabIndex = 30
         Me.ToolTipKonfig.SetToolTip(Me.MappingGrid, "Enter the mappings between source and target tables")
         '
@@ -939,7 +940,7 @@ Partial Class Konfiguration
         '
         'B_Save
         '
-        Me.B_Save.Location = New System.Drawing.Point(1007, 592)
+        Me.B_Save.Location = New System.Drawing.Point(1007, 842)
         Me.B_Save.Name = "B_Save"
         Me.B_Save.Size = New System.Drawing.Size(194, 31)
         Me.B_Save.TabIndex = 45
@@ -978,11 +979,41 @@ Partial Class Konfiguration
         '
         Me.OpenFileDialog1.FileName = "OpenFileDialog1"
         '
+        'T_OrderID
+        '
+        Me.T_OrderID.Location = New System.Drawing.Point(72, 36)
+        Me.T_OrderID.Name = "T_OrderID"
+        Me.T_OrderID.Size = New System.Drawing.Size(49, 22)
+        Me.T_OrderID.TabIndex = 47
+        Me.ToolTipKonfig.SetToolTip(Me.T_OrderID, "Order ID: In case you want to store multiple files in one job folder, which has t" &
+        "o be proccessed in a specific order." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "This has to be a numeric value.")
+        '
+        'L_OrderID
+        '
+        Me.L_OrderID.AutoSize = True
+        Me.L_OrderID.Location = New System.Drawing.Point(13, 40)
+        Me.L_OrderID.Name = "L_OrderID"
+        Me.L_OrderID.Size = New System.Drawing.Size(54, 13)
+        Me.L_OrderID.TabIndex = 48
+        Me.L_OrderID.Text = "Order ID:"
+        '
+        'B_Load
+        '
+        Me.B_Load.Location = New System.Drawing.Point(12, 842)
+        Me.B_Load.Name = "B_Load"
+        Me.B_Load.Size = New System.Drawing.Size(194, 31)
+        Me.B_Load.TabIndex = 49
+        Me.B_Load.Text = "Load Configuration..."
+        Me.B_Load.UseVisualStyleBackColor = True
+        '
         'Konfiguration
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1219, 631)
+        Me.ClientSize = New System.Drawing.Size(1219, 885)
+        Me.Controls.Add(Me.B_Load)
+        Me.Controls.Add(Me.L_OrderID)
+        Me.Controls.Add(Me.T_OrderID)
         Me.Controls.Add(Me.C_Silent)
         Me.Controls.Add(Me.C_DebugLog)
         Me.Controls.Add(Me.B_Save)
@@ -1097,4 +1128,7 @@ Partial Class Konfiguration
     Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents C_SourceFilterColumn As Windows.Forms.ComboBox
     Friend WithEvents C_TargetTimestampfield As Windows.Forms.ComboBox
+    Friend WithEvents T_OrderID As Windows.Forms.TextBox
+    Friend WithEvents L_OrderID As Windows.Forms.Label
+    Friend WithEvents B_Load As Windows.Forms.Button
 End Class

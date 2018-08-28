@@ -73,7 +73,7 @@ Public Class SQLOperations
                 Else
                     Dim Reihe As New Reihe
                     Reihe.SetUp(SQL, TargetSQL)
-                    If Target.MapTargetIDColumnValue = "YES" Then ' If the Identifier has to be modified before matching with the target 
+                    If Target.MapTargetIDColumnValue = True Then ' If the Identifier has to be modified before matching with the target 
                         Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
                         Reihe.MapIdentifier()
                     Else

@@ -45,7 +45,7 @@ Public Class XMLFiles
         Read = Jobliste
     End Function
 
-    Private Function ReadJobFile(sPath As String) As ENV
+    Public Function ReadJobFile(sPath As String) As ENV
         ' Reads the XML File and returns an ENV object.
         Dim ENV As New ENV
         If IsNothing(sPath) = True Then
@@ -115,7 +115,11 @@ Public Class XMLFiles
                                                 Case "TargetID"
                                                     Setting.TargetID = .Value
                                                 Case "MapTargetIDColumnValue"
-                                                    Setting.MapTargetIDColumnValue = .Value
+                                                    If .Value.ToLower = "true" Or .Value.ToLower = "yes" Then
+                                                        Setting.MapTargetIDColumnValue = True
+                                                    Else
+                                                        Setting.MapTargetIDColumnValue = False
+                                                    End If
                                                 Case "StringSeparator"
                                                     Setting.StringSeperator = .Value
                                                 Case "StringPart"
@@ -135,7 +139,7 @@ Public Class XMLFiles
                                                 Case "Servertype"
                                                     Setting.Servertype = .Value
                                                 Case "SessionTimestampField"
-                                                    Setting.SessionTimeStampField = .Value
+                                                    Setting.SessionTimestampField = .Value
                                             End Select
                                         End While
                                         ENV.SQLServer.AddLast(Setting)
@@ -183,6 +187,15 @@ Public Class XMLFiles
 
                                     End If
 
+                                Case "Order"
+                                    If .AttributeCount > 0 Then
+                                        While .MoveToNextAttribute
+                                            Select Case .Name
+                                                Case "ID"
+                                                    ENV.OrderID = CInt(.Value)
+                                            End Select
+                                        End While
+                                    End If
                             End Select
                     End Select
 
@@ -214,6 +227,10 @@ Public Class XMLFiles
             .WriteAttributeString("Adress", ENV.GetLogPath)
             .WriteAttributeString("LogLevel", ENV.LogLevel)
             .WriteAttributeString("Silent", ENV.LogSilent.ToString)
+            .WriteEndElement()
+
+            .WriteStartElement("Order")
+            .WriteAttributeString("ID", ENV.OrderID)
             .WriteEndElement()
 
             Dim Source As New SQLServerSettings

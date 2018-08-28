@@ -20,9 +20,9 @@
 
     '-------------Jobsettings-----------------------------------------
     Public ID As String
-    Public InsertAllowed As Boolean
-    Public UpdateAllowed As Boolean
-    Public DeleteAllowed As Boolean 'Has to be implemented...
+    Public InsertAllowed As Boolean = False
+    Public UpdateAllowed As Boolean = False
+    Public DeleteAllowed As Boolean = False 'Has to be implemented...
     Public Direction As String 'This Parameter defines if it is a target or source setting
     Public TargetID As String
     Public SessionTimestampField As String
@@ -35,7 +35,7 @@
     '-----------------------------------------------------------------
 
     '-----------Mapping-----------------------------------------------
-    Public MapTargetIDColumnValue As String
+    Public MapTargetIDColumnValue As Boolean = False
     Public StringSeperator As String
     Public StringPart As String
     '-----------------------------------------------------------------

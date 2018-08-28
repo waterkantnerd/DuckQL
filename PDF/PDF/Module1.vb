@@ -79,17 +79,44 @@ Module Module1
         Dim XMLFiles As New XMLFiles
         Dim Jobliste As New LinkedList(Of ENV)
         Jobliste = XMLFiles.Read(ENVPath)
+        Jobliste = SortJobList(Jobliste)
         For Each ENV In Jobliste
             If IsNothing(ENV) = True Then
             Else
                 ' Every filled ENV object will initiate the program logic
                 Start(ENV)
+                EndAndClear()
             End If
 
         Next
         '---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     End Sub
+
+    Private Function SortJobList(Jobliste As LinkedList(Of ENV)) As LinkedList(Of ENV)
+        Dim JobArr(Jobliste.Count) As ENV
+        Jobliste.CopyTo(JobArr, 0)
+        Dim i As Integer = 0
+        For i = 0 To Jobliste.Count - 1
+            If IsNothing(JobArr(i + 1)) Then
+
+            Else
+                If JobArr(i).OrderID > JobArr(i + 1).OrderID Then
+                    Dim tmp As ENV = JobArr(i)
+                    JobArr(i) = JobArr(i + 1)
+                    JobArr(i + 1) = tmp
+                End If
+            End If
+        Next
+        Jobliste.Clear()
+        For Each ENV In JobArr
+            If IsNothing(ENV) Then
+            Else
+                Jobliste.AddLast(ENV)
+            End If
+        Next
+        SortJobList = Jobliste
+    End Function
 
     Private Sub EndAndClear()
         '------------------------------------------------Summary--------------------------------------------------------------------------------------------------------
