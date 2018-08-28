@@ -27,4 +27,17 @@ Public Class Core
         i = r.Next
         Me.SessionStamp = Now() & " - " & i
     End Sub
+
+    Public Sub Clear()
+        Me.CurrentENV = Nothing
+        Me.CurrentLog = Nothing
+        Me.SQLServer.Clear()
+        Me.Reihen.Clear()
+        Me.SessionStamp = ""
+        Me.TimeStamp = Now()
+        Me.JobXMLPath = ""
+        Me.SQLCommands.Clear()
+        Me.JobStartTime = Nothing
+        Me.JobEndTime = Nothing
+    End Sub
 End Class

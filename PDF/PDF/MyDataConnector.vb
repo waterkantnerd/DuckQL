@@ -51,9 +51,9 @@ Public Class MyDataConnector
     '--------------------------------------------------MySQL-------------------------------------------------------------------
     Public Function ConnectMySQL(sServer As String, sDB As String, sUsername As String, Optional sPW As String = "") As MySqlConnection
         If sPW = "" Then
-            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";")
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";" & "SslMode=None;")
         Else
-            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";")
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";" & "SslMode=None;")
         End If
 
         Try
@@ -455,7 +455,12 @@ Public Class MyDataConnector
                     End If
                 Case "DateTime", "7"
                     If IsDate(SQL_Attribut) Then
-                        CSQL = "'" & SQL_Attribut.Replace(".", "-") & "'"
+                        Select Case Setting.Servertype
+                            Case "MySQL"
+                                CSQL = "'" & Format(CDate(SQL_Attribut), "yyyy/MM/dd H:mm:ss") & "'"
+                            Case Else
+                                CSQL = "'" & SQL_Attribut.Replace(".", "-") & "'"
+                        End Select
                         Exit Function
                     Else
                         CSQL = "'" & SQL_Attribut & "'"

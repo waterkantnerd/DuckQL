@@ -61,7 +61,6 @@ Partial Class Konfiguration
         Me.T_SourceDB = New System.Windows.Forms.TextBox()
         Me.C_SourceType = New System.Windows.Forms.ComboBox()
         Me.T_SourceAdress = New System.Windows.Forms.TextBox()
-        Me.T_SourceIDColumn = New System.Windows.Forms.TextBox()
         Me.T_SourceFilterColumn = New System.Windows.Forms.TextBox()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.L_TargetIDDatatype = New System.Windows.Forms.Label()
@@ -98,7 +97,6 @@ Partial Class Konfiguration
         Me.C_TargetConnectionType = New System.Windows.Forms.ComboBox()
         Me.L_TargetServerAdress = New System.Windows.Forms.Label()
         Me.C_TargetTable = New System.Windows.Forms.ComboBox()
-        Me.T_TargetIDColumn = New System.Windows.Forms.TextBox()
         Me.T_TargetTimestampfield = New System.Windows.Forms.TextBox()
         Me.T_TargetTable = New System.Windows.Forms.TextBox()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
@@ -493,12 +491,6 @@ Partial Class Konfiguration
         Me.T_SourceAdress.TabIndex = 5
         Me.ToolTipKonfig.SetToolTip(Me.T_SourceAdress, "Server Adress: The Adress of the SQL instance, this may be a hostname or an IP.")
         '
-        'T_SourceIDColumn
-        '
-        Me.T_SourceIDColumn.Location = New System.Drawing.Point(0, 0)
-        Me.T_SourceIDColumn.Name = "T_SourceIDColumn"
-        Me.T_SourceIDColumn.Size = New System.Drawing.Size(100, 20)
-        Me.T_SourceIDColumn.TabIndex = 0
         '
         'T_SourceFilterColumn
         '
@@ -881,12 +873,6 @@ Partial Class Konfiguration
         Me.C_TargetTable.TabIndex = 52
         Me.ToolTipKonfig.SetToolTip(Me.C_TargetTable, "Type: The datatype of your identifier column")
         '
-        'T_TargetIDColumn
-        '
-        Me.T_TargetIDColumn.Location = New System.Drawing.Point(0, 0)
-        Me.T_TargetIDColumn.Name = "T_TargetIDColumn"
-        Me.T_TargetIDColumn.Size = New System.Drawing.Size(100, 20)
-        Me.T_TargetIDColumn.TabIndex = 0
         '
         'T_TargetTimestampfield
         '
@@ -1036,7 +1022,6 @@ Partial Class Konfiguration
     Friend WithEvents T_SourceFilterValue As Windows.Forms.TextBox
     Friend WithEvents T_SourceFilterColumn As Windows.Forms.TextBox
     Friend WithEvents C_SourceFilterType As Windows.Forms.ComboBox
-    Friend WithEvents T_SourceIDColumn As Windows.Forms.TextBox
     Friend WithEvents C_SourceConnMode As Windows.Forms.ComboBox
     Friend WithEvents T_SourcePassword As Windows.Forms.TextBox
     Friend WithEvents T_SourceUsername As Windows.Forms.TextBox
@@ -1063,7 +1048,6 @@ Partial Class Konfiguration
     Friend WithEvents T_TargetTimestampfield As Windows.Forms.TextBox
     Friend WithEvents Label20 As Windows.Forms.Label
     Friend WithEvents Label13 As Windows.Forms.Label
-    Friend WithEvents T_TargetIDColumn As Windows.Forms.TextBox
     Friend WithEvents C_TargetServerType As Windows.Forms.ComboBox
     Friend WithEvents L_TargetConnectionType As Windows.Forms.Label
     Friend WithEvents T_TargetServerAdress As Windows.Forms.TextBox

@@ -5,24 +5,8 @@
     Private TargetSQL As MyDataConnector
 
 
-    Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
-
-    End Sub
-
-    Private Sub Label12_Click(sender As Object, e As EventArgs) Handles L_SQLFilterStatement.Click
-
-    End Sub
-
     Private Sub T_SourceUsername_TextChanged(sender As Object, e As EventArgs) Handles T_SourceUsername.TextChanged
         Me.T_SourceUsername.BackColor = Drawing.SystemColors.Window
-    End Sub
-
-    Private Sub Label4_Click(sender As Object, e As EventArgs) Handles L_SourceUsername.Click
-
-    End Sub
-
-    Private Sub Label5_Click(sender As Object, e As EventArgs) Handles L_SourcePassword.Click
-
     End Sub
 
     Private Sub T_SourcePassword_TextChanged(sender As Object, e As EventArgs) Handles T_SourcePassword.TextChanged
@@ -33,10 +17,6 @@
     Private Sub B_LoggingDirectory_Click(sender As Object, e As EventArgs) Handles B_LoggingDirectory.Click
         FolderBrowserDialog1.ShowDialog()
         Me.T_LoggingDirectory.Text = FolderBrowserDialog1.SelectedPath
-    End Sub
-
-    Private Sub TextBox12_TextChanged(sender As Object, e As EventArgs)
-
     End Sub
 
     Private Sub SourceConnectionTypes()
