@@ -6,7 +6,7 @@ Imports System.IO
 Public Class ENV
     Protected JobName As String
     Public SQLServer As New LinkedList(Of SQLServerSettings)
-
+    Public ConsistenceCheck As Boolean = False
     Public OrderID As Integer
 
     Public FilterColumn As String

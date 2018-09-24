@@ -7,6 +7,7 @@
     Public SQLDB As String
     Public Servertype As String
     Public FilePath As String
+    Public BatchQueryAllowed As Boolean = False
     '-----------------------------------------------------------------
 
     '-------------Tablesettings---------------------------------------
@@ -24,7 +25,7 @@
     Public UpdateAllowed As Boolean = False
     Public DeleteAllowed As Boolean = False 'Has to be implemented...
     Public Direction As String 'This Parameter defines if it is a target or source setting
-    Public TargetID As String
+    Public TargetID As String 'Has to be implemented -> more than one target allowed
     Public SessionTimestampField As String
     '-----------------------------------------------------------------
 

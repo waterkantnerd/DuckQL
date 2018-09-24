@@ -11,6 +11,7 @@ Public Class Reihe
     Public Log As LOG = Module1.Core.CurrentLog
     Public Source As MyDataConnector
     Public Target As MyDataConnector
+    Public Table As String
 
     Public Sub SetUp(SourceSQL As MyDataConnector, TargetSQL As MyDataConnector)
         Me.Source = SourceSQL

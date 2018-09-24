@@ -47,7 +47,7 @@ Partial Class Konfiguration
         Me.L_SourceConnectionType = New System.Windows.Forms.Label()
         Me.L_SourcePassword = New System.Windows.Forms.Label()
         Me.L_SourceUsername = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
+        Me.L_SourceDB = New System.Windows.Forms.Label()
         Me.T_SourceSQLFilter = New System.Windows.Forms.TextBox()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.L_SourceServerAdress = New System.Windows.Forms.Label()
@@ -91,7 +91,7 @@ Partial Class Konfiguration
         Me.T_TargetDB = New System.Windows.Forms.TextBox()
         Me.L_TargetUsername = New System.Windows.Forms.Label()
         Me.T_TargetUsername = New System.Windows.Forms.TextBox()
-        Me.Label17 = New System.Windows.Forms.Label()
+        Me.L_TargetDB = New System.Windows.Forms.Label()
         Me.T_TargetPassword = New System.Windows.Forms.TextBox()
         Me.Label18 = New System.Windows.Forms.Label()
         Me.C_TargetConnectionType = New System.Windows.Forms.ComboBox()
@@ -111,8 +111,9 @@ Partial Class Konfiguration
         Me.C_DebugLog = New System.Windows.Forms.CheckBox()
         Me.C_Silent = New System.Windows.Forms.CheckBox()
         Me.ToolTipKonfig = New System.Windows.Forms.ToolTip(Me.components)
-        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.T_OrderID = New System.Windows.Forms.TextBox()
+        Me.C_CheckConsistency = New System.Windows.Forms.CheckBox()
+        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.L_OrderID = New System.Windows.Forms.Label()
         Me.B_Load = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
@@ -146,7 +147,7 @@ Partial Class Konfiguration
         Me.T_LoggingDirectory.Location = New System.Drawing.Point(587, 10)
         Me.T_LoggingDirectory.Name = "T_LoggingDirectory"
         Me.T_LoggingDirectory.Size = New System.Drawing.Size(501, 22)
-        Me.T_LoggingDirectory.TabIndex = 1
+        Me.T_LoggingDirectory.TabIndex = 4
         Me.ToolTipKonfig.SetToolTip(Me.T_LoggingDirectory, "Logging Directory: Enter the path where logfiles should be stored. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You can use " &
         "the button next to this field to chose the directory via gui. ")
         '
@@ -164,7 +165,7 @@ Partial Class Konfiguration
         Me.B_LoggingDirectory.Location = New System.Drawing.Point(1094, 10)
         Me.B_LoggingDirectory.Name = "B_LoggingDirectory"
         Me.B_LoggingDirectory.Size = New System.Drawing.Size(50, 23)
-        Me.B_LoggingDirectory.TabIndex = 2
+        Me.B_LoggingDirectory.TabIndex = 3
         Me.B_LoggingDirectory.Text = "..."
         Me.ToolTipKonfig.SetToolTip(Me.B_LoggingDirectory, "Click here to choose a logging directory")
         Me.B_LoggingDirectory.UseVisualStyleBackColor = True
@@ -187,7 +188,7 @@ Partial Class Konfiguration
         Me.GroupBox1.Controls.Add(Me.L_SourceConnectionType)
         Me.GroupBox1.Controls.Add(Me.L_SourcePassword)
         Me.GroupBox1.Controls.Add(Me.L_SourceUsername)
-        Me.GroupBox1.Controls.Add(Me.Label3)
+        Me.GroupBox1.Controls.Add(Me.L_SourceDB)
         Me.GroupBox1.Controls.Add(Me.T_SourceSQLFilter)
         Me.GroupBox1.Controls.Add(Me.Label2)
         Me.GroupBox1.Controls.Add(Me.L_SourceServerAdress)
@@ -364,14 +365,14 @@ Partial Class Konfiguration
         Me.L_SourceUsername.Text = "Username:"
         Me.L_SourceUsername.Visible = False
         '
-        'Label3
+        'L_SourceDB
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(9, 49)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(58, 13)
-        Me.Label3.TabIndex = 13
-        Me.Label3.Text = "Database:"
+        Me.L_SourceDB.AutoSize = True
+        Me.L_SourceDB.Location = New System.Drawing.Point(9, 49)
+        Me.L_SourceDB.Name = "L_SourceDB"
+        Me.L_SourceDB.Size = New System.Drawing.Size(58, 13)
+        Me.L_SourceDB.TabIndex = 13
+        Me.L_SourceDB.Text = "Database:"
         '
         'T_SourceSQLFilter
         '
@@ -479,7 +480,7 @@ Partial Class Konfiguration
         'C_SourceType
         '
         Me.C_SourceType.FormattingEnabled = True
-        Me.C_SourceType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access"})
+        Me.C_SourceType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access", "XML", "CSV"})
         Me.C_SourceType.Location = New System.Drawing.Point(80, 19)
         Me.C_SourceType.Name = "C_SourceType"
         Me.C_SourceType.Size = New System.Drawing.Size(191, 21)
@@ -531,7 +532,7 @@ Partial Class Konfiguration
         Me.GroupBox2.Controls.Add(Me.T_TargetDB)
         Me.GroupBox2.Controls.Add(Me.L_TargetUsername)
         Me.GroupBox2.Controls.Add(Me.T_TargetUsername)
-        Me.GroupBox2.Controls.Add(Me.Label17)
+        Me.GroupBox2.Controls.Add(Me.L_TargetDB)
         Me.GroupBox2.Controls.Add(Me.T_TargetPassword)
         Me.GroupBox2.Controls.Add(Me.Label18)
         Me.GroupBox2.Controls.Add(Me.C_TargetConnectionType)
@@ -756,7 +757,7 @@ Partial Class Konfiguration
         'C_TargetServerType
         '
         Me.C_TargetServerType.FormattingEnabled = True
-        Me.C_TargetServerType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access"})
+        Me.C_TargetServerType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access", "XML", "CSV"})
         Me.C_TargetServerType.Location = New System.Drawing.Point(81, 18)
         Me.C_TargetServerType.Name = "C_TargetServerType"
         Me.C_TargetServerType.Size = New System.Drawing.Size(191, 21)
@@ -818,14 +819,14 @@ Partial Class Konfiguration
         Me.ToolTipKonfig.SetToolTip(Me.T_TargetUsername, resources.GetString("T_TargetUsername.ToolTip"))
         Me.T_TargetUsername.Visible = False
         '
-        'Label17
+        'L_TargetDB
         '
-        Me.Label17.AutoSize = True
-        Me.Label17.Location = New System.Drawing.Point(10, 48)
-        Me.Label17.Name = "Label17"
-        Me.Label17.Size = New System.Drawing.Size(58, 13)
-        Me.Label17.TabIndex = 32
-        Me.Label17.Text = "Database:"
+        Me.L_TargetDB.AutoSize = True
+        Me.L_TargetDB.Location = New System.Drawing.Point(10, 48)
+        Me.L_TargetDB.Name = "L_TargetDB"
+        Me.L_TargetDB.Size = New System.Drawing.Size(58, 13)
+        Me.L_TargetDB.TabIndex = 32
+        Me.L_TargetDB.Text = "Database:"
         '
         'T_TargetPassword
         '
@@ -891,6 +892,7 @@ Partial Class Konfiguration
         '
         'MappingGrid
         '
+        Me.MappingGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.MappingGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.MappingGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceColumn, Me.TargetColumn, Me.SourceType, Me.TargetType, Me.Seperator, Me.PartOfSubstring})
         Me.MappingGrid.Location = New System.Drawing.Point(16, 430)
@@ -901,17 +903,22 @@ Partial Class Konfiguration
         '
         'SourceColumn
         '
+        Me.SourceColumn.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.[Nothing]
+        Me.SourceColumn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.SourceColumn.HeaderText = "Source Column"
         Me.SourceColumn.Name = "SourceColumn"
         Me.SourceColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.SourceColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.SourceColumn.Width = 101
         '
         'TargetColumn
         '
+        Me.TargetColumn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.TargetColumn.HeaderText = "Target Column"
         Me.TargetColumn.Name = "TargetColumn"
         Me.TargetColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.TargetColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.TargetColumn.Width = 97
         '
         'SourceType
         '
@@ -919,6 +926,7 @@ Partial Class Konfiguration
         Me.SourceType.Name = "SourceType"
         Me.SourceType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.SourceType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.SourceType.Width = 66
         '
         'TargetType
         '
@@ -926,17 +934,20 @@ Partial Class Konfiguration
         Me.TargetType.Name = "TargetType"
         Me.TargetType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.TargetType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.TargetType.Width = 62
         '
         'Seperator
         '
         Me.Seperator.HeaderText = "Seperator"
         Me.Seperator.Name = "Seperator"
+        Me.Seperator.Width = 82
         '
         'PartOfSubstring
         '
         Me.PartOfSubstring.HeaderText = "Part Of Substring"
         Me.PartOfSubstring.Items.AddRange(New Object() {"left", "right"})
         Me.PartOfSubstring.Name = "PartOfSubstring"
+        Me.PartOfSubstring.Width = 92
         '
         'B_Save
         '
@@ -953,7 +964,7 @@ Partial Class Konfiguration
         Me.C_DebugLog.Location = New System.Drawing.Point(587, 36)
         Me.C_DebugLog.Name = "C_DebugLog"
         Me.C_DebugLog.Size = New System.Drawing.Size(145, 17)
-        Me.C_DebugLog.TabIndex = 3
+        Me.C_DebugLog.TabIndex = 5
         Me.C_DebugLog.Text = "Enable Debug Logging"
         Me.ToolTipKonfig.SetToolTip(Me.C_DebugLog, "Enable Debug Logging: This is helpful in testing szenarios. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "CAUTION!! This crea" &
         "tes a lot of noise. ")
@@ -965,7 +976,7 @@ Partial Class Konfiguration
         Me.C_Silent.Location = New System.Drawing.Point(739, 36)
         Me.C_Silent.Name = "C_Silent"
         Me.C_Silent.Size = New System.Drawing.Size(141, 17)
-        Me.C_Silent.TabIndex = 46
+        Me.C_Silent.TabIndex = 6
         Me.C_Silent.Text = "Enable Silent Running"
         Me.ToolTipKonfig.SetToolTip(Me.C_Silent, "Enable Silent Running: This disables the prompt in the shell and adds a little bi" &
         "t of extra" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "performance. Very useful in a productive environment.")
@@ -975,18 +986,29 @@ Partial Class Konfiguration
         '
         Me.ToolTipKonfig.ToolTipTitle = "Configuration"
         '
-        'OpenFileDialog1
-        '
-        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
-        '
         'T_OrderID
         '
         Me.T_OrderID.Location = New System.Drawing.Point(72, 36)
         Me.T_OrderID.Name = "T_OrderID"
         Me.T_OrderID.Size = New System.Drawing.Size(49, 22)
-        Me.T_OrderID.TabIndex = 47
+        Me.T_OrderID.TabIndex = 1
         Me.ToolTipKonfig.SetToolTip(Me.T_OrderID, "Order ID: In case you want to store multiple files in one job folder, which has t" &
         "o be proccessed in a specific order." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "This has to be a numeric value.")
+        '
+        'C_CheckConsistency
+        '
+        Me.C_CheckConsistency.AutoSize = True
+        Me.C_CheckConsistency.Location = New System.Drawing.Point(347, 36)
+        Me.C_CheckConsistency.Name = "C_CheckConsistency"
+        Me.C_CheckConsistency.Size = New System.Drawing.Size(121, 17)
+        Me.C_CheckConsistency.TabIndex = 2
+        Me.C_CheckConsistency.Text = "Check Consistency"
+        Me.ToolTipKonfig.SetToolTip(Me.C_CheckConsistency, resources.GetString("C_CheckConsistency.ToolTip"))
+        Me.C_CheckConsistency.UseVisualStyleBackColor = True
+        '
+        'OpenFileDialog1
+        '
+        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
         '
         'L_OrderID
         '
@@ -1011,6 +1033,7 @@ Partial Class Konfiguration
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1219, 885)
+        Me.Controls.Add(Me.C_CheckConsistency)
         Me.Controls.Add(Me.B_Load)
         Me.Controls.Add(Me.L_OrderID)
         Me.Controls.Add(Me.T_OrderID)
@@ -1069,7 +1092,7 @@ Partial Class Konfiguration
     Friend WithEvents L_SourceConnectionType As Windows.Forms.Label
     Friend WithEvents L_SourcePassword As Windows.Forms.Label
     Friend WithEvents L_SourceUsername As Windows.Forms.Label
-    Friend WithEvents Label3 As Windows.Forms.Label
+    Friend WithEvents L_SourceDB As Windows.Forms.Label
     Friend WithEvents Label23 As Windows.Forms.Label
     Friend WithEvents C_TargetPartSubstring As Windows.Forms.ComboBox
     Friend WithEvents Label22 As Windows.Forms.Label
@@ -1086,7 +1109,7 @@ Partial Class Konfiguration
     Friend WithEvents T_TargetDB As Windows.Forms.TextBox
     Friend WithEvents L_TargetUsername As Windows.Forms.Label
     Friend WithEvents T_TargetUsername As Windows.Forms.TextBox
-    Friend WithEvents Label17 As Windows.Forms.Label
+    Friend WithEvents L_TargetDB As Windows.Forms.Label
     Friend WithEvents T_TargetPassword As Windows.Forms.TextBox
     Friend WithEvents Label18 As Windows.Forms.Label
     Friend WithEvents C_TargetConnectionType As Windows.Forms.ComboBox
@@ -1120,15 +1143,16 @@ Partial Class Konfiguration
     Friend WithEvents C_SourceIDColumn As Windows.Forms.ComboBox
     Friend WithEvents C_TargetTable As Windows.Forms.ComboBox
     Friend WithEvents C_TargetIDColumn As Windows.Forms.ComboBox
+    Friend WithEvents C_SourceFilterColumn As Windows.Forms.ComboBox
+    Friend WithEvents C_TargetTimestampfield As Windows.Forms.ComboBox
+    Friend WithEvents T_OrderID As Windows.Forms.TextBox
+    Friend WithEvents L_OrderID As Windows.Forms.Label
+    Friend WithEvents B_Load As Windows.Forms.Button
+    Friend WithEvents C_CheckConsistency As Windows.Forms.CheckBox
     Friend WithEvents SourceColumn As Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents TargetColumn As Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents SourceType As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents TargetType As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents C_SourceFilterColumn As Windows.Forms.ComboBox
-    Friend WithEvents C_TargetTimestampfield As Windows.Forms.ComboBox
-    Friend WithEvents T_OrderID As Windows.Forms.TextBox
-    Friend WithEvents L_OrderID As Windows.Forms.Label
-    Friend WithEvents B_Load As Windows.Forms.Button
 End Class

@@ -45,6 +45,7 @@ Public Class XMLFiles
         Read = Jobliste
     End Function
 
+
     Public Function ReadJobFile(sPath As String) As ENV
         ' Reads the XML File and returns an ENV object.
         Dim ENV As New ENV
@@ -73,6 +74,12 @@ Public Class XMLFiles
                                             Select Case .Name
                                                 Case "Jobname"
                                                     ENV.CreateName(.Value)
+                                                Case "ConsistenceCheck"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        ENV.ConsistenceCheck = True
+                                                    Else
+                                                        ENV.ConsistenceCheck = False
+                                                    End If
                                             End Select
                                         End While
 
@@ -222,6 +229,7 @@ Public Class XMLFiles
         With XMLobj
             .WriteStartElement("Job")
             .WriteAttributeString("Jobname", ENV.GetName)
+            .WriteAttributeString("ConsistenceCheck", ENV.ConsistenceCheck)
 
             .WriteStartElement("LoggingDirectory")
             .WriteAttributeString("Adress", ENV.GetLogPath)

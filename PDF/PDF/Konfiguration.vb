@@ -32,6 +32,10 @@
                 Me.C_SourceConnMode.Items.Clear()
                 Me.C_SourceConnMode.Items.Add("Normal")
                 Me.C_SourceConnMode.Items.Add("Trusted")
+                Me.C_SourceConnMode.Text = "Normal"
+                Me.L_SourceDB.Visible = True
+                Me.T_SourceDB.Visible = True
+                Me.T_SourceDB.Text = ""
             Case "MySQL"
                 Me.L_SourceServerAdress.Visible = True
                 Me.T_SourceAdress.Visible = True
@@ -42,6 +46,10 @@
                 Me.L_SourceConnectionType.Visible = True
                 Me.C_SourceConnMode.Items.Clear()
                 Me.C_SourceConnMode.Items.Add("Normal")
+                Me.C_SourceConnMode.Text = "Normal"
+                Me.L_SourceDB.Visible = True
+                Me.T_SourceDB.Visible = True
+                Me.T_SourceDB.Text = ""
             Case "Access"
                 Me.L_SourceServerAdress.Visible = False
                 Me.T_SourceAdress.Visible = False
@@ -52,10 +60,56 @@
                 Me.L_SourceConnectionType.Visible = True
                 Me.C_SourceConnMode.Items.Clear()
                 Me.C_SourceConnMode.Items.Add("Standard Security")
+                Me.C_SourceConnMode.Text = "Standard Security"
                 Me.T_SourceUsername.Visible = False
                 Me.T_SourcePassword.Visible = False
                 Me.T_SourcePassword.Text = "  "
                 Me.T_SourceUsername.Text = "  "
+                Me.L_SourceUsername.Visible = False
+                Me.L_SourcePassword.Visible = False
+                Me.L_SourceDB.Visible = True
+                Me.T_SourceDB.Visible = True
+                Me.T_SourceDB.Text = ""
+            Case "XML"
+                Me.L_SourceServerAdress.Visible = False
+                Me.T_SourceAdress.Visible = False
+                Me.T_SourcePath.Visible = True
+                Me.L_SourcePath.Visible = True
+                Me.B_SourcePath.Visible = True
+                Me.C_SourceConnMode.Visible = True
+                Me.L_SourceConnectionType.Visible = True
+                Me.C_SourceConnMode.Items.Clear()
+                Me.C_SourceConnMode.Items.Add("Normal")
+                Me.C_SourceConnMode.Text = "Normal"
+                Me.T_SourceUsername.Visible = False
+                Me.T_SourcePassword.Visible = False
+                Me.T_SourcePassword.Text = "  "
+                Me.T_SourceUsername.Text = "  "
+                Me.L_SourceUsername.Visible = False
+                Me.L_SourcePassword.Visible = False
+                Me.L_SourceDB.Visible = False
+                Me.T_SourceDB.Visible = False
+                Me.T_SourceDB.Text = "XML"
+            Case "CSV"
+                Me.L_SourceServerAdress.Visible = False
+                Me.T_SourceAdress.Visible = False
+                Me.T_SourcePath.Visible = True
+                Me.L_SourcePath.Visible = True
+                Me.B_SourcePath.Visible = True
+                Me.C_SourceConnMode.Visible = True
+                Me.L_SourceConnectionType.Visible = True
+                Me.C_SourceConnMode.Items.Clear()
+                Me.C_SourceConnMode.Items.Add("Normal")
+                Me.C_SourceConnMode.Text = "Normal"
+                Me.T_SourceUsername.Visible = False
+                Me.T_SourcePassword.Visible = False
+                Me.T_SourcePassword.Text = "  "
+                Me.T_SourceUsername.Text = "  "
+                Me.L_SourceUsername.Visible = False
+                Me.L_SourcePassword.Visible = False
+                Me.L_SourceDB.Visible = False
+                Me.T_SourceDB.Visible = False
+                Me.T_SourceDB.Text = "CSV"
             Case Else
                 Me.L_SourceServerAdress.Visible = True
                 Me.T_SourceAdress.Visible = True
@@ -64,6 +118,9 @@
                 Me.B_SourcePath.Visible = False
                 Me.C_SourceConnMode.Visible = False
                 Me.L_SourceConnectionType.Visible = False
+                Me.L_SourceDB.Visible = True
+                Me.T_SourceDB.Visible = True
+                Me.T_SourceDB.Text = ""
         End Select
     End Sub
 
@@ -213,6 +270,12 @@
             ENV.LogSilent = False
         End If
 
+        If Me.C_CheckConsistency.Checked = True Then
+            ENV.ConsistenceCheck = True
+        Else
+            ENV.ConsistenceCheck = False
+        End If
+
         Dim SourceSettings As New SQLServerSettings With {
             .Direction = "source",
             .Servertype = Me.C_SourceType.Text,
@@ -325,8 +388,6 @@
         SourceConnectionTypes()
         Me.C_SourceType.BackColor = Drawing.SystemColors.Window
     End Sub
-
-
 
     Private Sub C_SourceConnMode_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_SourceConnMode.SelectedValueChanged
         SourceConnectionTypeChoosed()
@@ -1003,6 +1064,17 @@
     End Sub
 
     Private Sub B_SourcePath_Click(sender As Object, e As EventArgs) Handles B_SourcePath.Click
+        Select Case Me.C_SourceType.Text
+            Case "Access"
+                Me.OpenFileDialog1.Filter = "Access Databases |*.mdb; *.accdb"
+            Case "XML"
+                Me.OpenFileDialog1.Filter = "XML-Files | *.xml"
+            Case "CSV"
+                Me.OpenFileDialog1.Filter = "CSV-Files | *.csv"
+        End Select
+
+        Me.OpenFileDialog1.FileName = ""
+
         Me.OpenFileDialog1.ShowDialog()
         Me.T_SourcePath.Text = Me.OpenFileDialog1.FileName
     End Sub
@@ -1069,12 +1141,15 @@
     End Sub
 
     Private Function GetDataTypeForColumn(Columnname As String, Connector As MyDataConnector) As String
-        For Each Column In Connector.TableSchema.Columns
-            If Column.Name = Columnname Then
-                GetDataTypeForColumn = Column.DataType
-                Exit Function
-            End If
-        Next
+        If IsNothing(Connector) Then
+        Else
+            For Each Column In Connector.TableSchema.Columns
+                If Column.Name = Columnname Then
+                    GetDataTypeForColumn = Column.DataType
+                    Exit Function
+                End If
+            Next
+        End If
         GetDataTypeForColumn = ""
     End Function
 
@@ -1134,9 +1209,12 @@
         If IsNothing(OpenENV) = False Then
             Me.T_Jobname.Text = OpenENV.GetName()
             Me.T_OrderID.Text = OpenENV.OrderID
+            Me.C_CheckConsistency.Checked = OpenENV.ConsistenceCheck
+
             Me.T_LoggingDirectory.Text = OpenENV.GetLogPath
             Me.C_Silent.Checked = OpenENV.LogSilent
             Me.C_DebugLog.Checked = OpenENV.LogLevel
+
 
             For Each Setting In OpenENV.SQLServer
                 Select Case Setting.Direction.ToLower
@@ -1194,4 +1272,10 @@
         End If
         Me.OpenFileDialog1.OpenFile.Close()
     End Sub
+
+    Private Sub MappingGrid_DataError(sender As Object, e As Windows.Forms.DataGridViewDataErrorEventArgs) Handles MappingGrid.DataError
+        System.Console.WriteLine("Error while Loading while from Job file: Could not validate. Is the connection ok?")
+    End Sub
+
+
 End Class
