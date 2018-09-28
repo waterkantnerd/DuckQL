@@ -8,6 +8,8 @@ Public Class ENV
     Public SQLServer As New LinkedList(Of SQLServerSettings)
     Public ConsistenceCheck As Boolean = False
     Public OrderID As Integer
+    Public IDLessBatch As Boolean 'Do not try matching entries in source and target databases by an Identifier. Instead, just push everything into target and don't bother about duplicates.
+
 
     Public FilterColumn As String
     Public FilterType As String

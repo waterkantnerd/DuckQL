@@ -14,6 +14,7 @@ Public Class Daten
     Public TargetDatatype As String
     Public Source As MyDataConnector
     Public Target As MyDataConnector
+    Public Layer As Integer = 0 'If XML Layer has to be written...
 
     Public Sub SetUp(SourceSQL As MyDataConnector, TargetSQL As MyDataConnector)
         Me.Source = SourceSQL
@@ -66,5 +67,7 @@ Public Class Daten
         End While
         GetMapping = MappingFound
     End Function
+
+
 
 End Class

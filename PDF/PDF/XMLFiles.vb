@@ -4,7 +4,11 @@
 ' It reads the folder which has been set up in the first parameter on the program start.
 ' Once there has been a XML file found, it will load all information to an ENV object.
 '----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 Public Class XMLFiles
+
     Private Function LoadJobFolder(directory As String) As String()
         ' Looks up XML Files in the Folder
         Dim value As System.Collections.ObjectModel.ReadOnlyCollection(Of String)
@@ -79,6 +83,12 @@ Public Class XMLFiles
                                                         ENV.ConsistenceCheck = True
                                                     Else
                                                         ENV.ConsistenceCheck = False
+                                                    End If
+                                                Case "IDlessBatch"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        ENV.IDLessBatch = True
+                                                    Else
+                                                        ENV.IDLessBatch = False
                                                     End If
                                             End Select
                                         End While
@@ -168,6 +178,14 @@ Public Class XMLFiles
                                                     Mapping.Separator = .Value
                                                 Case "StringPart"
                                                     Mapping.SeperatorDirection = .Value
+                                                Case "StaticValue"
+                                                    Mapping.StaticValue = .Value
+                                                Case "NoSouce"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        Mapping.NoSource = True
+                                                    Else
+                                                        Mapping.NoSource = False
+                                                    End If
                                             End Select
                                         End While
                                         ENV.Mappings.AddLast(Mapping)
@@ -230,6 +248,7 @@ Public Class XMLFiles
             .WriteStartElement("Job")
             .WriteAttributeString("Jobname", ENV.GetName)
             .WriteAttributeString("ConsistenceCheck", ENV.ConsistenceCheck)
+            .WriteAttributeString("IDlessBatch", ENV.IDLessBatch)
 
             .WriteStartElement("LoggingDirectory")
             .WriteAttributeString("Adress", ENV.GetLogPath)
@@ -305,6 +324,8 @@ Public Class XMLFiles
                 .WriteAttributeString("TargetType", Mapping.Targettype)
                 .WriteAttributeString("StringSeperator", Mapping.Separator)
                 .WriteAttributeString("StringPart", Mapping.SeperatorDirection)
+                .WriteAttributeString("StaticValue", Mapping.StaticValue)
+                .WriteAttributeString("NoSource", Mapping.NoSource)
                 .WriteEndElement()
             Next
             .WriteEndElement()
@@ -314,4 +335,5 @@ Public Class XMLFiles
 
         End With
     End Sub
+
 End Class

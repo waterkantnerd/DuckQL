@@ -8,4 +8,6 @@ Public Class Mapping
     Public SeperatorDirection As String = ""
     Public Sourcetype As String = ""
     Public Targettype As String = ""
+    Public StaticValue As String = ""
+    Public NoSource As Boolean = False
 End Class

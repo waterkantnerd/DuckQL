@@ -153,12 +153,39 @@ Public Class MyDataConnector
         ' After some research it seems, that the Microsoft.ACE.OLEDB.12.0 is only availabe in a 32bit Version
         ' Found the solution in this blog post https://blogs.technet.microsoft.com/austria/2014/02/06/der-microsoft-ace-oledb-12-0-provider-fehlt/
         ' 
-        SQLLog.Write(1, "Connecting to Access DB...")
+        SQLLog.Write(1, "Connecting to CSV...")
+
+        If IsNothing(Setting.Direction) = True Then
+        Else
+            If Me.Setting.Direction.ToUpper = "TARGET" Then
+                Try
+                    Dim myWriter As New StreamWriter(Path, False)
+                    Dim headerString As String = ""
+                    For Each Mapping In Me.ENV.Mappings
+                        If headerString = "" Then
+                            headerString = Mapping.Targetname
+                        Else
+                            headerString = ";" & Mapping.Targetname
+                        End If
+                    Next
+                    headerString = headerString & ";"
+                    myWriter.WriteLine(headerString)
+                    myWriter.Close()
+                Catch ex As Exception
+                    SQLLog.Write(0, "ERROR while writing csv file: " & ex.Message)
+                    ConnectDBCSV = Nothing
+                    Exit Function
+                End Try
+            Else
+            End If
+        End If
+        Path = Path.Substring(0, Path.LastIndexOf("\"))
+
         Try
             'Create a Connection object.
             Me.CSVCon = New OleDb.OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & Path & ";Extended Properties='text;HDR=Yes;FMT=Delimited';")
             'Create a Command object.
-            Me.CSVCmd = Me.AccessCon.CreateCommand
+            Me.CSVCmd = Me.CSVCon.CreateCommand
             Me.CSVCmd.CommandText = "USE " & sDB
 
             Me.CSVCon.Open()
@@ -229,6 +256,8 @@ Public Class MyDataConnector
                     Case Else
                         Me.CSVCon = ConnectDBCSV(Setting.FilePath, Setting.SQLDB)
                 End Select
+            Case Else
+                SQLLog.Write(1, Setting.Servertype & " choosen no Dataconnection neccessary.")
         End Select
 
     End Sub

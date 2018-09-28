@@ -42,7 +42,7 @@ Partial Class Konfiguration
         Me.L_FilterValue = New System.Windows.Forms.Label()
         Me.L_FilterColumn = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
-        Me.Label8 = New System.Windows.Forms.Label()
+        Me.L_SourceIDColumn = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.L_SourceConnectionType = New System.Windows.Forms.Label()
         Me.L_SourcePassword = New System.Windows.Forms.Label()
@@ -73,15 +73,15 @@ Partial Class Konfiguration
         Me.C_DeleteAllowed = New System.Windows.Forms.CheckBox()
         Me.C_UpdateAllowed = New System.Windows.Forms.CheckBox()
         Me.C_InsertAllowed = New System.Windows.Forms.CheckBox()
-        Me.Label24 = New System.Windows.Forms.Label()
-        Me.Label23 = New System.Windows.Forms.Label()
+        Me.L_PartOfSubString = New System.Windows.Forms.Label()
+        Me.L_PartOfSubstringUse = New System.Windows.Forms.Label()
         Me.C_TargetPartSubstring = New System.Windows.Forms.ComboBox()
-        Me.Label22 = New System.Windows.Forms.Label()
+        Me.L_TargetSeperator = New System.Windows.Forms.Label()
         Me.T_TargetSeperator = New System.Windows.Forms.TextBox()
         Me.C_MapIDValue = New System.Windows.Forms.CheckBox()
         Me.Label21 = New System.Windows.Forms.Label()
         Me.C_TargetTimestampfield = New System.Windows.Forms.ComboBox()
-        Me.Label20 = New System.Windows.Forms.Label()
+        Me.L_TargetIDColumn = New System.Windows.Forms.Label()
         Me.Label13 = New System.Windows.Forms.Label()
         Me.C_TargetIDColumn = New System.Windows.Forms.ComboBox()
         Me.C_TargetServerType = New System.Windows.Forms.ComboBox()
@@ -107,20 +107,32 @@ Partial Class Konfiguration
         Me.TargetType = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Seperator = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.PartOfSubstring = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.StaticValue = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.B_Save = New System.Windows.Forms.Button()
         Me.C_DebugLog = New System.Windows.Forms.CheckBox()
         Me.C_Silent = New System.Windows.Forms.CheckBox()
         Me.ToolTipKonfig = New System.Windows.Forms.ToolTip(Me.components)
         Me.T_OrderID = New System.Windows.Forms.TextBox()
         Me.C_CheckConsistency = New System.Windows.Forms.CheckBox()
+        Me.C_IDlessBatch = New System.Windows.Forms.CheckBox()
+        Me.MappingGrid_Offline = New System.Windows.Forms.DataGridView()
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.L_OrderID = New System.Windows.Forms.Label()
         Me.B_Load = New System.Windows.Forms.Button()
+        Me.SourceColumn_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.TargetColumn_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.SourceType_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.TargetType_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Seperator_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.PartOfSubstring_Offline = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.StaticValue_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.B_TargetSaveFile = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
         CType(Me.PB_Target, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.MappingGrid, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.MappingGrid_Offline, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'T_Jobname
@@ -183,7 +195,7 @@ Partial Class Konfiguration
         Me.GroupBox1.Controls.Add(Me.L_FilterValue)
         Me.GroupBox1.Controls.Add(Me.L_FilterColumn)
         Me.GroupBox1.Controls.Add(Me.Label9)
-        Me.GroupBox1.Controls.Add(Me.Label8)
+        Me.GroupBox1.Controls.Add(Me.L_SourceIDColumn)
         Me.GroupBox1.Controls.Add(Me.Label7)
         Me.GroupBox1.Controls.Add(Me.L_SourceConnectionType)
         Me.GroupBox1.Controls.Add(Me.L_SourcePassword)
@@ -317,14 +329,14 @@ Partial Class Konfiguration
         Me.Label9.TabIndex = 19
         Me.Label9.Text = "Filter Type:"
         '
-        'Label8
+        'L_SourceIDColumn
         '
-        Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(9, 152)
-        Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(64, 13)
-        Me.Label8.TabIndex = 18
-        Me.Label8.Text = "ID Column:"
+        Me.L_SourceIDColumn.AutoSize = True
+        Me.L_SourceIDColumn.Location = New System.Drawing.Point(9, 152)
+        Me.L_SourceIDColumn.Name = "L_SourceIDColumn"
+        Me.L_SourceIDColumn.Size = New System.Drawing.Size(64, 13)
+        Me.L_SourceIDColumn.TabIndex = 18
+        Me.L_SourceIDColumn.Text = "ID Column:"
         '
         'Label7
         '
@@ -504,6 +516,7 @@ Partial Class Konfiguration
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.B_TargetSaveFile)
         Me.GroupBox2.Controls.Add(Me.L_TargetIDDatatype)
         Me.GroupBox2.Controls.Add(Me.C_TargetIDDatatype)
         Me.GroupBox2.Controls.Add(Me.B_TargetPath)
@@ -514,15 +527,15 @@ Partial Class Konfiguration
         Me.GroupBox2.Controls.Add(Me.C_DeleteAllowed)
         Me.GroupBox2.Controls.Add(Me.C_UpdateAllowed)
         Me.GroupBox2.Controls.Add(Me.C_InsertAllowed)
-        Me.GroupBox2.Controls.Add(Me.Label24)
-        Me.GroupBox2.Controls.Add(Me.Label23)
+        Me.GroupBox2.Controls.Add(Me.L_PartOfSubString)
+        Me.GroupBox2.Controls.Add(Me.L_PartOfSubstringUse)
         Me.GroupBox2.Controls.Add(Me.C_TargetPartSubstring)
-        Me.GroupBox2.Controls.Add(Me.Label22)
+        Me.GroupBox2.Controls.Add(Me.L_TargetSeperator)
         Me.GroupBox2.Controls.Add(Me.T_TargetSeperator)
         Me.GroupBox2.Controls.Add(Me.C_MapIDValue)
         Me.GroupBox2.Controls.Add(Me.Label21)
         Me.GroupBox2.Controls.Add(Me.C_TargetTimestampfield)
-        Me.GroupBox2.Controls.Add(Me.Label20)
+        Me.GroupBox2.Controls.Add(Me.L_TargetIDColumn)
         Me.GroupBox2.Controls.Add(Me.Label13)
         Me.GroupBox2.Controls.Add(Me.C_TargetIDColumn)
         Me.GroupBox2.Controls.Add(Me.C_TargetServerType)
@@ -646,23 +659,23 @@ Partial Class Konfiguration
         Me.ToolTipKonfig.SetToolTip(Me.C_InsertAllowed, "INSERT allowed: Check if you want new values to be added to your source.")
         Me.C_InsertAllowed.UseVisualStyleBackColor = True
         '
-        'Label24
+        'L_PartOfSubString
         '
-        Me.Label24.AutoSize = True
-        Me.Label24.Location = New System.Drawing.Point(507, 187)
-        Me.Label24.Name = "Label24"
-        Me.Label24.Size = New System.Drawing.Size(76, 26)
-        Me.Label24.TabIndex = 44
-        Me.Label24.Text = "...part of " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "the substring"
+        Me.L_PartOfSubString.AutoSize = True
+        Me.L_PartOfSubString.Location = New System.Drawing.Point(507, 187)
+        Me.L_PartOfSubString.Name = "L_PartOfSubString"
+        Me.L_PartOfSubString.Size = New System.Drawing.Size(76, 26)
+        Me.L_PartOfSubString.TabIndex = 44
+        Me.L_PartOfSubString.Text = "...part of " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "the substring"
         '
-        'Label23
+        'L_PartOfSubstringUse
         '
-        Me.Label23.AutoSize = True
-        Me.Label23.Location = New System.Drawing.Point(310, 190)
-        Me.Label23.Name = "Label23"
-        Me.Label23.Size = New System.Drawing.Size(26, 13)
-        Me.Label23.TabIndex = 43
-        Me.Label23.Text = "Use"
+        Me.L_PartOfSubstringUse.AutoSize = True
+        Me.L_PartOfSubstringUse.Location = New System.Drawing.Point(310, 190)
+        Me.L_PartOfSubstringUse.Name = "L_PartOfSubstringUse"
+        Me.L_PartOfSubstringUse.Size = New System.Drawing.Size(26, 13)
+        Me.L_PartOfSubstringUse.TabIndex = 43
+        Me.L_PartOfSubstringUse.Text = "Use"
         '
         'C_TargetPartSubstring
         '
@@ -676,14 +689,14 @@ Partial Class Konfiguration
         "or the right side starting from" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "the seperator, i.e. of you cut 10-12345 to 1234" &
         "5 you have to choose ""right"".")
         '
-        'Label22
+        'L_TargetSeperator
         '
-        Me.Label22.AutoSize = True
-        Me.Label22.Location = New System.Drawing.Point(170, 190)
-        Me.Label22.Name = "Label22"
-        Me.Label22.Size = New System.Drawing.Size(60, 13)
-        Me.Label22.TabIndex = 41
-        Me.Label22.Text = "Seperator:"
+        Me.L_TargetSeperator.AutoSize = True
+        Me.L_TargetSeperator.Location = New System.Drawing.Point(170, 190)
+        Me.L_TargetSeperator.Name = "L_TargetSeperator"
+        Me.L_TargetSeperator.Size = New System.Drawing.Size(60, 13)
+        Me.L_TargetSeperator.TabIndex = 41
+        Me.L_TargetSeperator.Text = "Seperator:"
         '
         'T_TargetSeperator
         '
@@ -727,14 +740,14 @@ Partial Class Konfiguration
         Me.ToolTipKonfig.SetToolTip(Me.C_TargetTimestampfield, "Time Stamp Field: If you want to set a sync timestamp, to see when the row has sy" &
         "nced, you can add the name")
         '
-        'Label20
+        'L_TargetIDColumn
         '
-        Me.Label20.AutoSize = True
-        Me.Label20.Location = New System.Drawing.Point(10, 152)
-        Me.Label20.Name = "Label20"
-        Me.Label20.Size = New System.Drawing.Size(64, 13)
-        Me.Label20.TabIndex = 24
-        Me.Label20.Text = "ID Column:"
+        Me.L_TargetIDColumn.AutoSize = True
+        Me.L_TargetIDColumn.Location = New System.Drawing.Point(10, 152)
+        Me.L_TargetIDColumn.Name = "L_TargetIDColumn"
+        Me.L_TargetIDColumn.Size = New System.Drawing.Size(64, 13)
+        Me.L_TargetIDColumn.TabIndex = 24
+        Me.L_TargetIDColumn.Text = "ID Column:"
         '
         'Label13
         '
@@ -894,7 +907,7 @@ Partial Class Konfiguration
         '
         Me.MappingGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
         Me.MappingGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.MappingGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceColumn, Me.TargetColumn, Me.SourceType, Me.TargetType, Me.Seperator, Me.PartOfSubstring})
+        Me.MappingGrid.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceColumn, Me.TargetColumn, Me.SourceType, Me.TargetType, Me.Seperator, Me.PartOfSubstring, Me.StaticValue})
         Me.MappingGrid.Location = New System.Drawing.Point(16, 430)
         Me.MappingGrid.Name = "MappingGrid"
         Me.MappingGrid.Size = New System.Drawing.Size(1185, 406)
@@ -903,7 +916,6 @@ Partial Class Konfiguration
         '
         'SourceColumn
         '
-        Me.SourceColumn.DisplayStyle = System.Windows.Forms.DataGridViewComboBoxDisplayStyle.[Nothing]
         Me.SourceColumn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.SourceColumn.HeaderText = "Source Column"
         Me.SourceColumn.Name = "SourceColumn"
@@ -944,10 +956,19 @@ Partial Class Konfiguration
         '
         'PartOfSubstring
         '
+        Me.PartOfSubstring.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.PartOfSubstring.HeaderText = "Part Of Substring"
         Me.PartOfSubstring.Items.AddRange(New Object() {"left", "right"})
         Me.PartOfSubstring.Name = "PartOfSubstring"
         Me.PartOfSubstring.Width = 92
+        '
+        'StaticValue
+        '
+        Me.StaticValue.HeaderText = "Static Value for Target Column"
+        Me.StaticValue.Name = "StaticValue"
+        Me.StaticValue.ToolTipText = "If there is no fitting source, you can set a static value, which will be set for " &
+    "every row, here."
+        Me.StaticValue.Width = 133
         '
         'B_Save
         '
@@ -1006,6 +1027,28 @@ Partial Class Konfiguration
         Me.ToolTipKonfig.SetToolTip(Me.C_CheckConsistency, resources.GetString("C_CheckConsistency.ToolTip"))
         Me.C_CheckConsistency.UseVisualStyleBackColor = True
         '
+        'C_IDlessBatch
+        '
+        Me.C_IDlessBatch.AutoSize = True
+        Me.C_IDlessBatch.Location = New System.Drawing.Point(253, 36)
+        Me.C_IDlessBatch.Name = "C_IDlessBatch"
+        Me.C_IDlessBatch.Size = New System.Drawing.Size(92, 17)
+        Me.C_IDlessBatch.TabIndex = 50
+        Me.C_IDlessBatch.Text = "ID-less Batch"
+        Me.ToolTipKonfig.SetToolTip(Me.C_IDlessBatch, resources.GetString("C_IDlessBatch.ToolTip"))
+        Me.C_IDlessBatch.UseVisualStyleBackColor = True
+        '
+        'MappingGrid_Offline
+        '
+        Me.MappingGrid_Offline.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
+        Me.MappingGrid_Offline.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.MappingGrid_Offline.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.SourceColumn_Offline, Me.TargetColumn_Offline, Me.SourceType_Offline, Me.TargetType_Offline, Me.Seperator_Offline, Me.PartOfSubstring_Offline, Me.StaticValue_Offline})
+        Me.MappingGrid_Offline.Location = New System.Drawing.Point(16, 430)
+        Me.MappingGrid_Offline.Name = "MappingGrid_Offline"
+        Me.MappingGrid_Offline.Size = New System.Drawing.Size(1186, 406)
+        Me.MappingGrid_Offline.TabIndex = 51
+        Me.ToolTipKonfig.SetToolTip(Me.MappingGrid_Offline, "Enter the mappings between source and target tables")
+        '
         'OpenFileDialog1
         '
         Me.OpenFileDialog1.FileName = "OpenFileDialog1"
@@ -1028,11 +1071,77 @@ Partial Class Konfiguration
         Me.B_Load.Text = "Load Configuration..."
         Me.B_Load.UseVisualStyleBackColor = True
         '
+        'SourceColumn_Offline
+        '
+        Me.SourceColumn_Offline.HeaderText = "Source Column"
+        Me.SourceColumn_Offline.Name = "SourceColumn_Offline"
+        Me.SourceColumn_Offline.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.SourceColumn_Offline.Width = 101
+        '
+        'TargetColumn_Offline
+        '
+        Me.TargetColumn_Offline.HeaderText = "Target Column"
+        Me.TargetColumn_Offline.Name = "TargetColumn_Offline"
+        Me.TargetColumn_Offline.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.TargetColumn_Offline.Width = 97
+        '
+        'SourceType_Offline
+        '
+        Me.SourceType_Offline.HeaderText = "Source Type"
+        Me.SourceType_Offline.Name = "SourceType_Offline"
+        Me.SourceType_Offline.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.SourceType_Offline.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.SourceType_Offline.Width = 66
+        '
+        'TargetType_Offline
+        '
+        Me.TargetType_Offline.HeaderText = "Target Type"
+        Me.TargetType_Offline.Name = "TargetType_Offline"
+        Me.TargetType_Offline.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.TargetType_Offline.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.TargetType_Offline.Width = 62
+        '
+        'Seperator_Offline
+        '
+        Me.Seperator_Offline.HeaderText = "Seperator"
+        Me.Seperator_Offline.Name = "Seperator_Offline"
+        Me.Seperator_Offline.Width = 82
+        '
+        'PartOfSubstring_Offline
+        '
+        Me.PartOfSubstring_Offline.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.PartOfSubstring_Offline.HeaderText = "Part Of Substring"
+        Me.PartOfSubstring_Offline.Items.AddRange(New Object() {"left", "right"})
+        Me.PartOfSubstring_Offline.Name = "PartOfSubstring_Offline"
+        Me.PartOfSubstring_Offline.Width = 92
+        '
+        'StaticValue_Offline
+        '
+        Me.StaticValue_Offline.HeaderText = "Static Value for Target Column"
+        Me.StaticValue_Offline.Name = "StaticValue_Offline"
+        Me.StaticValue_Offline.ToolTipText = "If there is no fitting source, you can set a static value, which will be set for " &
+    "every row, here."
+        Me.StaticValue_Offline.Width = 133
+        '
+        'B_TargetSaveFile
+        '
+        Me.B_TargetSaveFile.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.B_TargetSaveFile.Location = New System.Drawing.Point(547, 18)
+        Me.B_TargetSaveFile.Name = "B_TargetSaveFile"
+        Me.B_TargetSaveFile.Size = New System.Drawing.Size(21, 23)
+        Me.B_TargetSaveFile.TabIndex = 53
+        Me.B_TargetSaveFile.Text = "..."
+        Me.ToolTipKonfig.SetToolTip(Me.B_TargetSaveFile, "Click here to choose a logging directory")
+        Me.B_TargetSaveFile.UseVisualStyleBackColor = True
+        Me.B_TargetSaveFile.Visible = False
+        '
         'Konfiguration
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1219, 885)
+        Me.Controls.Add(Me.MappingGrid_Offline)
+        Me.Controls.Add(Me.C_IDlessBatch)
         Me.Controls.Add(Me.C_CheckConsistency)
         Me.Controls.Add(Me.B_Load)
         Me.Controls.Add(Me.L_OrderID)
@@ -1058,6 +1167,7 @@ Partial Class Konfiguration
         Me.GroupBox2.PerformLayout()
         CType(Me.PB_Target, System.ComponentModel.ISupportInitialize).EndInit()
         CType(Me.MappingGrid, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.MappingGrid_Offline, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -1087,20 +1197,20 @@ Partial Class Konfiguration
     Friend WithEvents L_FilterValue As Windows.Forms.Label
     Friend WithEvents L_FilterColumn As Windows.Forms.Label
     Friend WithEvents Label9 As Windows.Forms.Label
-    Friend WithEvents Label8 As Windows.Forms.Label
+    Friend WithEvents L_SourceIDColumn As Windows.Forms.Label
     Friend WithEvents Label7 As Windows.Forms.Label
     Friend WithEvents L_SourceConnectionType As Windows.Forms.Label
     Friend WithEvents L_SourcePassword As Windows.Forms.Label
     Friend WithEvents L_SourceUsername As Windows.Forms.Label
     Friend WithEvents L_SourceDB As Windows.Forms.Label
-    Friend WithEvents Label23 As Windows.Forms.Label
+    Friend WithEvents L_PartOfSubstringUse As Windows.Forms.Label
     Friend WithEvents C_TargetPartSubstring As Windows.Forms.ComboBox
-    Friend WithEvents Label22 As Windows.Forms.Label
+    Friend WithEvents L_TargetSeperator As Windows.Forms.Label
     Friend WithEvents T_TargetSeperator As Windows.Forms.TextBox
     Friend WithEvents C_MapIDValue As Windows.Forms.CheckBox
     Friend WithEvents Label21 As Windows.Forms.Label
     Friend WithEvents T_TargetTimestampfield As Windows.Forms.TextBox
-    Friend WithEvents Label20 As Windows.Forms.Label
+    Friend WithEvents L_TargetIDColumn As Windows.Forms.Label
     Friend WithEvents Label13 As Windows.Forms.Label
     Friend WithEvents C_TargetServerType As Windows.Forms.ComboBox
     Friend WithEvents L_TargetConnectionType As Windows.Forms.Label
@@ -1119,7 +1229,7 @@ Partial Class Konfiguration
     Friend WithEvents C_DeleteAllowed As Windows.Forms.CheckBox
     Friend WithEvents C_UpdateAllowed As Windows.Forms.CheckBox
     Friend WithEvents C_InsertAllowed As Windows.Forms.CheckBox
-    Friend WithEvents Label24 As Windows.Forms.Label
+    Friend WithEvents L_PartOfSubString As Windows.Forms.Label
     Friend WithEvents MappingGrid As Windows.Forms.DataGridView
     Friend WithEvents B_Save As Windows.Forms.Button
     Friend WithEvents C_DebugLog As Windows.Forms.CheckBox
@@ -1149,10 +1259,21 @@ Partial Class Konfiguration
     Friend WithEvents L_OrderID As Windows.Forms.Label
     Friend WithEvents B_Load As Windows.Forms.Button
     Friend WithEvents C_CheckConsistency As Windows.Forms.CheckBox
+    Friend WithEvents C_IDlessBatch As Windows.Forms.CheckBox
     Friend WithEvents SourceColumn As Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents TargetColumn As Windows.Forms.DataGridViewComboBoxColumn
     Friend WithEvents SourceType As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents TargetType As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents StaticValue As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents MappingGrid_Offline As Windows.Forms.DataGridView
+    Friend WithEvents SourceColumn_Offline As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents TargetColumn_Offline As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents SourceType_Offline As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents TargetType_Offline As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents Seperator_Offline As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents PartOfSubstring_Offline As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents StaticValue_Offline As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents B_TargetSaveFile As Windows.Forms.Button
 End Class

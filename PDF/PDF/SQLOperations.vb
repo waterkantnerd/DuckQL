@@ -33,6 +33,7 @@ Public Class SQLOperations
 
         Select Case Me.Setting.Servertype
             Case "XML"
+                Dim ReaderDepth As Integer = 0
                 If IsNothing(Me.Setting.FilePath) = True Then
                     Log.Write(0, "Could not read XML File: No Path was found.")
                     Exit Sub
@@ -40,29 +41,57 @@ Public Class SQLOperations
                 Try
                     Dim XMLReader As Xml.XmlReader = New Xml.XmlTextReader(Me.Setting.FilePath)
                     With XMLReader
-                        Do While .Read
-                            Select Case .NodeType
-                                Case Xml.XmlNodeType.Element
-                                    Dim Reihe As New Reihe
-                                    Reihe.SetUp(SQL, TargetSQL)
-                                    Reihe.Table = .Name                         'Since within an XML File may be more than one table to be adressed.
-                                    If .AttributeCount > 0 Then
-                                        While .MoveToNextAttribute
-                                            Dim Daten As New Daten
-                                            Daten.SetUp(SQL, TargetSQL)
-                                            Daten.SourceKey = .Name
-                                            Daten.Wert = .Value
-                                            If Daten.GetMapping = True Then
-                                                Daten.MapDaten()
-                                                Log.Write(1, "Tupel has been added to row.")
-                                                Reihe.Spalten.AddLast(Daten)
-                                            End If
-                                        End While
+                        Dim PrevDepth As Integer = 0
+                        Dim Reihe As Reihe = Nothing
+                        While .Read
+                            Dim CurrentDepth As Integer = .Depth
+                            If Me.Setting.XMLStartLayerLookup > CurrentDepth Then
+                                Log.Write(1, "Current Depth is " & CurrentDepth & " ignoring entrys since I should start at " & Me.Setting.XMLStartLayerLookup)
+                            Else
+                                'Everytime the reader Depth falls under the StartLayerLookup it should create a new row
+                                If PrevDepth <= Me.Setting.XMLStartLayerLookup Then
+                                    If IsNothing(Reihe) = True Then
+                                    Else
+                                        Module1.Core.Reihen.AddLast(Reihe)
                                     End If
-                            End Select
-                        Loop
+                                    Reihe = New Reihe
+                                    Reihe.SetUp(SQL, TargetSQL)
+                                End If
+                                For Each Mapping In Module1.Core.CurrentENV.Mappings
+                                    If Mapping.Sourcename = .Name Then
+                                        Dim Daten As New Daten
+                                        Daten.SetUp(SQL, TargetSQL)
+                                        Daten.SourceKey = .Name
+                                        Daten.Layer = .Depth
+                                        Select Case .NodeType
+                                            Case Xml.XmlNodeType.Element
+                                                If .AttributeCount > 0 Then
+                                                    'This case has to be defined...
+                                                    'How should the user define if the column he/she is looking for is a Node or an Attribute?? -> Config XML && GUI
+                                                Else
+                                                    If CurrentDepth = 0 Then
+                                                    Else
+
+                                                        Daten.Wert = CheckInnerXML4XML(.ReadInnerXml)
+
+
+                                                    End If
+                                                    If Daten.GetMapping = True Then
+                                                        Daten.MapDaten()
+                                                        Log.Write(1, "Tupel has been added to row.")
+                                                        Reihe.Spalten.AddLast(Daten)
+                                                    End If
+                                                End If
+                                        End Select
+                                    End If
+                                Next
+                            End If
+                            PrevDepth = CurrentDepth 'saving the previous depth for the next iteration...
+                        End While
                         .Close()
                     End With
+
+
                 Catch ex As Exception
                     Log.Write(0, "Error while reading XML File: " & ex.Message)
                 End Try
@@ -121,6 +150,21 @@ Public Class SQLOperations
                             Next
                             '------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+                            For Each Mapping In ENV.Mappings
+                                If Mapping.NoSource = True Then
+                                    Dim Daten As New Daten
+                                    Daten.SetUp(SQL, TargetSQL)
+                                    Daten.IdentifierCol = Setting.IDColumn
+                                    Daten.IdentifierVal = ResultRow(Setting.IDColumn).ToString
+                                    Daten.Wert = Mapping.StaticValue
+                                    Daten.Mapping = Mapping
+                                    Daten.TargetDatatype = Mapping.Targettype
+                                    Log.Write(1, "Static Tupel for " & Mapping.Targetname & " with value of " & Mapping.StaticValue & " created")
+                                    Reihe.Spalten.AddLast(Daten)
+                                End If
+                            Next
+
+
                             If Target.SessionTimestampField <> "" Then
                                 Dim Daten As New Daten
                                 Daten.SetUp(SQL, TargetSQL)
@@ -147,6 +191,11 @@ Public Class SQLOperations
         End Select
         SQLrq = ""
     End Sub
+
+    Private Function CheckInnerXML4XML(XMLString As String) As String
+        'Has to check if is in this inner xml is still xml code and replace it with actual value...
+        CheckInnerXML4XML = XMLString
+    End Function
 
     Private Function CreateSelectStatement() As String
         Dim SQLrq As String = ""
@@ -216,6 +265,13 @@ Public Class SQLOperations
         ' For optimized performance querys are send every 12.000 rows to the server,
         ' this is a compromize between performance -> one big query and timeout handling 
         ' of the several servers which the program can not influence.
+
+
+        ' NOTE: UPDATES is only possible if:
+        ' - The Programm is allowed to UPDATE
+        ' - The Target Datasource is an SQL Server --> Flatfiles like XML, CSV OR XLS will alway be rewritten!!
+        ' - IDless Batch Mode is deactivated
+
         Me.SQL = SQL
         Me.Setting = SQL.Setting
 
@@ -244,17 +300,38 @@ Public Class SQLOperations
                 XMLobj.WriteEndElement()
                 XMLobj.Close()
             Case "CSV"
-
+                For Each Reihe In Module1.Core.Reihen
+                    Dim RowStr As String = ""
+                    For Each Spalte In Reihe.Spalten
+                        If RowStr = "" Then
+                            RowStr = Spalte.Wert & ";"
+                        Else
+                            RowStr = RowStr & Spalte.Wert & ";"
+                        End If
+                    Next
+                    Log.Write(1, RowStr)
+                Next
             Case "XLS"
 
             Case "HTML"
 
             Case Else
+                Log.Write(1, "Writing to Target...")
+                If ENV.IDLessBatch = True Then
+                    Log.Write(1, "NOTE: IDless Batch Mode is enabled")
+                Else
+                    Log.Write(1, "NOTE: IDless Batch Mode is disabled")
+                End If
                 For Each Reihe In Module1.Core.Reihen
-                    SQLrq = "SELECT * FROM " & Setting.SQLTable & " WHERE " & Setting.IDColumn & "=" & SQL.CSQL(Reihe.IDValue, Reihe.GetIDValueDataType)
-                    DS = SQL.CreateDataAdapter(SQLrq)
-                    SQLrq = ""
-                    If IsNothing(DS) = True Then
+                    'The Program checks only for an existing ID if IDless Batch Mode is deactivated
+                    If ENV.IDLessBatch = True Then
+                    Else
+                        SQLrq = "SELECT * FROM " & Setting.SQLTable & " WHERE " & Setting.IDColumn & "=" & SQL.CSQL(Reihe.IDValue, Reihe.GetIDValueDataType)
+                        DS = SQL.CreateDataAdapter(SQLrq)
+                        SQLrq = ""
+                    End If
+                    'If it can't find a Records with the corresponding ID OR IDless Batch Mode is activated, the programs creates an insert string (if allowed)
+                    If IsNothing(DS) = True Or ENV.IDLessBatch = True Then
                         If Setting.InsertAllowed = True Then
                             Log.Write(1, "So far the Identifier didn't exist --> INSERT")
                             Reihe.MakeInsertString()

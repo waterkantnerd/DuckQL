@@ -137,6 +137,12 @@
                 Me.C_TargetConnectionType.Items.Clear()
                 Me.C_TargetConnectionType.Items.Add("Normal")
                 Me.C_TargetConnectionType.Items.Add("Trusted")
+                Me.C_TargetConnectionType.Text = ""
+                Me.L_TargetDB.Visible = True
+                Me.T_TargetDB.Visible = True
+                Me.T_TargetDB.Text = ""
+                Me.B_TargetPath.Visible = True
+                Me.B_TargetSaveFile.Visible = False
             Case "MySQL"
                 Me.L_TargetServerAdress.Visible = True
                 Me.T_TargetServerAdress.Visible = True
@@ -147,6 +153,12 @@
                 Me.L_TargetConnectionType.Visible = True
                 Me.C_TargetConnectionType.Items.Clear()
                 Me.C_TargetConnectionType.Items.Add("Normal")
+                Me.C_TargetConnectionType.Text = "Normal"
+                Me.L_TargetDB.Visible = True
+                Me.T_TargetDB.Visible = True
+                Me.T_TargetDB.Text = ""
+                Me.B_TargetPath.Visible = True
+                Me.B_TargetSaveFile.Visible = False
             Case "Access"
                 Me.L_TargetServerAdress.Visible = False
                 Me.T_TargetServerAdress.Visible = False
@@ -157,10 +169,57 @@
                 Me.L_TargetConnectionType.Visible = True
                 Me.C_TargetConnectionType.Items.Clear()
                 Me.C_TargetConnectionType.Items.Add("Standard Security")
+                Me.C_TargetConnectionType.Text = "Standard Security"
                 Me.T_TargetUsername.Visible = False
                 Me.T_TargetUsername.Text = "  "
                 Me.T_TargetPassword.Visible = False
                 Me.T_TargetPassword.Text = "  "
+                Me.B_TargetPath.Visible = True
+                Me.B_TargetSaveFile.Visible = False
+            Case "XML"
+                Me.L_TargetServerAdress.Visible = False
+                Me.T_TargetServerAdress.Visible = False
+                Me.T_TargetPath.Visible = True
+                Me.L_TargetPath.Visible = True
+                Me.B_TargetPath.Visible = True
+                Me.C_TargetConnectionType.Visible = True
+                Me.L_TargetConnectionType.Visible = True
+                Me.C_TargetConnectionType.Items.Clear()
+                Me.C_TargetConnectionType.Items.Add("Normal")
+                Me.C_TargetConnectionType.Text = "Normal"
+                Me.T_TargetUsername.Visible = False
+                Me.T_TargetPassword.Visible = False
+                Me.T_TargetPassword.Text = "  "
+                Me.T_TargetUsername.Text = "  "
+                Me.L_TargetUsername.Visible = False
+                Me.L_TargetPassword.Visible = False
+                Me.L_TargetDB.Visible = False
+                Me.T_TargetDB.Visible = False
+                Me.T_TargetDB.Text = "XML"
+                Me.B_TargetPath.Visible = False
+                Me.B_TargetSaveFile.Visible = True
+            Case "CSV"
+                Me.L_TargetServerAdress.Visible = False
+                Me.T_TargetServerAdress.Visible = False
+                Me.T_TargetPath.Visible = True
+                Me.L_TargetPath.Visible = True
+                Me.B_TargetPath.Visible = True
+                Me.C_TargetConnectionType.Visible = True
+                Me.L_TargetConnectionType.Visible = True
+                Me.C_TargetConnectionType.Items.Clear()
+                Me.C_TargetConnectionType.Items.Add("Normal")
+                Me.C_TargetConnectionType.Text = "Normal"
+                Me.T_TargetUsername.Visible = False
+                Me.T_TargetPassword.Visible = False
+                Me.T_TargetPassword.Text = "  "
+                Me.T_TargetUsername.Text = "  "
+                Me.L_TargetUsername.Visible = False
+                Me.L_TargetPassword.Visible = False
+                Me.L_TargetDB.Visible = False
+                Me.T_TargetDB.Visible = False
+                Me.T_TargetDB.Text = "CSV"
+                Me.B_TargetPath.Visible = False
+                Me.B_TargetSaveFile.Visible = True
             Case Else
                 Me.L_TargetServerAdress.Visible = True
                 Me.T_TargetServerAdress.Visible = True
@@ -256,7 +315,13 @@
 
         ENV.CreateName(Me.T_Jobname.Text)
         ENV.SetLogPath(Me.T_LoggingDirectory.Text)
-        ENV.OrderID = Me.T_OrderID.Text
+        If Me.T_OrderID.Text = "" Or IsNothing(Me.T_OrderID.Text) = True Then
+            ENV.OrderID = 0
+        Else
+            ENV.OrderID = Me.T_OrderID.Text
+        End If
+
+        ENV.IDLessBatch = Me.C_IDlessBatch.Checked
 
         If Me.C_DebugLog.Checked = True Then
             ENV.LogLevel = "1"
@@ -339,31 +404,71 @@
         ENV.SQLServer.AddLast(SourceSettings)
         ENV.SQLServer.AddLast(TargetSettings)
 
-        For Rows = 0 To MappingGrid.RowCount - 1
-            Dim Mapping As New Mapping
-            For Columns = 0 To MappingGrid.ColumnCount - 1
-                Select Case MappingGrid.Columns.Item(Columns).Name
-                    Case "SourceColumn"
-                        Mapping.Sourcename = MappingGrid.Item(Columns, Rows).Value
-                    Case "TargetColumn"
-                        Mapping.Targetname = MappingGrid.Item(Columns, Rows).Value
-                    Case "SourceType"
-                        Mapping.Sourcetype = MappingGrid.Item(Columns, Rows).Value
-                    Case "TargetType"
-                        Mapping.Targettype = MappingGrid.Item(Columns, Rows).Value
-                    Case "Seperator"
-                        Mapping.Separator = MappingGrid.Item(Columns, Rows).Value
-                    Case "PartOfSubstring"
-                        Mapping.SeperatorDirection = MappingGrid.Item(Columns, Rows).Value
-                    Case Else
-                        Mapping.Sourcename = "Error"
-                End Select
+        'Depeding on which MappingGrid is visible to the user:
+        'The visible MappingGrid will be used as leading grid in terms of storing the config.
+        If Me.MappingGrid.Visible = True Then
+            For Rows = 0 To MappingGrid.RowCount - 1
+                Dim Mapping As New Mapping
+                For Columns = 0 To MappingGrid.ColumnCount - 1
+                    Select Case MappingGrid.Columns.Item(Columns).Name
+                        Case "SourceColumn"
+                            If MappingGrid.Item(Columns, Rows).Value = "" Then
+                                Mapping.NoSource = True
+                            End If
+                            Mapping.Sourcename = MappingGrid.Item(Columns, Rows).Value
+                        Case "TargetColumn"
+                            Mapping.Targetname = MappingGrid.Item(Columns, Rows).Value
+                        Case "SourceType"
+                            Mapping.Sourcetype = MappingGrid.Item(Columns, Rows).Value
+                        Case "TargetType"
+                            Mapping.Targettype = MappingGrid.Item(Columns, Rows).Value
+                        Case "Seperator"
+                            Mapping.Separator = MappingGrid.Item(Columns, Rows).Value
+                        Case "PartOfSubstring"
+                            Mapping.SeperatorDirection = MappingGrid.Item(Columns, Rows).Value
+                        Case "StaticValue"
+                            Mapping.StaticValue = MappingGrid.Item(Columns, Rows).Value
+                        Case Else
+                            Mapping.Sourcename = "Error"
+                    End Select
+                Next
+                If Mapping.Sourcename = "" And Mapping.Targetname = "" And Mapping.Sourcetype = "" And Mapping.Targettype = "" Then
+                Else
+                    ENV.Mappings.AddLast(Mapping)
+                End If
             Next
-            If Mapping.Sourcename = "" And Mapping.Targetname = "" And Mapping.Sourcetype = "" And Mapping.Targettype = "" Then
-            Else
-                ENV.Mappings.AddLast(Mapping)
-            End If
-        Next
+        Else
+            For Rows = 0 To MappingGrid_Offline.RowCount - 1
+                Dim Mapping As New Mapping
+                For Columns = 0 To MappingGrid_Offline.ColumnCount - 1
+                    Select Case MappingGrid_Offline.Columns.Item(Columns).Name
+                        Case "SourceColumn_Offline"
+                            If MappingGrid_Offline.Item(Columns, Rows).Value = "" Then
+                                Mapping.NoSource = True
+                            End If
+                            Mapping.Sourcename = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "TargetColumn_Offline"
+                            Mapping.Targetname = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "SourceType_Offline"
+                            Mapping.Sourcetype = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "TargetType_Offline"
+                            Mapping.Targettype = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "Seperator_Offline"
+                            Mapping.Separator = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "PartOfSubstring_Offline"
+                            Mapping.SeperatorDirection = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "StaticValue_Offline"
+                            Mapping.StaticValue = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case Else
+                            Mapping.Sourcename = "Error"
+                    End Select
+                Next
+                If Mapping.Sourcename = "" And Mapping.Targetname = "" And Mapping.Sourcetype = "" And Mapping.Targettype = "" Then
+                Else
+                    ENV.Mappings.AddLast(Mapping)
+                End If
+            Next
+        End If
 
         Dim XMLFile As New XMLFiles
         Dim Path As String
@@ -412,14 +517,14 @@
 
         If IsNothing(Me.T_Jobname.Text) Or Me.T_Jobname.Text = "" Then
             Me.T_Jobname.BackColor = Drawing.Color.Red
-            MsgBox("You have to enter a Jobname!")
+            MsgBox("You have To enter a Jobname!")
             ValidateUserInput = False
             Exit Function
         End If
 
         If IsNumeric(Me.T_OrderID.Text) = False And Not (IsNothing(Me.T_OrderID.Text) = True Or Me.T_OrderID.Text="") Then
             Me.T_OrderID.BackColor = Drawing.Color.Red
-            MsgBox("Please enter a numeric value to OrderID")
+            MsgBox("Please enter a numeric value To OrderID")
             ValidateUserInput = False
             Exit Function
         End If
@@ -433,7 +538,7 @@
 
         If IsNothing(Me.C_SourceType.Text) Or Me.C_SourceType.Text = "" Then
             Me.C_SourceType.BackColor = Drawing.Color.Red
-            MsgBox("Please choose a server type for your datasource!")
+            MsgBox("Please choose a server type For your datasource!")
             ValidateUserInput = False
             Exit Function
         End If
@@ -442,7 +547,31 @@
             Case "Access"
                 If IsNothing(Me.T_SourcePath.Text) Or Me.T_SourcePath.Text = "" Then
                     Me.T_SourcePath.BackColor = Drawing.Color.Red
-                    MsgBox("Please enter the path of your datasource!")
+                    MsgBox("Please enter the path Of your datasource!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
+            Case "XML"
+                If IsNothing(Me.T_SourcePath.Text) Or Me.T_SourcePath.Text = "" Then
+                    Me.T_SourcePath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path Of your datasource!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
+            Case "CSV"
+                If IsNothing(Me.T_SourcePath.Text) Or Me.T_SourcePath.Text = "" Then
+                    Me.T_SourcePath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path Of your datasource!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
+            Case "HTML"
+                If IsNothing(Me.T_SourcePath.Text) Or Me.T_SourcePath.Text = "" Then
+                    Me.T_SourcePath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path Of your datasource!")
                     ValidateUserInput = False
                     Exit Function
                 End If
@@ -450,7 +579,7 @@
             Case Else
                 If IsNothing(Me.T_SourceAdress.Text) Or Me.T_SourceAdress.Text = "" Then
                     Me.T_SourceAdress.BackColor = Drawing.Color.Red
-                    MsgBox("Please enter the adress of your datasource!")
+                    MsgBox("Please enter the adress Of your datasource!")
                     ValidateUserInput = False
                     Exit Function
                 End If
@@ -460,7 +589,7 @@
 
         If IsNothing(Me.T_SourceDB.Text) Or Me.T_SourceDB.Text = "" Then
             Me.T_SourceDB.BackColor = Drawing.Color.Red
-            MsgBox("Please enter the database you want to connect to!")
+            MsgBox("Please enter the database you want To connect to!")
             ValidateUserInput = False
             Exit Function
         End If
@@ -475,28 +604,28 @@
         If Me.C_SourceConnMode.Text = "Normal" And (IsNothing(Me.T_SourceUsername.Text) = True Or Me.T_SourceUsername.Text = "" Or IsNothing(Me.T_SourcePassword.Text) = True Or Me.T_SourceUsername.Text = "") Then
             Me.T_SourceUsername.BackColor = Drawing.Color.Red
             Me.T_SourcePassword.BackColor = Drawing.Color.Red
-            MsgBox("You have to enter username and password for this authentication method!" & "Note that anonymous login is not provided in this version.")
+            MsgBox("You have To enter username And password For this authentication method!" & "Note that anonymous login Is Not provided In this version.")
             ValidateUserInput = False
             Exit Function
         End If
 
         If IsNothing(Me.C_SourceTable.Text) Or Me.C_SourceTable.Text = "" Then
             Me.C_SourceTable.BackColor = Drawing.Color.Red
-            MsgBox("Please choose a table of your source database!")
+            MsgBox("Please choose a table Of your source database!")
             ValidateUserInput = False
             Exit Function
         End If
 
-        If IsNothing(Me.C_SourceIDColumn.Text) Or Me.C_SourceIDColumn.Text = "" Then
+        If (IsNothing(Me.C_SourceIDColumn.Text) Or Me.C_SourceIDColumn.Text = "") And Me.C_IDlessBatch.Checked = False Then
             Me.C_SourceIDColumn.BackColor = Drawing.Color.Red
             MsgBox("Please enter the identifier column!")
             ValidateUserInput = False
             Exit Function
         End If
 
-        If IsNothing(Me.C_SourceIDDatatype.Text) = True Then
+        If IsNothing(Me.C_SourceIDDatatype.Text) = True And Me.C_IDlessBatch.Checked = False Then
             Me.C_SourceIDDatatype.BackColor = Drawing.Color.Red
-            MsgBox("Please choose the datatype of you identifier field")
+            MsgBox("Please choose the datatype Of you identifier field")
             ValidateUserInput = False
             Exit Function
         End If
@@ -504,7 +633,7 @@
         If Me.C_SourceFilterType.Text = "one column match" And (IsNothing(Me.C_SourceFilterColumn.Text) = True Or Me.C_SourceFilterColumn.Text = "" Or IsNothing(Me.T_SourceFilterValue.Text) = True Or Me.T_SourceFilterValue.Text = "") Then
             Me.C_SourceFilterColumn.BackColor = Drawing.Color.Red
             Me.T_SourceFilterValue.BackColor = Drawing.Color.Red
-            MsgBox("Please enter the column you want to use for your filter and the corrosponding value." & vbLf & "If you don't want to filter your data choose" & Chr(34) & "none" & Chr(34) & "in the Filter Type dropdown menu.")
+            MsgBox("Please enter the column you want To use For your filter And the corrosponding value." & vbLf & "If you don't want to filter your data choose" & Chr(34) & "none" & Chr(34) & "in the Filter Type dropdown menu.")
             ValidateUserInput = False
             Exit Function
         End If
@@ -531,6 +660,31 @@
                     ValidateUserInput = False
                     Exit Function
                 End If
+
+            Case "CSV"
+                If IsNothing(Me.T_TargetPath.Text) Or Me.T_TargetPath.Text = "" Then
+                    Me.T_TargetPath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path of your datatarget!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
+            Case "XML"
+                If IsNothing(Me.T_TargetPath.Text) Or Me.T_TargetPath.Text = "" Then
+                    Me.T_TargetPath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path of your datatarget!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
+            Case "HTML"
+                If IsNothing(Me.T_TargetPath.Text) Or Me.T_TargetPath.Text = "" Then
+                    Me.T_TargetPath.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the path of your datatarget!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
             Case Else
                 If IsNothing(Me.T_TargetServerAdress.Text) Or Me.T_TargetServerAdress.Text = "" Then
                     Me.T_TargetServerAdress.BackColor = Drawing.Color.Red
@@ -570,7 +724,7 @@
             Exit Function
         End If
 
-        If IsNothing(Me.C_TargetIDColumn.Text) Or Me.C_TargetIDColumn.Text = "" Then
+        If (IsNothing(Me.C_TargetIDColumn.Text) Or Me.C_TargetIDColumn.Text = "") And Me.C_IDlessBatch.Checked = False Then
             Me.C_TargetIDColumn.BackColor = Drawing.Color.Red
             MsgBox("Please enter the identifier column!")
             ValidateUserInput = False
@@ -585,7 +739,7 @@
             Exit Function
         End If
 
-        If IsNothing(Me.C_TargetIDDatatype.Text) = True Then
+        If IsNothing(Me.C_TargetIDDatatype.Text) = True And Me.C_IDlessBatch.Checked = False Then
             Me.C_TargetIDDatatype.BackColor = Drawing.Color.Red
             MsgBox("Please choose the datatype of your target identifier field")
             ValidateUserInput = False
@@ -601,63 +755,124 @@
             Exit Function
         End If
 
-        If MappingGrid.RowCount <= 0 Then
-            MsgBox("Please specify your column mappings!")
-            ValidateUserInput = False
-            Exit Function
-        End If
-        RefreshMappingGridDataTypes()
         Dim ErrorInGrid As Boolean = False
+        Dim EmptySourceColumn As Boolean = False
         Dim ErrorMessages As New LinkedList(Of String)
         Dim EmptyRowsInGrid As Integer = 0
         Dim Rows As Integer = 0
         Dim Columns As Integer = 0
-        For Rows = 0 To MappingGrid.RowCount - 1
-            If IsEmptyRowInGrid(Rows) = True Then
-                EmptyRowsInGrid = EmptyRowsInGrid + 1
-                If Rows < MappingGrid.RowCount - 1 Or Rows = 0 Then
-                    ErrorInGrid = True
-                    ErrorMessages.AddLast("Warning empty row in Grid on Line " & Rows + 1)
-                End If
-            Else
-                Dim SeperatorChecked As Boolean = False
-                For Columns = 0 To MappingGrid.ColumnCount - 1
-                    Select Case MappingGrid.Columns.Item(Columns).Name
-                        Case "SourceColumn"
-                            If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
-                                ErrorInGrid = True
-                                ErrorMessages.AddLast("Missing Source Column on Line " & Rows + 1)
-                            End If
-                        Case "TargetColumn"
-                            If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
-                                ErrorInGrid = True
-                                ErrorMessages.AddLast("Missing Target Column on Line " & Rows + 1)
-                            End If
-                        Case "SourceType"
-                            If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
-                                ErrorInGrid = True
-                                ErrorMessages.AddLast("Missing Source Type on Line " & Rows + 1)
-                            End If
-                        Case "TargetType"
-                            If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
-                                ErrorInGrid = True
-                                ErrorMessages.AddLast("Missing Target Type on Line " & Rows + 1)
-                            End If
-                        Case "Seperator"
-                            If IsNothing(MappingGrid.Item(Columns, Rows).Value) = False Then
-                                SeperatorChecked = True
-                            End If
-                        Case "PartOfSubstring"
-                            If SeperatorChecked = True And IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
-                                ErrorInGrid = True
-                                ErrorMessages.AddLast("Missing Part of Substring on Line " & Rows + 1)
-                            End If
-                    End Select
-                Next
-                SeperatorChecked = False
+        If MappingGrid.Visible = True Then
+            If MappingGrid.RowCount <= 0 Then
+                MsgBox("Please specify your column mappings!")
+                ValidateUserInput = False
+                Exit Function
             End If
-        Next
-
+            RefreshMappingGridDataTypes()
+            For Rows = 0 To MappingGrid.RowCount - 1
+                If IsEmptyRowInGrid(Rows) = True Then
+                    EmptyRowsInGrid = EmptyRowsInGrid + 1
+                    If Rows < MappingGrid.RowCount - 1 Or Rows = 0 Then
+                        ErrorInGrid = True
+                        ErrorMessages.AddLast("Warning empty row in Grid on Line " & Rows + 1)
+                    End If
+                Else
+                    Dim SeperatorChecked As Boolean = False
+                    For Columns = 0 To MappingGrid.ColumnCount - 1
+                        Select Case MappingGrid.Columns.Item(Columns).Name
+                            Case "SourceColumn"
+                                If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                                    EmptySourceColumn = True
+                                End If
+                            Case "TargetColumn"
+                                If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Target Column on Line " & Rows + 1)
+                                End If
+                            Case "SourceType"
+                                If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Source Type on Line " & Rows + 1)
+                                End If
+                            Case "TargetType"
+                                If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Target Type on Line " & Rows + 1)
+                                End If
+                            Case "Seperator"
+                                If IsNothing(MappingGrid.Item(Columns, Rows).Value) = False Then
+                                    SeperatorChecked = True
+                                End If
+                            Case "PartOfSubstring"
+                                If SeperatorChecked = True And IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Part of Substring on Line " & Rows + 1)
+                                End If
+                            Case "Static Value for Target Column"
+                                If EmptySourceColumn = True And IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Source Column or Static Value on Line " & Rows + 1)
+                                End If
+                        End Select
+                    Next
+                    SeperatorChecked = False
+                End If
+            Next
+        Else
+            If MappingGrid_Offline.RowCount <= 0 Then
+                MsgBox("Please specify your column mappings!")
+                ValidateUserInput = False
+                Exit Function
+            End If
+            For Rows = 0 To MappingGrid_Offline.RowCount - 1
+                If IsEmptyRowInGrid(Rows) = True Then
+                    EmptyRowsInGrid = EmptyRowsInGrid + 1
+                    If Rows < MappingGrid_Offline.RowCount - 1 Or Rows = 0 Then
+                        ErrorInGrid = True
+                        ErrorMessages.AddLast("Warning empty row in Grid on Line " & Rows + 1)
+                    End If
+                Else
+                    Dim SeperatorChecked As Boolean = False
+                    For Columns = 0 To MappingGrid_Offline.ColumnCount - 1
+                        Select Case MappingGrid_Offline.Columns.Item(Columns).Name
+                            Case "SourceColumn_Offline"
+                                If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
+                                    EmptySourceColumn = True
+                                End If
+                            Case "TargetColumn_Offline"
+                                If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Target Column on Line " & Rows + 1)
+                                End If
+                            Case "SourceType_Offline"
+                                If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Source Type on Line " & Rows + 1)
+                                End If
+                            Case "TargetType_Offline"
+                                If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Target Type on Line " & Rows + 1)
+                                End If
+                            Case "Seperator_Offline"
+                                If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = False Then
+                                    SeperatorChecked = True
+                                End If
+                            Case "PartOfSubstring_Offline"
+                                If SeperatorChecked = True And IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Part of Substring on Line " & Rows + 1)
+                                End If
+                            Case "StaticValue_Offline"
+                                If EmptySourceColumn = True And IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
+                                    ErrorInGrid = True
+                                    ErrorMessages.AddLast("Missing Source Column or Static Value on Line " & Rows + 1)
+                                End If
+                        End Select
+                    Next
+                    SeperatorChecked = False
+                End If
+            Next
+        End If
         If ErrorInGrid = True Then
             Dim ErrorString As String = ""
             For Each Line In ErrorMessages
@@ -672,19 +887,26 @@
             Exit Function
         End If
 
-
-
         ValidateUserInput = True
     End Function
 
     Private Function IsEmptyRowInGrid(RowIndex As Integer) As Boolean
         Dim Columns As Integer
-        For Columns = 0 To MappingGrid.ColumnCount - 1
-            If IsNothing(MappingGrid.Item(Columns, RowIndex).Value) = False Then
-                IsEmptyRowInGrid = False
-                Exit Function
-            End If
-        Next
+        If Me.MappingGrid.Visible = True Then
+            For Columns = 0 To MappingGrid.ColumnCount - 1
+                If IsNothing(MappingGrid.Item(Columns, RowIndex).Value) = False Then
+                    IsEmptyRowInGrid = False
+                    Exit Function
+                End If
+            Next
+        Else
+            For Columns = 0 To MappingGrid_Offline.ColumnCount - 1
+                If IsNothing(MappingGrid_Offline.Item(Columns, RowIndex).Value) = False Then
+                    IsEmptyRowInGrid = False
+                    Exit Function
+                End If
+            Next
+        End If
         IsEmptyRowInGrid = True
     End Function
 
@@ -777,6 +999,8 @@
         Me.C_SourceTable.Items.Clear()
         VerifyDatasourceConnection()
         If IsNothing(SourceSQL) = True Then
+            Me.MappingGrid_Offline.Visible = True
+            Me.MappingGrid.Visible = False
         Else
             If SourceSQL.Setting.Worked = True Then
                 SourceSQL.Tables.Clear()
@@ -784,6 +1008,9 @@
                 For Each Table In SourceSQL.Tables
                     Me.C_SourceTable.Items.Add(Table.TableName)
                 Next
+            Else
+                Me.MappingGrid_Offline.Visible = True
+                Me.MappingGrid.Visible = False
             End If
         End If
         Me.Refresh()
@@ -791,6 +1018,8 @@
         Me.C_TargetTable.Items.Clear()
         VerifyDataTargetConnection()
         If IsNothing(TargetSQL) = True Then
+            Me.MappingGrid_Offline.Visible = True
+            Me.MappingGrid.Visible = False
         Else
             TargetSQL.Tables.Clear()
             TargetSQL.GetTableNamesFromDatabase()
@@ -798,8 +1027,19 @@
                 For Each Table In TargetSQL.Tables
                     Me.C_TargetTable.Items.Add(Table.TableName)
                 Next
+            Else
+                Me.MappingGrid_Offline.Visible = True
+                Me.MappingGrid.Visible = False
             End If
         End If
+        If IsNothing(SourceSQL) Or IsNothing(TargetSQL) Then
+        Else
+            If SourceSQL.Setting.Worked = True And TargetSQL.Setting.Worked = True Then
+                Me.MappingGrid_Offline.Visible = False
+                Me.MappingGrid.Visible = True
+            End If
+        End If
+
         Me.Refresh()
     End Sub
 
@@ -1210,6 +1450,7 @@
             Me.T_Jobname.Text = OpenENV.GetName()
             Me.T_OrderID.Text = OpenENV.OrderID
             Me.C_CheckConsistency.Checked = OpenENV.ConsistenceCheck
+            Me.C_IDlessBatch.Checked = OpenENV.IDLessBatch
 
             Me.T_LoggingDirectory.Text = OpenENV.GetLogPath
             Me.C_Silent.Checked = OpenENV.LogSilent
@@ -1265,6 +1506,16 @@
                 Me.MappingGrid.Rows(i).Cells(3).Value = Mapping.Targettype
                 Me.MappingGrid.Rows(i).Cells(4).Value = Mapping.Separator
                 Me.MappingGrid.Rows(i).Cells(5).Value = Mapping.SeperatorDirection
+                Me.MappingGrid.Rows(i).Cells(6).Value = Mapping.StaticValue
+
+                Me.MappingGrid_Offline.Rows.Add()
+                Me.MappingGrid_Offline.Rows(i).Cells(0).Value = Mapping.Sourcename
+                Me.MappingGrid_Offline.Rows(i).Cells(1).Value = Mapping.Targetname
+                Me.MappingGrid_Offline.Rows(i).Cells(2).Value = Mapping.Sourcetype
+                Me.MappingGrid_Offline.Rows(i).Cells(3).Value = Mapping.Targettype
+                Me.MappingGrid_Offline.Rows(i).Cells(4).Value = Mapping.Separator
+                Me.MappingGrid_Offline.Rows(i).Cells(5).Value = Mapping.SeperatorDirection
+                Me.MappingGrid_Offline.Rows(i).Cells(6).Value = Mapping.StaticValue
                 i = i + 1
             Next
             Me.MappingGrid.Refresh()
@@ -1277,5 +1528,60 @@
         System.Console.WriteLine("Error while Loading while from Job file: Could not validate. Is the connection ok?")
     End Sub
 
+    Private Sub C_IDlessBatch_CheckedChanged(sender As Object, e As EventArgs) Handles C_IDlessBatch.CheckedChanged
+        If Me.C_IDlessBatch.Checked = True Then
+            Me.C_SourceIDColumn.Visible = False
+            Me.C_SourceIDDatatype.Visible = False
+            Me.C_TargetIDColumn.Visible = False
+            Me.C_TargetIDDatatype.Visible = False
+            Me.L_SourceIDColumn.Visible = False
+            Me.L_SourceIDDataType.Visible = False
+            Me.L_TargetIDColumn.Visible = False
+            Me.L_TargetIDDatatype.Visible = False
+            Me.C_MapIDValue.Visible = False
+            Me.L_TargetSeperator.Visible = False
+            Me.T_TargetSeperator.Visible = False
+            Me.L_PartOfSubstringUse.Visible = False
+            Me.C_TargetPartSubstring.Visible = False
+            Me.L_PartOfSubString.Visible = False
+            Me.C_UpdateAllowed.Visible = False
+            Me.C_DeleteAllowed.Visible = False
+            Me.C_InsertAllowed.Checked = True
 
+        Else
+            Me.C_SourceIDColumn.Visible = True
+            Me.C_SourceIDDatatype.Visible = True
+            Me.C_TargetIDColumn.Visible = True
+            Me.C_TargetIDDatatype.Visible = True
+            Me.C_TargetIDDatatype.Visible = True
+            Me.L_SourceIDColumn.Visible = True
+            Me.L_SourceIDDataType.Visible = True
+            Me.L_TargetIDColumn.Visible = True
+            Me.L_TargetIDDatatype.Visible = True
+            Me.C_MapIDValue.Visible = True
+            Me.L_TargetSeperator.Visible = True
+            Me.T_TargetSeperator.Visible = True
+            Me.L_PartOfSubstringUse.Visible = True
+            Me.C_TargetPartSubstring.Visible = True
+            Me.L_PartOfSubString.Visible = True
+            Me.C_UpdateAllowed.Visible = True
+            Me.C_DeleteAllowed.Visible = True
+            Me.C_InsertAllowed.Checked = False
+        End If
+    End Sub
+
+    Private Sub B_TargetSaveFile_Click(sender As Object, e As EventArgs) Handles B_TargetSaveFile.Click
+        Select Case Me.C_TargetServerType.Text
+            Case "CSV"
+                SaveFileDialog1.DefaultExt = ".csv"
+                SaveFileDialog1.AddExtension = True
+                SaveFileDialog1.Filter = "CSV-Files (*.csv)|*.csv"
+            Case "XML"
+                SaveFileDialog1.DefaultExt = ".xml"
+                SaveFileDialog1.AddExtension = True
+                SaveFileDialog1.Filter = "XML-Files (*.xml)|*.xml"
+        End Select
+        SaveFileDialog1.ShowDialog()
+        Me.T_TargetPath.Text = SaveFileDialog1.FileName
+    End Sub
 End Class

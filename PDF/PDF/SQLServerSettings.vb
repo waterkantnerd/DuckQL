@@ -16,7 +16,7 @@
     Public SQLTable As String
     Public FilterColumn As String
     Public FilterValue As String
-
+    Public XMLStartLayerLookup As Integer = 1 'In case an XML-File -> on which Layer/Level the Reader should store attributes 
     '-----------------------------------------------------------------
 
     '-------------Jobsettings-----------------------------------------

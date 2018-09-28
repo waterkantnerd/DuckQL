@@ -19,6 +19,7 @@ Public Class Reihe
     End Sub
 
 
+
     Public Sub MapIdentifier()
         If IsNothing(Target.Setting.StringSeperator) Then
             Exit Sub
