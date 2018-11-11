@@ -163,12 +163,12 @@ Public Class MyDataConnector
                     Dim headerString As String = ""
                     For Each Mapping In Me.ENV.Mappings
                         If headerString = "" Then
-                            headerString = Mapping.Targetname
+                            headerString = Chr(34) & Mapping.Targetname & Chr(34)
                         Else
-                            headerString = ";" & Mapping.Targetname
+                            headerString = headerString & ";" & Chr(34) & Mapping.Targetname & Chr(34)
                         End If
                     Next
-                    headerString = headerString & ";"
+                    headerString = headerString & ";" & vbCrLf
                     myWriter.WriteLine(headerString)
                     myWriter.Close()
                 Catch ex As Exception
@@ -190,7 +190,7 @@ Public Class MyDataConnector
 
             Me.CSVCon.Open()
             SQLLog.Write(1, "Established connection to:" & Path)
-            ConnectDBCSV = Me.AccessCon
+            ConnectDBCSV = Me.CSVCon
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBCSV = Nothing
@@ -198,6 +198,49 @@ Public Class MyDataConnector
         End Try
         Me.CSVCon.Close()
     End Function
+
+    Public Sub RewriteCSVForXMLData(SourceXMLStartLayerLookup As Integer)
+        'This Sub Rewrites the csv header for XML Data which is normally spread in several layers
+        Dim myWriter As StreamWriter
+        Dim headerString As String = ""
+        Try
+            myWriter = New StreamWriter(Setting.FilePath, False)
+
+        Catch ex As Exception
+            SQLLog.Write(0, "ERROR while rewriting csv file: " & ex.Message)
+            Exit Sub
+        End Try
+
+        If Module1.Core.Reihen.Count <= 0 Then
+            Exit Sub
+        End If
+
+
+        'The Starting Point for i is defined by the starting layer from the source setting
+        Dim i As Integer = SourceXMLStartLayerLookup
+
+        'From the starting point to the maximum depth, which has been extracted from the xml, there will be columns written
+        'The target layout should be in a schematic way look like: column1/layer1,column2/layer1,column1/layer2,column2/layer2...and so on...
+        While i <= Module1.Core.MaxLayers
+            For Each Mapping In Module1.Core.CurrentENV.Mappings
+                If headerString = "" Then
+                    headerString = Mapping.Targetname & "_" & i
+                Else
+                    headerString = headerString & "," & Mapping.Targetname & "_" & i
+                End If
+            Next
+            i = i + 1
+        End While
+
+        Try
+            headerString = headerString & "," & vbCrLf
+            myWriter.WriteLine(headerString)
+            myWriter.Close()
+        Catch ex As Exception
+            SQLLog.Write(0, "ERROR while rewriting csv file: " & ex.Message)
+            Exit Sub
+        End Try
+    End Sub
     '------------------------------------------------------------------------------------------------------------------------
 
     Public Sub CreateSQLCon()

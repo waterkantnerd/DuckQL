@@ -36,6 +36,7 @@
                 Me.L_SourceDB.Visible = True
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
+                Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
             Case "MySQL"
                 Me.L_SourceServerAdress.Visible = True
                 Me.T_SourceAdress.Visible = True
@@ -50,6 +51,7 @@
                 Me.L_SourceDB.Visible = True
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
+                Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
             Case "Access"
                 Me.L_SourceServerAdress.Visible = False
                 Me.T_SourceAdress.Visible = False
@@ -70,6 +72,7 @@
                 Me.L_SourceDB.Visible = True
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
+                Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
             Case "XML"
                 Me.L_SourceServerAdress.Visible = False
                 Me.T_SourceAdress.Visible = False
@@ -90,6 +93,7 @@
                 Me.L_SourceDB.Visible = False
                 Me.T_SourceDB.Visible = False
                 Me.T_SourceDB.Text = "XML"
+                Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = True
             Case "CSV"
                 Me.L_SourceServerAdress.Visible = False
                 Me.T_SourceAdress.Visible = False
@@ -110,6 +114,7 @@
                 Me.L_SourceDB.Visible = False
                 Me.T_SourceDB.Visible = False
                 Me.T_SourceDB.Text = "CSV"
+                Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
             Case Else
                 Me.L_SourceServerAdress.Visible = True
                 Me.T_SourceAdress.Visible = True
@@ -121,6 +126,7 @@
                 Me.L_SourceDB.Visible = True
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
+                Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
         End Select
     End Sub
 
@@ -459,6 +465,8 @@
                             Mapping.SeperatorDirection = MappingGrid_Offline.Item(Columns, Rows).Value
                         Case "StaticValue_Offline"
                             Mapping.StaticValue = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "XMLAttribute"
+                            Mapping.XMLAttributeName = MappingGrid_Offline.Item(Columns, Rows).Value
                         Case Else
                             Mapping.Sourcename = "Error"
                     End Select
@@ -472,7 +480,7 @@
 
         Dim XMLFile As New XMLFiles
         Dim Path As String
-
+        Dim FSO As New FilesystemOperations
 
         SaveFileDialog1.DefaultExt = ".xml"
         SaveFileDialog1.AddExtension = True
@@ -481,7 +489,10 @@
 
         If IsNothing(Path) Or Path = "" Or Path = "2" Then
         Else
+
             XMLFile.WriteJobFile(SaveFileDialog1.FileName, ENV)
+
+
             Module1.Core.JobXMLPath = SaveFileDialog1.FileName.Substring(0, SaveFileDialog1.FileName.LastIndexOf("\"))
             Me.Close()
         End If
@@ -1437,11 +1448,25 @@
         Dim StrFile As String = ""
         Dim OpenENV As ENV
         Dim XMLFile As New XMLFiles
-        Me.OpenFileDialog1.ShowDialog()
-        Me.OpenFileDialog1.OpenFile()
-        StrFile = Me.OpenFileDialog1.FileName
+        Dim FSO As New FilesystemOperations
+
+
+        If Me.OpenFileDialog1.ShowDialog() = Windows.Forms.DialogResult.OK Then
+            StrFile = Me.OpenFileDialog1.FileName
+        Else
+            Exit Sub
+
+        End If
+        'Me.OpenFileDialog1.OpenFile()
+
+
+
         If StrFile <> "" Then
-            OpenENV = XMLFile.ReadJobFile(StrFile)
+            If FSO.FileExists(StrFile) = True Then
+                OpenENV = XMLFile.ReadJobFile(StrFile)
+            Else
+                Exit Sub
+            End If
         Else
             Exit Sub
         End If
@@ -1521,7 +1546,6 @@
             Me.MappingGrid.Refresh()
             Me.Refresh()
         End If
-        Me.OpenFileDialog1.OpenFile.Close()
     End Sub
 
     Private Sub MappingGrid_DataError(sender As Object, e As Windows.Forms.DataGridViewDataErrorEventArgs) Handles MappingGrid.DataError

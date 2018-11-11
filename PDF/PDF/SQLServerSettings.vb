@@ -7,7 +7,7 @@
     Public SQLDB As String
     Public Servertype As String
     Public FilePath As String
-    Public BatchQueryAllowed As Boolean = False
+    Public BatchQueryAllowed As Boolean = True
     '-----------------------------------------------------------------
 
     '-------------Tablesettings---------------------------------------
@@ -16,7 +16,7 @@
     Public SQLTable As String
     Public FilterColumn As String
     Public FilterValue As String
-    Public XMLStartLayerLookup As Integer = 1 'In case an XML-File -> on which Layer/Level the Reader should store attributes 
+    Public XMLStartLayerLookup As Integer = 0 'In case an XML-File -> on which Layer/Level the Reader should store attributes 
     '-----------------------------------------------------------------
 
     '-------------Jobsettings-----------------------------------------

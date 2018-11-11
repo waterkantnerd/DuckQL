@@ -3,6 +3,7 @@
 ' One Layer for generic database operations and types, like querys, sql connectors, etc. which is in the sql class.
 ' However the program specific logic is in the sql operations class. 
 '----------------------------------------------------------------------------------------------------------------------------------------------------------
+Imports System.Xml
 Public Class SQLOperations
     Private SQL As MyDataConnector
     Private Log As LOG = Module1.Core.CurrentLog
@@ -35,7 +36,7 @@ Public Class SQLOperations
             Case "XML"
                 Dim ReaderDepth As Integer = 0
                 If IsNothing(Me.Setting.FilePath) = True Then
-                    Log.Write(0, "Could not read XML File: No Path was found.")
+                    Log.Write(0, "Could not read XML File: No Path was found!")
                     Exit Sub
                 End If
                 Try
@@ -45,15 +46,17 @@ Public Class SQLOperations
                         Dim Reihe As Reihe = Nothing
                         While .Read
                             Dim CurrentDepth As Integer = .Depth
-                            If Me.Setting.XMLStartLayerLookup > CurrentDepth Then
+                            If Me.Setting.XMLStartLayerLookup >= CurrentDepth Then
                                 Log.Write(1, "Current Depth is " & CurrentDepth & " ignoring entrys since I should start at " & Me.Setting.XMLStartLayerLookup)
                             Else
-                                'Everytime the reader Depth falls under the StartLayerLookup it should create a new row
-                                If PrevDepth <= Me.Setting.XMLStartLayerLookup Then
-                                    If IsNothing(Reihe) = True Then
-                                    Else
-                                        Module1.Core.Reihen.AddLast(Reihe)
-                                    End If
+                                'Everytime a row is not yet initiated, it should start a new one...
+                                If IsNothing(Reihe) Then
+                                    Reihe = New Reihe
+                                    Reihe.SetUp(SQL, TargetSQL)
+                                End If
+                                If Reihe.IsComplete Then
+                                    'If a row is complete, it should be written into core
+                                    Module1.Core.Reihen.AddLast(Reihe)
                                     Reihe = New Reihe
                                     Reihe.SetUp(SQL, TargetSQL)
                                 End If
@@ -63,35 +66,38 @@ Public Class SQLOperations
                                         Daten.SetUp(SQL, TargetSQL)
                                         Daten.SourceKey = .Name
                                         Daten.Layer = .Depth
+                                        'If The current Layer is higher than the Layer stored in the core it will be overwritten
+                                        'Later the Max Layer Value will help to set up a correct header (if export in csv is choosen in the config)
+                                        If Daten.Layer > Module1.Core.MaxLayers Then
+                                            Module1.Core.MaxLayers = Daten.Layer
+                                        End If
                                         Select Case .NodeType
                                             Case Xml.XmlNodeType.Element
                                                 If .AttributeCount > 0 Then
-                                                    'This case has to be defined...
-                                                    'How should the user define if the column he/she is looking for is a Node or an Attribute?? -> Config XML && GUI
+                                                    While .MoveToNextAttribute
+                                                        If .Name = Mapping.XMLAttributeName Then
+                                                            Daten.Wert = .Value
+                                                        End If
+                                                    End While
                                                 Else
                                                     If CurrentDepth = 0 Then
                                                     Else
-
-                                                        Daten.Wert = CheckInnerXML4XML(.ReadInnerXml)
-
-
+                                                        Dim CurrentNodeType As XmlNodeType = .NodeType
+                                                        Daten.Wert = CheckInnerXML4XML(.ReadInnerXml, CurrentNodeType)
                                                     End If
-                                                    If Daten.GetMapping = True Then
-                                                        Daten.MapDaten()
-                                                        Log.Write(1, "Tupel has been added to row.")
-                                                        Reihe.Spalten.AddLast(Daten)
-                                                    End If
+                                                End If
+                                                If Daten.GetMapping = True Then
+                                                    Daten.MapDaten()
+                                                    Log.Write(1, "Tupel " & Daten.Mapping.Targetname & " with the value " & Daten.Wert & " has been added to row.")
+                                                    Reihe.Spalten.AddLast(Daten)
                                                 End If
                                         End Select
                                     End If
                                 Next
                             End If
-                            PrevDepth = CurrentDepth 'saving the previous depth for the next iteration...
                         End While
                         .Close()
                     End With
-
-
                 Catch ex As Exception
                     Log.Write(0, "Error while reading XML File: " & ex.Message)
                 End Try
@@ -189,11 +195,41 @@ Public Class SQLOperations
                     Log.Write(0, "Error while searching for ID: " & ex.Message)
                 End Try
         End Select
+
         SQLrq = ""
     End Sub
 
-    Private Function CheckInnerXML4XML(XMLString As String) As String
+    Private Function CheckInnerXML4XML(XMLString As String, XMLKnotenTyp As Xml.XmlNodeType) As String
         'Has to check if is in this inner xml is still xml code and replace it with actual value...
+        Select Case XMLKnotenTyp
+            Case Xml.XmlNodeType.Whitespace
+
+            Case Xml.XmlNodeType.SignificantWhitespace
+
+            Case Else
+                Dim XMLReader As Xml.XmlReader = New Xml.XmlTextReader(XMLString, XMLKnotenTyp, Nothing)
+                While XMLReader.Read
+                    Select Case XMLReader.NodeType
+                        Case Xml.XmlNodeType.Element
+
+                        Case Xml.XmlNodeType.CDATA
+                            XMLString = XMLReader.Value
+                        Case Xml.XmlNodeType.Comment
+
+                        Case Xml.XmlNodeType.Document
+
+                        Case Xml.XmlNodeType.DocumentFragment
+
+                        Case Xml.XmlNodeType.Entity
+
+                        Case Xml.XmlNodeType.Text
+
+                    End Select
+                End While
+        End Select
+
+
+
         CheckInnerXML4XML = XMLString
     End Function
 
@@ -210,6 +246,8 @@ Public Class SQLOperations
 
         SelectStatement = SelectStatement.Remove(SelectStatement.Length - 1)
 
+
+        'For compatibility reasons there are serveral cases that are doing the same. Sorry for the mess :P
         Select Case Setting.Filtertype
             Case ""
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable
@@ -222,6 +260,8 @@ Public Class SQLOperations
             Case "simple" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
             Case "Simple" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
+                SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
+            Case "one column match"
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
             Case "SQL Filter" ' For more complex statements you can set up a sql filter setting on your own.
                 SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.SQLFilter
@@ -267,7 +307,7 @@ Public Class SQLOperations
         ' of the several servers which the program can not influence.
 
 
-        ' NOTE: UPDATES is only possible if:
+        ' NOTE: UPDATE Command is only possible if:
         ' - The Programm is allowed to UPDATE
         ' - The Target Datasource is an SQL Server --> Flatfiles like XML, CSV OR XLS will alway be rewritten!!
         ' - IDless Batch Mode is deactivated
@@ -300,16 +340,11 @@ Public Class SQLOperations
                 XMLobj.WriteEndElement()
                 XMLobj.Close()
             Case "CSV"
+                'Preparing rows for rewriting the header of the csv
+                SQL.RewriteCSVForXMLData(GetSourceSetting.XMLStartLayerLookup)
                 For Each Reihe In Module1.Core.Reihen
-                    Dim RowStr As String = ""
-                    For Each Spalte In Reihe.Spalten
-                        If RowStr = "" Then
-                            RowStr = Spalte.Wert & ";"
-                        Else
-                            RowStr = RowStr & Spalte.Wert & ";"
-                        End If
-                    Next
-                    Log.Write(1, RowStr)
+                    Reihe.MakeInsertString()
+                    SQL.ExecuteQuery(Reihe.InsertString)
                 Next
             Case "XLS"
 
@@ -330,7 +365,7 @@ Public Class SQLOperations
                         DS = SQL.CreateDataAdapter(SQLrq)
                         SQLrq = ""
                     End If
-                    'If it can't find a Records with the corresponding ID OR IDless Batch Mode is activated, the programs creates an insert string (if allowed)
+                    'If it can't find Records with the corresponding ID OR IDless Batch Mode is activated, the programs creates an insert string (if allowed)
                     If IsNothing(DS) = True Or ENV.IDLessBatch = True Then
                         If Setting.InsertAllowed = True Then
                             Log.Write(1, "So far the Identifier didn't exist --> INSERT")
@@ -586,6 +621,35 @@ Public Class SQLOperations
         Next
         Return Nothing
     End Function
+
+    Private Function GetSourceSetting() As SQLServerSettings
+        If IsNothing(SQL) Then
+            Return Nothing
+        End If
+        For Each SQLobject In Module1.Core.SQLServer
+            If SQLobject.Setting.Direction = "Source" Or SQLobject.Setting.Direction = "source" Then
+                If Setting.TargetID = SQLobject.Setting.ID Then
+                    Return SQLobject.Setting
+                End If
+            End If
+        Next
+        Return Nothing
+    End Function
+
+    Private Function GetSourceSQL() As MyDataConnector
+        If IsNothing(Setting) = True Then
+            Return Nothing
+        End If
+        For Each SQLobject In Module1.Core.SQLServer
+            If SQLobject.Setting.Direction = "Source" Or SQLobject.Setting.Direction = "source" Then
+                If Setting.TargetID = SQLobject.Setting.ID Then
+                    Return SQLobject
+                End If
+            End If
+        Next
+        Return Nothing
+    End Function
+
 
     Private Function GetTargetSQL() As MyDataConnector
         If IsNothing(Setting) = True Then

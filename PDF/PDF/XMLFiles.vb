@@ -186,6 +186,8 @@ Public Class XMLFiles
                                                     Else
                                                         Mapping.NoSource = False
                                                     End If
+                                                Case "XMLAttributeName"
+                                                    Mapping.XMLAttributeName = .Value
                                             End Select
                                         End While
                                         ENV.Mappings.AddLast(Mapping)
@@ -226,7 +228,10 @@ Public Class XMLFiles
 
                 Loop
                 .Close()  ' XMLTextReader close
+
             End With
+            XMLReader.Dispose()
+            XMLReader = Nothing
         Catch ex As Exception
             System.Console.WriteLine(ex.Message)
             ReadJobFile = Nothing
@@ -326,6 +331,7 @@ Public Class XMLFiles
                 .WriteAttributeString("StringPart", Mapping.SeperatorDirection)
                 .WriteAttributeString("StaticValue", Mapping.StaticValue)
                 .WriteAttributeString("NoSource", Mapping.NoSource)
+                .WriteAttributeString("XMLAttributeName", Mapping.XMLAttributeName)
                 .WriteEndElement()
             Next
             .WriteEndElement()
