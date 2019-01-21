@@ -4,6 +4,8 @@
 ' However the program specific logic is in the sql operations class. 
 '----------------------------------------------------------------------------------------------------------------------------------------------------------
 Imports System.Xml
+Imports HtmlAgilityPack
+
 Public Class SQLOperations
     Private SQL As MyDataConnector
     Private Log As LOG = Module1.Core.CurrentLog
@@ -106,7 +108,32 @@ Public Class SQLOperations
             Case "XLS"
                 '2be implemented soon...
             Case "HTML"
-                '2be implemented soon...
+                i = 0
+                Dim htmlDoc As New HtmlDocument
+                For Each f In Module1.Core.Files
+                    Log.Write(1, "Reading File " & i & " from " & Module1.Core.Files.Count)
+                    Log.Write(1, "Filename: " & f)
+                    htmlDoc.DetectEncodingAndLoad(f)
+                    Dim Reihe As New Reihe
+                    For Each Mapping In Module1.Core.CurrentENV.Mappings
+                        Dim HTMLKnoten As HtmlNodeCollection
+                        HTMLKnoten = htmlDoc.DocumentNode.SelectNodes(Mapping.XPath)
+                        If IsNothing(HTMLKnoten) = True Then
+                            Log.Write(1, "Path " & Mapping.XPath & " was not found in Document " & f)
+                        Else
+                            For Each Node In HTMLKnoten
+                                Dim Spalte As New Daten
+                                Spalte.SetUp(Me.SQL, Me.GetTargetSQL)
+                                Spalte.Mapping = Mapping
+                                Dim TempWert As String = Node.InnerText
+                                TempWert.Trim()
+                                TempWert.TrimEnd()
+                                Spalte.Wert = TempWert
+                                Reihe.Spalten.AddLast(Spalte)
+                            Next
+                        End If
+                    Next
+                Next
             Case Else 'Every SQL Engine, which is supported...
                 SQLrq = CreateSelectStatement()
                 '--------------------------------------------------------------Getting the rows from the result-----------------------------------------------------------------------------------------
@@ -361,7 +388,8 @@ Public Class SQLOperations
                     'The Program checks only for an existing ID if IDless Batch Mode is deactivated
                     If ENV.IDLessBatch = True Then
                     Else
-                        SQLrq = "SELECT * FROM " & Setting.SQLTable & " WHERE " & Setting.IDColumn & "=" & SQL.CSQL(Reihe.IDValue, Reihe.GetIDValueDataType)
+                        Reihe.CreateIdentifierStrings()
+                        SQLrq = "SELECT * FROM " & Setting.SQLTable & Reihe.TargetIdentifier
                         DS = SQL.CreateDataAdapter(SQLrq)
                         SQLrq = ""
                     End If

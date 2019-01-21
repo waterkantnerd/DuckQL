@@ -90,6 +90,11 @@ Public Class XMLFiles
                                                     Else
                                                         ENV.IDLessBatch = False
                                                     End If
+                                                Case "MultipleIdentifier"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                    Else
+
+                                                    End If
                                             End Select
                                         End While
 
@@ -188,6 +193,14 @@ Public Class XMLFiles
                                                     End If
                                                 Case "XMLAttributeName"
                                                     Mapping.XMLAttributeName = .Value
+                                                Case "SourceXPath"
+                                                    Mapping.XPath = .Value
+                                                Case "UseAsIdentifier"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        Mapping.UseAsIdentifier = True
+                                                    Else
+                                                        Mapping.UseAsIdentifier = False
+                                                    End If
                                             End Select
                                         End While
                                         ENV.Mappings.AddLast(Mapping)
@@ -324,6 +337,7 @@ Public Class XMLFiles
             For Each Mapping In ENV.Mappings
                 .WriteStartElement("Mapping")
                 .WriteAttributeString("SourceColumn", Mapping.Sourcename)
+                .WriteAttributeString("SourceXPath", Mapping.XPath)
                 .WriteAttributeString("TargetColumn", Mapping.Targetname)
                 .WriteAttributeString("SourceType", Mapping.Sourcetype)
                 .WriteAttributeString("TargetType", Mapping.Targettype)

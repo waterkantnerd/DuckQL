@@ -13,6 +13,9 @@ Public Class Reihe
     Public Target As MyDataConnector
     Public Table As String
     Public HasMaxColumns As Boolean = False
+    Public SourceIdentifier As String
+    Public TargetIdentifier As String
+    Private SQL As MyDataConnector
 
 
     Public Sub SetUp(SourceSQL As MyDataConnector, TargetSQL As MyDataConnector)
@@ -33,6 +36,30 @@ Public Class Reihe
         End Select
         Log.Write(1, "Mapped ID Value:" & IDValue)
     End Sub
+
+    Public Sub CreateIdentifierStrings()
+        Dim TargetIDString As String = ""
+        Dim SourceIDString As String = ""
+        If Module1.Core.CurrentENV.HasMultipleIdentifiers = True Then
+            For Each Spalte In Spalten
+                If Spalte.Mapping.UseAsIdentifier = True Then
+                    If TargetIDString = "" Then
+                        TargetIDString = " WHERE " & Spalte.Mapping.Targetname & "=" & SQL.CSQL(Spalte.Wert, Spalte.Mapping.Targettype)
+                        SourceIDString = " WHERE " & Spalte.Mapping.Sourcename & "=" & SQL.CSQL(Spalte.Wert, Spalte.Mapping.Sourcetype)
+                    Else
+                        TargetIDString = " AND " & Spalte.Mapping.Targetname & "=" & SQL.CSQL(Spalte.Wert, Spalte.Mapping.Targettype)
+                        SourceIDString = " AND " & Spalte.Mapping.Sourcename & "=" & SQL.CSQL(Spalte.Wert, Spalte.Mapping.Sourcetype)
+                    End If
+                End If
+            Next
+            Me.TargetIdentifier = TargetIDString
+            Me.SourceIdentifier = SourceIDString
+        Else
+            Me.TargetIdentifier = " WHERE " & Target.Setting.IDColumn & "=" & SQL.CSQL(Me.IDValue, Me.GetIDValueDataType)
+            Me.TargetIdentifier = " WHERE " & Source.Setting.IDColumn & "=" & SQL.CSQL(Me.IDValue, Me.GetIDValueDataType)
+        End If
+    End Sub
+
     Public Sub MakeUpdateString()
         Log.Write(1, "Creating SQL UPDATE-string...")
         Dim SQL As MyDataConnector = Target

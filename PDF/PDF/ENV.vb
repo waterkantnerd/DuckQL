@@ -9,6 +9,7 @@ Public Class ENV
     Public ConsistenceCheck As Boolean = False
     Public OrderID As Integer
     Public IDLessBatch As Boolean 'Do not try matching entries in source and target databases by an Identifier. Instead, just push everything into target and don't bother about duplicates.
+    Public HasMultipleIdentifiers As Boolean = False 'If this is true the program will lookup the Identifier Columns in the Mappings.
 
 
     Public FilterColumn As String
@@ -23,6 +24,9 @@ Public Class ENV
     Public LogLevel As String
     Public Log As New LOG
     Public LogSilent As Boolean = False
+
+    Public ContentDirectory As String
+    Public FileExtenstions As New LinkedList(Of String)
 
     Protected Timestamp As String
 

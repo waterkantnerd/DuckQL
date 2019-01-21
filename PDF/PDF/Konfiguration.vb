@@ -37,6 +37,8 @@
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
                 Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceXPath").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceColumn_Offline").Visible = True
             Case "MySQL"
                 Me.L_SourceServerAdress.Visible = True
                 Me.T_SourceAdress.Visible = True
@@ -52,6 +54,8 @@
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
                 Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceXPath").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceColumn_Offline").Visible = True
             Case "Access"
                 Me.L_SourceServerAdress.Visible = False
                 Me.T_SourceAdress.Visible = False
@@ -73,6 +77,8 @@
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
                 Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceXPath").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceColumn_Offline").Visible = True
             Case "XML"
                 Me.L_SourceServerAdress.Visible = False
                 Me.T_SourceAdress.Visible = False
@@ -94,6 +100,8 @@
                 Me.T_SourceDB.Visible = False
                 Me.T_SourceDB.Text = "XML"
                 Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = True
+                Me.MappingGrid_Offline.Columns("SourceXPath").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceColumn_Offline").Visible = True
             Case "CSV"
                 Me.L_SourceServerAdress.Visible = False
                 Me.T_SourceAdress.Visible = False
@@ -115,6 +123,31 @@
                 Me.T_SourceDB.Visible = False
                 Me.T_SourceDB.Text = "CSV"
                 Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceXPath").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceColumn_Offline").Visible = True
+            Case "HTML"
+                Me.L_SourceServerAdress.Visible = False
+                Me.T_SourceAdress.Visible = False
+                Me.T_SourcePath.Visible = True
+                Me.L_SourcePath.Visible = True
+                Me.B_SourcePath.Visible = True
+                Me.C_SourceConnMode.Visible = True
+                Me.L_SourceConnectionType.Visible = True
+                Me.C_SourceConnMode.Items.Clear()
+                Me.C_SourceConnMode.Items.Add("Normal")
+                Me.C_SourceConnMode.Text = "Normal"
+                Me.T_SourceUsername.Visible = False
+                Me.T_SourcePassword.Visible = False
+                Me.T_SourcePassword.Text = "  "
+                Me.T_SourceUsername.Text = "  "
+                Me.L_SourceUsername.Visible = False
+                Me.L_SourcePassword.Visible = False
+                Me.L_SourceDB.Visible = False
+                Me.T_SourceDB.Visible = False
+                Me.T_SourceDB.Text = "HTML"
+                Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceXPath").Visible = True
+                Me.MappingGrid_Offline.Columns("SourceColumn_Offline").Visible = False
             Case Else
                 Me.L_SourceServerAdress.Visible = True
                 Me.T_SourceAdress.Visible = True
@@ -127,6 +160,8 @@
                 Me.T_SourceDB.Visible = True
                 Me.T_SourceDB.Text = ""
                 Me.MappingGrid_Offline.Columns("XMLAttribute").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceXPath").Visible = False
+                Me.MappingGrid_Offline.Columns("SourceColumn_Offline").Visible = True
         End Select
     End Sub
 
@@ -328,6 +363,7 @@
         End If
 
         ENV.IDLessBatch = Me.C_IDlessBatch.Checked
+        ENV.HasMultipleIdentifiers = Me.MultipleIdentifier.Checked
 
         If Me.C_DebugLog.Checked = True Then
             ENV.LogLevel = "1"
@@ -434,6 +470,9 @@
                             Mapping.SeperatorDirection = MappingGrid.Item(Columns, Rows).Value
                         Case "StaticValue"
                             Mapping.StaticValue = MappingGrid.Item(Columns, Rows).Value
+                        Case "IsIdentity"
+                            Mapping.UseAsIdentifier = MappingGrid.Item(Columns, Rows).Value
+
                         Case Else
                             Mapping.Sourcename = "Error"
                     End Select
@@ -453,6 +492,12 @@
                                 Mapping.NoSource = True
                             End If
                             Mapping.Sourcename = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "SourceXPath"
+                            If MappingGrid_Offline.Item(Columns, Rows).Value = "" Then
+                            Else
+                                Mapping.NoSource = False
+                                Mapping.Sourcename = MappingGrid_Offline.Item(Columns, Rows).Value
+                            End If
                         Case "TargetColumn_Offline"
                             Mapping.Targetname = MappingGrid_Offline.Item(Columns, Rows).Value
                         Case "SourceType_Offline"
@@ -467,6 +512,8 @@
                             Mapping.StaticValue = MappingGrid_Offline.Item(Columns, Rows).Value
                         Case "XMLAttribute"
                             Mapping.XMLAttributeName = MappingGrid_Offline.Item(Columns, Rows).Value
+                        Case "IsIdentity_offline"
+                            Mapping.UseAsIdentifier = MappingGrid_Offline.Item(Columns, Rows).Value
                         Case Else
                             Mapping.Sourcename = "Error"
                     End Select
@@ -627,14 +674,14 @@
             Exit Function
         End If
 
-        If (IsNothing(Me.C_SourceIDColumn.Text) Or Me.C_SourceIDColumn.Text = "") And Me.C_IDlessBatch.Checked = False Then
+        If (IsNothing(Me.C_SourceIDColumn.Text) Or Me.C_SourceIDColumn.Text = "") And (Me.C_IDlessBatch.Checked = False Or Me.MultipleIdentifier.Checked = False) Then
             Me.C_SourceIDColumn.BackColor = Drawing.Color.Red
             MsgBox("Please enter the identifier column!")
             ValidateUserInput = False
             Exit Function
         End If
 
-        If IsNothing(Me.C_SourceIDDatatype.Text) = True And Me.C_IDlessBatch.Checked = False Then
+        If IsNothing(Me.C_SourceIDDatatype.Text) = True And (Me.C_IDlessBatch.Checked = False Or Me.MultipleIdentifier.Checked = False) Then
             Me.C_SourceIDDatatype.BackColor = Drawing.Color.Red
             MsgBox("Please choose the datatype Of you identifier field")
             ValidateUserInput = False
@@ -735,7 +782,7 @@
             Exit Function
         End If
 
-        If (IsNothing(Me.C_TargetIDColumn.Text) Or Me.C_TargetIDColumn.Text = "") And Me.C_IDlessBatch.Checked = False Then
+        If (IsNothing(Me.C_TargetIDColumn.Text) Or Me.C_TargetIDColumn.Text = "") And (Me.C_IDlessBatch.Checked = False Or Me.MultipleIdentifier.Checked = False) Then
             Me.C_TargetIDColumn.BackColor = Drawing.Color.Red
             MsgBox("Please enter the identifier column!")
             ValidateUserInput = False
@@ -750,7 +797,7 @@
             Exit Function
         End If
 
-        If IsNothing(Me.C_TargetIDDatatype.Text) = True And Me.C_IDlessBatch.Checked = False Then
+        If IsNothing(Me.C_TargetIDDatatype.Text) = True And (Me.C_IDlessBatch.Checked = False Or Me.MultipleIdentifier.Checked = False) Then
             Me.C_TargetIDDatatype.BackColor = Drawing.Color.Red
             MsgBox("Please choose the datatype of your target identifier field")
             ValidateUserInput = False
@@ -768,10 +815,12 @@
 
         Dim ErrorInGrid As Boolean = False
         Dim EmptySourceColumn As Boolean = False
+        Dim EmptySourceXPath As Boolean = False
         Dim ErrorMessages As New LinkedList(Of String)
         Dim EmptyRowsInGrid As Integer = 0
         Dim Rows As Integer = 0
         Dim Columns As Integer = 0
+        Dim HasIdentifier As Boolean = False 'Checks if at least one column is marked as ID-Column if Multiple Identifier Usage is checked
         If MappingGrid.Visible = True Then
             If MappingGrid.RowCount <= 0 Then
                 MsgBox("Please specify your column mappings!")
@@ -823,11 +872,19 @@
                                     ErrorInGrid = True
                                     ErrorMessages.AddLast("Missing Source Column or Static Value on Line " & Rows + 1)
                                 End If
+                            Case "IsIdentity"
+                                If MappingGrid.Item(Columns, Rows).Value = True Then
+                                    HasIdentifier = True
+                                End If
                         End Select
                     Next
                     SeperatorChecked = False
                 End If
             Next
+            If Me.MultipleIdentifier.Checked = True And HasIdentifier = False Then
+                ErrorInGrid = True
+                ErrorMessages.AddLast("You selected Multiple Identifier Usage, but selected no column as identifier. Please select columns as identifier")
+            End If
         Else
             If MappingGrid_Offline.RowCount <= 0 Then
                 MsgBox("Please specify your column mappings!")
@@ -848,6 +905,10 @@
                             Case "SourceColumn_Offline"
                                 If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
                                     EmptySourceColumn = True
+                                End If
+                            Case "SourceXPath"
+                                If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
+                                    EmptySourceXPath = True
                                 End If
                             Case "TargetColumn_Offline"
                                 If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
@@ -878,11 +939,19 @@
                                     ErrorInGrid = True
                                     ErrorMessages.AddLast("Missing Source Column or Static Value on Line " & Rows + 1)
                                 End If
+                            Case "IsIdentity_offline"
+                                If MappingGrid.Item(Columns, Rows).Value = True Then
+                                    HasIdentifier = True
+                                End If
                         End Select
                     Next
                     SeperatorChecked = False
                 End If
             Next
+            If Me.MultipleIdentifier.Checked = True And HasIdentifier = False Then
+                ErrorInGrid = True
+                ErrorMessages.AddLast("You selected Multiple Identifier Usage, but selected no column as identifier. Please select columns as identifier")
+            End If
         End If
         If ErrorInGrid = True Then
             Dim ErrorString As String = ""
@@ -1608,4 +1677,32 @@
         SaveFileDialog1.ShowDialog()
         Me.T_TargetPath.Text = SaveFileDialog1.FileName
     End Sub
+
+    Private Sub MultipleIdentifier_CheckedChanged(sender As Object, e As EventArgs) Handles MultipleIdentifier.CheckedChanged
+        If Me.MultipleIdentifier.Checked = True Then
+            Me.C_IDlessBatch.Visible = False
+            Me.IsIdentity.Visible = True
+            Me.IsIdentity_offline.Visible = True
+            Me.C_SourceIDColumn.Visible = False
+            Me.C_SourceIDDatatype.Visible = False
+            Me.C_TargetIDColumn.Visible = False
+            Me.C_TargetIDDatatype.Visible = False
+            Me.C_MapIDValue.Visible = False
+            Me.T_TargetSeperator.Visible = False
+            Me.C_TargetPartSubstring.Visible = False
+        Else
+            Me.C_IDlessBatch.Visible = True
+            Me.IsIdentity.Visible = False
+            Me.IsIdentity_offline.Visible = False
+            Me.C_SourceIDColumn.Visible = True
+            Me.C_SourceIDDatatype.Visible = True
+            Me.C_TargetIDColumn.Visible = True
+            Me.C_TargetIDDatatype.Visible = True
+            Me.C_MapIDValue.Visible = True
+            Me.T_TargetSeperator.Visible = True
+            Me.C_TargetPartSubstring.Visible = True
+        End If
+    End Sub
+
+
 End Class
