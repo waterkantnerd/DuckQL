@@ -56,9 +56,9 @@ Public Class MyDataConnector
     '--------------------------------------------------MySQL-------------------------------------------------------------------
     Public Function ConnectMySQL(sServer As String, sDB As String, sUsername As String, Optional sPW As String = "") As MySqlConnection
         If sPW = "" Then
-            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";" & "SslMode=None;")
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";" & "SslMode=None;Convert Zero Datetime=True;")
         Else
-            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";" & "SslMode=None;")
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";" & "SslMode=None;Convert Zero Datetime=True;")
         End If
 
         Try

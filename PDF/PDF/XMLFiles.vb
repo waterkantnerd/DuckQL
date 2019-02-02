@@ -92,8 +92,9 @@ Public Class XMLFiles
                                                     End If
                                                 Case "MultipleIdentifier"
                                                     If .Value.ToUpper = "TRUE" Then
+                                                        ENV.HasMultipleIdentifiers = True
                                                     Else
-
+                                                        ENV.HasMultipleIdentifiers = False
                                                     End If
                                             End Select
                                         End While
@@ -267,6 +268,7 @@ Public Class XMLFiles
             .WriteAttributeString("Jobname", ENV.GetName)
             .WriteAttributeString("ConsistenceCheck", ENV.ConsistenceCheck)
             .WriteAttributeString("IDlessBatch", ENV.IDLessBatch)
+            .WriteAttributeString("MultipleIdentifier", ENV.HasMultipleIdentifiers)
 
             .WriteStartElement("LoggingDirectory")
             .WriteAttributeString("Adress", ENV.GetLogPath)
@@ -346,6 +348,7 @@ Public Class XMLFiles
                 .WriteAttributeString("StaticValue", Mapping.StaticValue)
                 .WriteAttributeString("NoSource", Mapping.NoSource)
                 .WriteAttributeString("XMLAttributeName", Mapping.XMLAttributeName)
+                .WriteAttributeString("UseAsIdentifier", Mapping.UseAsIdentifier)
                 .WriteEndElement()
             Next
             .WriteEndElement()

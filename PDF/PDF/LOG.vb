@@ -52,16 +52,16 @@ Public Class LOG
                         Dim myWriter As New StreamWriter(Logpath & Logfile, True)
                         myWriter.WriteLine(sCode & " - " & Now & " - " & CurrENV.GetName & " - " & sMessage)
                         myWriter.Close()
-                        System.Console.WriteLine(Now & "-" & sMessage)
+                        System.Console.WriteLine(Now & "-" & CurrENV.GetName & "-" & sMessage)
                     Catch ex As Exception
                         System.Console.WriteLine(ex.Message)
-                        System.Console.WriteLine(Now & "-" & sMessage)
+                        System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
                         Exit Function
                     End Try
                 Else
                     If CurrENV.LogSilent = True Then
                     Else
-                        System.Console.WriteLine(Now & "-" & sMessage)
+                        System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
                     End If
                 End If
             Case 1
@@ -72,11 +72,11 @@ Public Class LOG
                     myWriter.Close()
                     If CurrENV.LogSilent = True Then
                     Else
-                        System.Console.WriteLine(Now & "-" & sMessage)
+                        System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
                     End If
                 Catch ex As Exception
                     System.Console.WriteLine(ex.Message)
-                    System.Console.WriteLine(Now & "-" & sMessage)
+                    System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
                     Exit Function
                 End Try
         End Select

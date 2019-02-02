@@ -182,7 +182,6 @@
                 Me.L_TargetDB.Visible = True
                 Me.T_TargetDB.Visible = True
                 Me.T_TargetDB.Text = ""
-                Me.B_TargetPath.Visible = True
                 Me.B_TargetSaveFile.Visible = False
             Case "MySQL"
                 Me.L_TargetServerAdress.Visible = True
@@ -198,7 +197,6 @@
                 Me.L_TargetDB.Visible = True
                 Me.T_TargetDB.Visible = True
                 Me.T_TargetDB.Text = ""
-                Me.B_TargetPath.Visible = True
                 Me.B_TargetSaveFile.Visible = False
             Case "Access"
                 Me.L_TargetServerAdress.Visible = False
@@ -237,7 +235,6 @@
                 Me.L_TargetDB.Visible = False
                 Me.T_TargetDB.Visible = False
                 Me.T_TargetDB.Text = "XML"
-                Me.B_TargetPath.Visible = False
                 Me.B_TargetSaveFile.Visible = True
             Case "CSV"
                 Me.L_TargetServerAdress.Visible = False
@@ -259,7 +256,6 @@
                 Me.L_TargetDB.Visible = False
                 Me.T_TargetDB.Visible = False
                 Me.T_TargetDB.Text = "CSV"
-                Me.B_TargetPath.Visible = False
                 Me.B_TargetSaveFile.Visible = True
             Case Else
                 Me.L_TargetServerAdress.Visible = True
@@ -1545,6 +1541,7 @@
             Me.T_OrderID.Text = OpenENV.OrderID
             Me.C_CheckConsistency.Checked = OpenENV.ConsistenceCheck
             Me.C_IDlessBatch.Checked = OpenENV.IDLessBatch
+            Me.MultipleIdentifier.Checked = OpenENV.HasMultipleIdentifiers
 
             Me.T_LoggingDirectory.Text = OpenENV.GetLogPath
             Me.C_Silent.Checked = OpenENV.LogSilent
@@ -1591,6 +1588,10 @@
 
 
             LoadTableSchemas()
+            If OpenENV.HasMultipleIdentifiers = True Then
+                Me.IsIdentity.Visible = True
+                Me.IsIdentity_offline.Visible = True
+            End If
             Dim i As Integer = 0
             For Each Mapping In OpenENV.Mappings
                 Me.MappingGrid.Rows.Add()
@@ -1601,6 +1602,7 @@
                 Me.MappingGrid.Rows(i).Cells(4).Value = Mapping.Separator
                 Me.MappingGrid.Rows(i).Cells(5).Value = Mapping.SeperatorDirection
                 Me.MappingGrid.Rows(i).Cells(6).Value = Mapping.StaticValue
+                Me.MappingGrid.Rows(i).Cells(7).Value = Mapping.UseAsIdentifier
 
                 Me.MappingGrid_Offline.Rows.Add()
                 Me.MappingGrid_Offline.Rows(i).Cells(0).Value = Mapping.Sourcename
@@ -1610,6 +1612,7 @@
                 Me.MappingGrid_Offline.Rows(i).Cells(4).Value = Mapping.Separator
                 Me.MappingGrid_Offline.Rows(i).Cells(5).Value = Mapping.SeperatorDirection
                 Me.MappingGrid_Offline.Rows(i).Cells(6).Value = Mapping.StaticValue
+                Me.MappingGrid_Offline.Rows(i).Cells(7).Value = Mapping.UseAsIdentifier
                 i = i + 1
             Next
             Me.MappingGrid.Refresh()
@@ -1690,6 +1693,16 @@
             Me.C_MapIDValue.Visible = False
             Me.T_TargetSeperator.Visible = False
             Me.C_TargetPartSubstring.Visible = False
+
+            Me.L_SourceIDColumn.Visible = False
+            Me.L_SourceIDDataType.Visible = False
+            Me.L_TargetIDColumn.Visible = False
+            Me.L_TargetIDDatatype.Visible = False
+            Me.L_TargetSeperator.Visible = False
+            Me.L_PartOfSubstringUse.Visible = False
+            Me.L_PartOfSubString.Visible = False
+
+
         Else
             Me.C_IDlessBatch.Visible = True
             Me.IsIdentity.Visible = False
@@ -1701,6 +1714,14 @@
             Me.C_MapIDValue.Visible = True
             Me.T_TargetSeperator.Visible = True
             Me.C_TargetPartSubstring.Visible = True
+
+            Me.L_SourceIDColumn.Visible = True
+            Me.L_SourceIDDataType.Visible = True
+            Me.L_TargetIDColumn.Visible = True
+            Me.L_TargetIDDatatype.Visible = True
+            Me.L_TargetSeperator.Visible = True
+            Me.L_PartOfSubstringUse.Visible = True
+            Me.L_PartOfSubString.Visible = True
         End If
     End Sub
 
