@@ -7,6 +7,7 @@
     Public SQLDB As String
     Public Servertype As String
     Public FilePath As String
+    Public BatchQueryAllowed As Boolean = True
     '-----------------------------------------------------------------
 
     '-------------Tablesettings---------------------------------------
@@ -15,16 +16,16 @@
     Public SQLTable As String
     Public FilterColumn As String
     Public FilterValue As String
-
+    Public XMLStartLayerLookup As Integer = 0 'In case an XML-File -> on which Layer/Level the Reader should store attributes 
     '-----------------------------------------------------------------
 
     '-------------Jobsettings-----------------------------------------
     Public ID As String
-    Public InsertAllowed As Boolean
-    Public UpdateAllowed As Boolean
-    Public DeleteAllowed As Boolean 'Has to be implemented...
+    Public InsertAllowed As Boolean = False
+    Public UpdateAllowed As Boolean = False
+    Public DeleteAllowed As Boolean = False 'Has to be implemented...
     Public Direction As String 'This Parameter defines if it is a target or source setting
-    Public TargetID As String
+    Public TargetID As String 'Has to be implemented -> more than one target allowed
     Public SessionTimestampField As String
     '-----------------------------------------------------------------
 
@@ -35,7 +36,7 @@
     '-----------------------------------------------------------------
 
     '-----------Mapping-----------------------------------------------
-    Public MapTargetIDColumnValue As String
+    Public MapTargetIDColumnValue As Boolean = False
     Public StringSeperator As String
     Public StringPart As String
     '-----------------------------------------------------------------

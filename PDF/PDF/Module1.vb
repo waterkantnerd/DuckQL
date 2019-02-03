@@ -35,21 +35,7 @@ Module Module1
         Else
             Select Case args(1)
                 Case "-c"
-                    Dim ConfigurationForm As New Konfiguration
-                    ConfigurationForm.ShowDialog()
-                    If Core.JobXMLPath <> "" Then
-                        System.Console.WriteLine("Found a Job File.")
-                        System.Console.WriteLine("Hit r if you want to run it.")
-                        System.Console.WriteLine("Type exit to end this program.")
-                        Select Case System.Console.In.ReadLine
-                            Case "r"
-                                Jobdir = Core.JobXMLPath
-                            Case "exit"
-                                Exit Sub
-                            Case Else
-
-                        End Select
-                    End If
+                    Jobdir = ShowConfigDialogue()
                 Case "-h"
                     ShowHelp()
                     If System.Console.In.ReadLine <> "" Then
@@ -79,17 +65,81 @@ Module Module1
         Dim XMLFiles As New XMLFiles
         Dim Jobliste As New LinkedList(Of ENV)
         Jobliste = XMLFiles.Read(ENVPath)
+        Jobliste = SortJobList(Jobliste)
         For Each ENV In Jobliste
             If IsNothing(ENV) = True Then
             Else
                 ' Every filled ENV object will initiate the program logic
                 Start(ENV)
+                EndAndClear()
             End If
 
         Next
         '---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     End Sub
+
+    Private Function ShowConfigDialogue() As String
+        Dim ConfigurationForm As New Konfiguration
+        ConfigurationForm.ShowDialog()
+        If Core.JobXMLPath <> "" Then
+            System.Console.WriteLine("Found a Job File.")
+            System.Console.WriteLine("Hit r if you want to run it.")
+            System.Console.WriteLine("Hit c if you want to start the config GUI again.")
+            System.Console.WriteLine("Type exit to end this program.")
+            Select Case System.Console.In.ReadLine
+                Case "r"
+                    ShowConfigDialogue = Core.JobXMLPath
+                    Exit Function
+                Case "c"
+                    ShowConfigDialogue()
+                Case "exit"
+                    ShowConfigDialogue = ""
+                    Exit Function
+                Case Else
+
+            End Select
+        End If
+        ShowConfigDialogue = ""
+    End Function
+
+    Private Function SortJobList(Jobliste As LinkedList(Of ENV)) As LinkedList(Of ENV)
+        Dim JobArr(Jobliste.Count) As ENV
+        Dim Sorted As Boolean = False
+        Jobliste.CopyTo(JobArr, 0)
+        Dim i As Integer = 0
+        While Sorted = False
+            For i = 0 To Jobliste.Count - 1
+                If IsNothing(JobArr(i + 1)) Then
+
+                Else
+                    If JobArr(i).OrderID > JobArr(i + 1).OrderID Then
+                        Dim tmp As ENV = JobArr(i)
+                        JobArr(i) = JobArr(i + 1)
+                        JobArr(i + 1) = tmp
+                    End If
+                End If
+            Next
+            Sorted = True
+            For i = 0 To Jobliste.Count - 1
+                If IsNothing(JobArr(i + 1)) Then
+
+                Else
+                    If JobArr(i).OrderID > JobArr(i + 1).OrderID Then
+                        Sorted = False
+                    End If
+                End If
+            Next
+        End While
+        Jobliste.Clear()
+        For Each ENV In JobArr
+            If IsNothing(ENV) Then
+            Else
+                Jobliste.AddLast(ENV)
+            End If
+        Next
+        SortJobList = Jobliste
+    End Function
 
     Private Sub EndAndClear()
         '------------------------------------------------Summary--------------------------------------------------------------------------------------------------------
@@ -137,12 +187,8 @@ Module Module1
         End Try
 
         '----------------------------------------------Jumps into "custom code" with all core functions of the program--------------------------------------------
-
         'Beispiel
         StartBatch()
-
-
-
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
     End Sub
 
@@ -160,21 +206,64 @@ Module Module1
         ' loads data from the datasource
         LadeDatenVonQuelle()
         ' writes data to targed
+
+
+
         SchreibeDatenInZiel()
+
+        If Core.CurrentENV.ConsistenceCheck = True Then
+            Log.Write(1, "Checking if Job is consistent...")
+            If ConsistenceCheck() = True Then
+            Else
+                Log.Write(0, "Warning! Job was not consistent. Source and Target rows are not equal.")
+            End If
+        Else
+
+        End If
 
         Log.Write(1, "Batch done...")
         mytime = Now()
         Core.JobEndTime = mytime
         Log.Write(1, "Job ended at " & mytime)
 
-        Dim Jobtime As Long = DateDiff(DateInterval.Second, Core.JobStartTime, Core.JobEndTime)
-        Dim Sekunden As Long = Jobtime Mod 60
-        Dim Minuten As Long = Jobtime / 60
-        Dim Stunden As Long = Minuten / 60
-        Dim Tage As Long = Stunden / 24
+        Dim Jobtime As TimeSpan = Core.JobEndTime - Core.JobStartTime
+        Dim Sekunden As Long = Jobtime.Seconds
+        Dim Minuten As Long = Jobtime.Minutes
+        Dim Stunden As Long = Jobtime.Hours
+        Dim Tage As Long = Jobtime.Days
         Log.Write(1, "Job took " & Tage & " days " & Stunden & " hours " & Minuten & " minutes " & Sekunden & " seconds.")
 
     End Sub
+
+    Private Function ConsistenceCheck() As Boolean
+        Dim Consistent As Boolean = False
+        Dim Source As MyDataConnector = GetConnector("source")
+        Dim Target As MyDataConnector = GetConnector("target")
+        Dim Log As LOG = Core.CurrentLog
+
+        If IsNothing(Source) Or IsNothing(Target) Then
+            Log.Write(0, "Could not findet Source- or Target Connector. Can not check consistency!")
+            ConsistenceCheck = False
+            Exit Function
+        End If
+
+        Dim SQLopSource As New SQLOperations
+        SQLopSource.Setup(Source)
+        Dim SQLopTarget As New SQLOperations
+        SQLopTarget.Setup(Target)
+        Dim SourceRows As Long = SQLopSource.CountRows
+        Dim TargetRows As Long = SQLopTarget.CountRows
+
+        If SourceRows = TargetRows Then
+            Log.Write(1, "Source Rows=" & SourceRows & " <=> Target Rows=" & TargetRows)
+            Consistent = True
+        Else
+            Log.Write(1, "Source Rows=" & SourceRows & " != Target Rows=" & TargetRows)
+            Consistent = False
+        End If
+
+        ConsistenceCheck = Consistent
+    End Function
 
     Private Sub LadeDatenVonQuelle()
         '----------------------------------------------Summary----------------------------------------------------------------------------------------------------
@@ -188,45 +277,43 @@ Module Module1
         ' However the program specific logic is in the sql operations class. 
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
         Dim SQLop As New SQLOperations
+        Dim Log As LOG = Core.CurrentLog
 
+        Dim Connector As MyDataConnector = GetConnector("source")
 
-
-        '----------------------------------------------This was more or less experimental...-----------------------------------------------------------------------
-        'Dim LokaleFiles As New LokaleDaten
-        'Dim Web As New web
-
-        'If IsNothing(Core.CurrentENV.IndexFilePath) Or Core.CurrentENV.IndexFilePath = "" Then
-        'Else
-        'LokaleFiles.IndexDateiAuslesen(Core.CurrentENV.IndexFilePath)
-        'web.DownloadDateiliste()
-        'End If
-
-        'If IsNothing(Core.CurrentENV.LokalWorkingDirectoryPath) Or Core.CurrentENV.LokalWorkingDirectoryPath = "" Then
-        'Else
-        'LokaleFiles.LadeDateienAusVerzeichnis(Core.CurrentENV.LokalWorkingDirectoryPath)
-        'LokaleFiles.SchreibeDateienInDatenbank()
-        'End If
-        '-----------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        For Each Connector In Core.SQLServer
-            If Connector.Setting.Direction = "Source" Or Connector.Setting.Direction = "source" Then
-                SQLop.Load(Connector)
-            End If
-        Next
-
+        If IsNothing(Connector) Then
+            Log.Write(0, "Critical Error - Could not read Source Job Connector vom Job File!")
+        Else
+            SQLop.Load(Connector)
+        End If
 
     End Sub
+
+    Private Function GetConnector(Direction As String) As MyDataConnector
+        '----------------------------------------------Summary----------------------------------------------------------------------------------------------------
+        ' Gets specified connector from the connectorlist in the central core
+        '---------------------------------------------------------------------------------------------------------------------------------------------------------
+        For Each Connector In Core.SQLServer
+            If Connector.Setting.Direction.ToUpper = Direction.ToUpper Then
+                GetConnector = Connector
+                Exit Function
+            End If
+        Next
+        GetConnector = Nothing
+    End Function
 
     Private Sub SchreibeDatenInZiel()
         '----------------------------------------------Summary----------------------------------------------------------------------------------------------------
         ' This sub writes data from the program core to the target database
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
         Dim SQLop As New SQLOperations
-        For Each Connector In Core.SQLServer
-            If Connector.Setting.Direction = "Target" Or Connector.Setting.Direction = "target" Then
-                SQLop.Fire(Connector)
-            End If
-        Next
+        Dim Log As LOG = Core.CurrentLog
+        Dim Connector As MyDataConnector = GetConnector("target")
+        If IsNothing(Connector) Then
+            Log.Write(0, "Critical Error - Could not read Target Job Connector vom Job File!")
+        Else
+            SQLop.Fire(Connector)
+        End If
     End Sub
 
     Private Sub ShowHelp()

@@ -12,7 +12,8 @@ Public Class Core
     Public SQLCommands As New LinkedList(Of String) ' List of SQL Commands that will be send to SQL Target Server at the end
     Public JobStartTime As Date
     Public JobEndTime As Date
-
+    Public MaxLayers As Integer = 0 'If you convert a xml 2 csv you have to know the maximum of layers of an row, to prevent dataloss. -> will be written to the header
+    Public Files As New LinkedList(Of String)       ' List of Files that should be process. -> Will be filled if a directory with flatfiles should be processed
 
     'Initializing the core
     Public Sub CoreStart(ENV As ENV, Log As LOG)

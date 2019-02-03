@@ -4,7 +4,11 @@
 ' It reads the folder which has been set up in the first parameter on the program start.
 ' Once there has been a XML file found, it will load all information to an ENV object.
 '----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
 Public Class XMLFiles
+
     Private Function LoadJobFolder(directory As String) As String()
         ' Looks up XML Files in the Folder
         Dim value As System.Collections.ObjectModel.ReadOnlyCollection(Of String)
@@ -45,7 +49,8 @@ Public Class XMLFiles
         Read = Jobliste
     End Function
 
-    Private Function ReadJobFile(sPath As String) As ENV
+
+    Public Function ReadJobFile(sPath As String) As ENV
         ' Reads the XML File and returns an ENV object.
         Dim ENV As New ENV
         If IsNothing(sPath) = True Then
@@ -73,6 +78,24 @@ Public Class XMLFiles
                                             Select Case .Name
                                                 Case "Jobname"
                                                     ENV.CreateName(.Value)
+                                                Case "ConsistenceCheck"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        ENV.ConsistenceCheck = True
+                                                    Else
+                                                        ENV.ConsistenceCheck = False
+                                                    End If
+                                                Case "IDlessBatch"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        ENV.IDLessBatch = True
+                                                    Else
+                                                        ENV.IDLessBatch = False
+                                                    End If
+                                                Case "MultipleIdentifier"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        ENV.HasMultipleIdentifiers = True
+                                                    Else
+                                                        ENV.HasMultipleIdentifiers = False
+                                                    End If
                                             End Select
                                         End While
 
@@ -115,7 +138,11 @@ Public Class XMLFiles
                                                 Case "TargetID"
                                                     Setting.TargetID = .Value
                                                 Case "MapTargetIDColumnValue"
-                                                    Setting.MapTargetIDColumnValue = .Value
+                                                    If .Value.ToLower = "true" Or .Value.ToLower = "yes" Then
+                                                        Setting.MapTargetIDColumnValue = True
+                                                    Else
+                                                        Setting.MapTargetIDColumnValue = False
+                                                    End If
                                                 Case "StringSeparator"
                                                     Setting.StringSeperator = .Value
                                                 Case "StringPart"
@@ -135,7 +162,7 @@ Public Class XMLFiles
                                                 Case "Servertype"
                                                     Setting.Servertype = .Value
                                                 Case "SessionTimestampField"
-                                                    Setting.SessionTimeStampField = .Value
+                                                    Setting.SessionTimestampField = .Value
                                             End Select
                                         End While
                                         ENV.SQLServer.AddLast(Setting)
@@ -157,6 +184,24 @@ Public Class XMLFiles
                                                     Mapping.Separator = .Value
                                                 Case "StringPart"
                                                     Mapping.SeperatorDirection = .Value
+                                                Case "StaticValue"
+                                                    Mapping.StaticValue = .Value
+                                                Case "NoSouce"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        Mapping.NoSource = True
+                                                    Else
+                                                        Mapping.NoSource = False
+                                                    End If
+                                                Case "XMLAttributeName"
+                                                    Mapping.XMLAttributeName = .Value
+                                                Case "SourceXPath"
+                                                    Mapping.XPath = .Value
+                                                Case "UseAsIdentifier"
+                                                    If .Value.ToUpper = "TRUE" Then
+                                                        Mapping.UseAsIdentifier = True
+                                                    Else
+                                                        Mapping.UseAsIdentifier = False
+                                                    End If
                                             End Select
                                         End While
                                         ENV.Mappings.AddLast(Mapping)
@@ -183,12 +228,24 @@ Public Class XMLFiles
 
                                     End If
 
+                                Case "Order"
+                                    If .AttributeCount > 0 Then
+                                        While .MoveToNextAttribute
+                                            Select Case .Name
+                                                Case "ID"
+                                                    ENV.OrderID = CInt(.Value)
+                                            End Select
+                                        End While
+                                    End If
                             End Select
                     End Select
 
                 Loop
                 .Close()  ' XMLTextReader close
+
             End With
+            XMLReader.Dispose()
+            XMLReader = Nothing
         Catch ex As Exception
             System.Console.WriteLine(ex.Message)
             ReadJobFile = Nothing
@@ -209,11 +266,18 @@ Public Class XMLFiles
         With XMLobj
             .WriteStartElement("Job")
             .WriteAttributeString("Jobname", ENV.GetName)
+            .WriteAttributeString("ConsistenceCheck", ENV.ConsistenceCheck)
+            .WriteAttributeString("IDlessBatch", ENV.IDLessBatch)
+            .WriteAttributeString("MultipleIdentifier", ENV.HasMultipleIdentifiers)
 
             .WriteStartElement("LoggingDirectory")
             .WriteAttributeString("Adress", ENV.GetLogPath)
             .WriteAttributeString("LogLevel", ENV.LogLevel)
             .WriteAttributeString("Silent", ENV.LogSilent.ToString)
+            .WriteEndElement()
+
+            .WriteStartElement("Order")
+            .WriteAttributeString("ID", ENV.OrderID)
             .WriteEndElement()
 
             Dim Source As New SQLServerSettings
@@ -275,11 +339,16 @@ Public Class XMLFiles
             For Each Mapping In ENV.Mappings
                 .WriteStartElement("Mapping")
                 .WriteAttributeString("SourceColumn", Mapping.Sourcename)
+                .WriteAttributeString("SourceXPath", Mapping.XPath)
                 .WriteAttributeString("TargetColumn", Mapping.Targetname)
                 .WriteAttributeString("SourceType", Mapping.Sourcetype)
                 .WriteAttributeString("TargetType", Mapping.Targettype)
                 .WriteAttributeString("StringSeperator", Mapping.Separator)
                 .WriteAttributeString("StringPart", Mapping.SeperatorDirection)
+                .WriteAttributeString("StaticValue", Mapping.StaticValue)
+                .WriteAttributeString("NoSource", Mapping.NoSource)
+                .WriteAttributeString("XMLAttributeName", Mapping.XMLAttributeName)
+                .WriteAttributeString("UseAsIdentifier", Mapping.UseAsIdentifier)
                 .WriteEndElement()
             Next
             .WriteEndElement()
@@ -289,4 +358,5 @@ Public Class XMLFiles
 
         End With
     End Sub
+
 End Class

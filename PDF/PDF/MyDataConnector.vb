@@ -28,6 +28,11 @@ Public Class MyDataConnector
     Private AccessCmd As OleDb.OleDbCommand
     Private AccessReader As OleDb.OleDbDataReader
 
+    'CSV could work with Access Object as well, but I implemented a more strict sepearation, in order to have a better overview and handling of the code
+    Public CSVCon As OleDb.OleDbConnection
+    Private CSVCmd As OleDb.OleDbCommand
+    Private CSVReader As OleDb.OleDbDataReader
+
     Public Setting As SQLServerSettings
     Public Testmode As Boolean = False
 
@@ -51,9 +56,9 @@ Public Class MyDataConnector
     '--------------------------------------------------MySQL-------------------------------------------------------------------
     Public Function ConnectMySQL(sServer As String, sDB As String, sUsername As String, Optional sPW As String = "") As MySqlConnection
         If sPW = "" Then
-            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";" & "SslMode=None;")
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";" & "SslMode=None;Convert Zero Datetime=True;")
         Else
-            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";" & "SslMode=None;")
+            MySQLCon = New MySqlConnection("Server=" & sServer & ";Database=" & sDB & ";Uid=" & sUsername & ";Pwd=" & sPW & ";" & "SslMode=None;Convert Zero Datetime=True;")
         End If
 
         Try
@@ -141,7 +146,106 @@ Public Class MyDataConnector
         Me.AccessCon.Close()
     End Function
     '------------------------------------------------------------------------------------------------------------------------
+
+    '--------------------------------------------------CSV------------------------------------------------------
+    Private Function ConnectDBCSV(Path As String, sDB As String) As OleDb.OleDbConnection
+        ' This one restrictes the application to x86 Architecture (32 bit Application) 
+        ' After some research it seems, that the Microsoft.ACE.OLEDB.12.0 is only availabe in a 32bit Version
+        ' Found the solution in this blog post https://blogs.technet.microsoft.com/austria/2014/02/06/der-microsoft-ace-oledb-12-0-provider-fehlt/
+        ' 
+        SQLLog.Write(1, "Connecting to CSV...")
+
+        If IsNothing(Setting.Direction) = True Then
+        Else
+            If Me.Setting.Direction.ToUpper = "TARGET" Then
+                Try
+                    Dim myWriter As New StreamWriter(Path, False)
+                    Dim headerString As String = ""
+                    For Each Mapping In Me.ENV.Mappings
+                        If headerString = "" Then
+                            headerString = Chr(34) & Mapping.Targetname & Chr(34)
+                        Else
+                            headerString = headerString & ";" & Chr(34) & Mapping.Targetname & Chr(34)
+                        End If
+                    Next
+                    headerString = headerString & ";" & vbCrLf
+                    myWriter.WriteLine(headerString)
+                    myWriter.Close()
+                Catch ex As Exception
+                    SQLLog.Write(0, "ERROR while writing csv file: " & ex.Message)
+                    ConnectDBCSV = Nothing
+                    Exit Function
+                End Try
+            Else
+            End If
+        End If
+        Path = Path.Substring(0, Path.LastIndexOf("\"))
+
+        Try
+            'Create a Connection object.
+            Me.CSVCon = New OleDb.OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" & Path & ";Extended Properties='text;HDR=Yes;FMT=Delimited';")
+            'Create a Command object.
+            Me.CSVCmd = Me.CSVCon.CreateCommand
+            Me.CSVCmd.CommandText = "USE " & sDB
+
+            Me.CSVCon.Open()
+            SQLLog.Write(1, "Established connection to:" & Path)
+            ConnectDBCSV = Me.CSVCon
+        Catch ex As Exception
+            SQLLog.Write(0, "ERROR!: " & ex.Message)
+            ConnectDBCSV = Nothing
+            Exit Function
+        End Try
+        Me.CSVCon.Close()
+    End Function
+
+    Public Sub RewriteCSVForXMLData(SourceXMLStartLayerLookup As Integer)
+        'This Sub Rewrites the csv header for XML Data which is normally spread in several layers
+        Dim myWriter As StreamWriter
+        Dim headerString As String = ""
+        Try
+            myWriter = New StreamWriter(Setting.FilePath, False)
+
+        Catch ex As Exception
+            SQLLog.Write(0, "ERROR while rewriting csv file: " & ex.Message)
+            Exit Sub
+        End Try
+
+        If Module1.Core.Reihen.Count <= 0 Then
+            Exit Sub
+        End If
+
+
+        'The Starting Point for i is defined by the starting layer from the source setting
+        Dim i As Integer = SourceXMLStartLayerLookup
+
+        'From the starting point to the maximum depth, which has been extracted from the xml, there will be columns written
+        'The target layout should be in a schematic way look like: column1/layer1,column2/layer1,column1/layer2,column2/layer2...and so on...
+        While i <= Module1.Core.MaxLayers
+            For Each Mapping In Module1.Core.CurrentENV.Mappings
+                If headerString = "" Then
+                    headerString = Mapping.Targetname & "_" & i
+                Else
+                    headerString = headerString & "," & Mapping.Targetname & "_" & i
+                End If
+            Next
+            i = i + 1
+        End While
+
+        Try
+            headerString = headerString & "," & vbCrLf
+            myWriter.WriteLine(headerString)
+            myWriter.Close()
+        Catch ex As Exception
+            SQLLog.Write(0, "ERROR while rewriting csv file: " & ex.Message)
+            Exit Sub
+        End Try
+    End Sub
+    '------------------------------------------------------------------------------------------------------------------------
+
     Public Sub CreateSQLCon()
+        ' Creates SQL connection depending on the servertype on the Settings-Object.
+        ' Note: No XML Connection will be done here, since the whole XML Datafile Handling is done within the SQLOperations Class.
         Select Case Setting.Servertype
             Case "MSSQL"
                 Select Case Setting.ConnMode
@@ -190,6 +294,13 @@ Public Class MyDataConnector
                     Case "Standard Security"
                         Me.AccessCon = ConnectDBAccess(Setting.FilePath, Setting.SQLDB)
                 End Select
+            Case "CSV"
+                Select Case Setting.ConnMode
+                    Case Else
+                        Me.CSVCon = ConnectDBCSV(Setting.FilePath, Setting.SQLDB)
+                End Select
+            Case Else
+                SQLLog.Write(1, Setting.Servertype & " choosen no Dataconnection neccessary.")
         End Select
 
     End Sub
@@ -215,7 +326,6 @@ Public Class MyDataConnector
                     CreateDataAdapter = Nothing
                     Exit Function
                 End Try
-
                 Try
                     dataadapter.Fill(ds, Module1.Core.CurrentENV.GetName())
                     SQLCon.Close()
@@ -273,12 +383,26 @@ Public Class MyDataConnector
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                 End Try
+            Case "CSV"
+                Try
+                    If CSVCon.State = ConnectionState.Open Then
+                        CSVCon.Close()
+                    End If
+                    Dim dataadapter As New OleDb.OleDbDataAdapter(SQLrq, CSVCon)
+                    Dim ds As New DataSet
+                    dataadapter.Fill(ds)
+                    CreateDataAdapter = ds
+                    Exit Function
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                End Try
         End Select
-
         CreateDataAdapter = Nothing
     End Function
 
     Public Function ExecuteQuery(SQLrq As String) As Boolean
+        'Writes one ore more querys to database
+        'Note: No XML Datafile handling here, since the XML Datafiles are handled in the SQLoperations-Class
         Dim Res As String = ""
 
         Dim RowsAffected As Integer = 0
@@ -345,6 +469,7 @@ Public Class MyDataConnector
                         AccessCon.Close()
                     End If
                     AccessCmd.CommandText = SQLrq
+
                     AccessCon.Open()
                     RowsAffected = AccessCmd.ExecuteNonQuery
                     SQLLog.Write(1, RowsAffected & " Row(s) affected.")
@@ -356,33 +481,30 @@ Public Class MyDataConnector
                     AccessCon.Close()
                     Exit Function
                 End Try
+            Case "CSV"
+                Try
+                    If CSVCon.State = ConnectionState.Open Then
+                        CSVCon.Close()
+                    End If
+                    CSVCmd.CommandText = SQLrq
+                    CSVCon.Open()
+                    RowsAffected = CSVCmd.ExecuteNonQuery
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    CSVCon.Close()
+                    ExecuteQuery = True
+                Catch e As Exception
+                    ExecuteQuery = False
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
+                    CSVCon.Close()
+                    Exit Function
+                End Try
             Case Else
+                SQLLog.Write(0, "Execute Query - Unknown (Target) Servertype. 0 Querys were send.")
                 ExecuteQuery = Nothing
         End Select
         RowsAffected = 0
     End Function
 
-    Public Sub ExecuteStoredProcedure(Params As LinkedList(Of SQLParamter))
-        Dim Param(Params.Count) As SQLParamter
-        Params.CopyTo(Param, 0)
-        Dim i As Integer
-        Dim cmd As New SqlCommand()
-        cmd.CommandType = CommandType.StoredProcedure
-        cmd.Connection = Me.SQLCon
-        cmd.CommandText = "ExecutedStoredProcedure"
-        For i = 0 To Params.Count - 1
-            cmd.Parameters.Add(Param(i).Parametername, Param(i).Parametertyp)
-            cmd.Parameters(Param(i).Parametername).Value = Param(i).Wert
-        Next
-        Try
-            If cmd.Connection.State = ConnectionState.Closed Then
-                cmd.Connection.Open()
-            End If
-            cmd.ExecuteNonQuery()
-        Catch ex As Exception
-            SQLLog.Write(0, ex.Message)
-        End Try
-    End Sub
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     '---------------------------------------------------------Masking Strings and Dates------------------------------------------------------------------------------
@@ -400,6 +522,12 @@ Public Class MyDataConnector
             Select Case VariableType
 
                 Case "String", "8"
+                    If InStr(1, SQL_Attribut, "\") <> 0 Then
+                        SQL_Attribut = Replace(CStr(SQL_Attribut), "\", "\\")
+                    Else
+
+                    End If
+
                     If InStr(1, SQL_Attribut, "'") <> 0 Then
                         CSQL = "'" & Replace(CStr(SQL_Attribut), "'", "''") & "'"
                         Exit Function
@@ -523,6 +651,17 @@ Public Class MyDataConnector
                 DT = AccessReader.GetSchemaTable
                 AccessReader.Close()
                 AccessCon.Close()
+            Case "CSV"
+                If CSVCon.State = ConnectionState.Open Then
+                    CSVCon.Close()
+                End If
+                CSVCon.Open()
+                CSVCmd.Connection = CSVCon
+                CSVCmd.CommandText = "SELECT * FROM " & Setting.SQLTable
+                CSVReader = CSVCmd.ExecuteReader
+                DT = CSVReader.GetSchemaTable
+                CSVReader.Close()
+                CSVCon.Close()
         End Select
         '------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -608,6 +747,21 @@ Public Class MyDataConnector
                     End If
                 Next
                 AccessCon.Close()
+            Case "CSV"
+                If CSVCon.State = ConnectionState.Open Then
+                    CSVCon.Close()
+                End If
+                CSVCon.Open()
+                TmpTables = CSVCon.GetSchema("Tables")
+                For Each Row In TmpTables.Rows
+                    If Row("TABLE_TYPE").ToString.ToUpper = "TABLE" Then
+                        Dim TBS As New TableSchema
+                        TBS.TableName = Row("TABLE_NAME".ToString)
+                        Tables.AddLast(TBS)
+                    Else
+                    End If
+                Next
+                CSVCon.Close()
         End Select
     End Sub
 
