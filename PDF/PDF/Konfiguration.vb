@@ -3,6 +3,7 @@
     Private TestedTargetSetting As SQLServerSettings
     Private SourceSQL As MyDataConnector
     Private TargetSQL As MyDataConnector
+    Private OnlineConfig As Boolean = False
 
 
     Private Sub T_SourceUsername_TextChanged(sender As Object, e As EventArgs) Handles T_SourceUsername.TextChanged
@@ -545,6 +546,7 @@
 
     Private Sub C_SourceType_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_SourceType.SelectedValueChanged
         SourceConnectionTypes()
+        VerifyConnections()
         Me.C_SourceType.BackColor = Drawing.SystemColors.Window
     End Sub
 
@@ -564,6 +566,7 @@
 
     Private Sub C_TargetServerType_SelectedValueChanged(sender As Object, e As EventArgs) Handles C_TargetServerType.SelectedValueChanged
         TargetConnectionTypes()
+        VerifyConnections()
         Me.C_TargetServerType.BackColor = Drawing.SystemColors.Window
     End Sub
 
@@ -923,7 +926,9 @@
                                 End If
                             Case "Seperator_Offline"
                                 If IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = False Then
-                                    SeperatorChecked = True
+                                    If MappingGrid_Offline.Item(Columns, Rows).Value <> "" Then
+                                        SeperatorChecked = True
+                                    End If
                                 End If
                             Case "PartOfSubstring_Offline"
                                 If SeperatorChecked = True And IsNothing(MappingGrid_Offline.Item(Columns, Rows).Value) = True Then
@@ -936,8 +941,12 @@
                                     ErrorMessages.AddLast("Missing Source Column or Static Value on Line " & Rows + 1)
                                 End If
                             Case "IsIdentity_offline"
-                                If MappingGrid.Item(Columns, Rows).Value = True Then
-                                    HasIdentifier = True
+                                If MultipleIdentifier.Checked = True Then
+                                    If MappingGrid.Item(Columns, Rows).Value = True Then
+                                        HasIdentifier = True
+                                    End If
+                                Else
+
                                 End If
                         End Select
                     Next
@@ -1087,6 +1096,7 @@
             Else
                 Me.MappingGrid_Offline.Visible = True
                 Me.MappingGrid.Visible = False
+                Me.OnlineConfig = False
             End If
         End If
         Me.Refresh()
@@ -1106,6 +1116,7 @@
             Else
                 Me.MappingGrid_Offline.Visible = True
                 Me.MappingGrid.Visible = False
+                Me.OnlineConfig = False
             End If
         End If
         If IsNothing(SourceSQL) Or IsNothing(TargetSQL) Then
@@ -1113,6 +1124,7 @@
             If SourceSQL.Setting.Worked = True And TargetSQL.Setting.Worked = True Then
                 Me.MappingGrid_Offline.Visible = False
                 Me.MappingGrid.Visible = True
+                Me.OnlineConfig = True
             End If
         End If
 
@@ -1226,104 +1238,120 @@
 
     Private Sub VerifyDataTargetConnection()
         If Me.C_TargetServerType.Text <> "" And (Me.T_TargetServerAdress.Text <> "" Or Me.T_TargetPath.Text <> "") And Me.T_TargetDB.Text <> "" And Me.C_TargetConnectionType.Text <> "" Then
-            If Me.C_TargetConnectionType.Text = "Trusted" Then
-                Dim TargetSettings As New SQLServerSettings With {
-                .Direction = "target",
-                .Servertype = Me.C_TargetServerType.Text,
-                .Servername = Me.T_TargetServerAdress.Text,
-                .FilePath = Me.T_TargetPath.Text,
-                .SQLDB = Me.T_TargetDB.Text,
-                .ConnMode = Me.C_TargetConnectionType.Text
-                }
+            Select Case C_TargetServerType.Text
+                Case "XML"
+                    Me.TestedTargetSetting = Nothing
+                    PB_Target.BackColor = Drawing.Color.Transparent
+                    Me.TargetSQL = Nothing
+                Case "CSV"
+                    Me.TestedTargetSetting = Nothing
+                    PB_Target.BackColor = Drawing.Color.Transparent
+                    Me.TargetSQL = Nothing
+                Case "HTML"
+                    Me.TestedTargetSetting = Nothing
+                    PB_Target.BackColor = Drawing.Color.Transparent
+                    Me.TargetSQL = Nothing
+                Case Else
+                    If Me.C_TargetConnectionType.Text = "Trusted" Then
+                        Dim TargetSettings As New SQLServerSettings With {
+                        .Direction = "target",
+                        .Servertype = Me.C_TargetServerType.Text,
+                        .Servername = Me.T_TargetServerAdress.Text,
+                        .FilePath = Me.T_TargetPath.Text,
+                        .SQLDB = Me.T_TargetDB.Text,
+                        .ConnMode = Me.C_TargetConnectionType.Text
+                        }
 
-                If IsNothing(Me.TestedTargetSetting) = False Then
-                    If Me.TestedTargetSetting.Tested = True Then
-                        If Me.TestedTargetSetting.Servername = TargetSettings.Servername And Me.TestedTargetSetting.Servertype = TargetSettings.Servertype And Me.TestedTargetSetting.ConnMode = TargetSettings.ConnMode Then
-                            Exit Sub
-                        End If
-                    End If
-                End If
-
-                Dim Log As New LOG With {
-                    .Testmode = True
-                }
-                Module1.Core.CurrentLog = Log
-                Dim SQL As New MyDataConnector With {
-                    .Setting = TargetSettings,
-                    .SQLLog = Log
-                }
-
-                SQL.CreateSQLCon()
-                Me.TestedTargetSetting = TargetSettings
-                Me.TestedTargetSetting.Tested = True
-                'At the moment only MS-SQL, so just one connection object to check...
-                If IsNothing(SQL.SQLCon) = True Then
-                    PB_Target.BackColor = Drawing.Color.Red
-                Else
-                    PB_Target.BackColor = Drawing.Color.Green
-                    Me.TestedTargetSetting.Worked = True
-                    Me.TargetSQL = SQL
-                End If
-            Else
-                If Me.T_TargetUsername.Text <> "" And Me.T_TargetPassword.Text <> "" Then
-                    Dim TargetSettings As New SQLServerSettings With {
-                    .Servertype = Me.C_TargetServerType.Text,
-                    .Servername = Me.T_TargetServerAdress.Text,
-                    .FilePath = Me.T_TargetPath.Text,
-                    .SQLDB = Me.T_TargetDB.Text,
-                    .ConnMode = Me.C_TargetConnectionType.Text,
-                    .User = Me.T_TargetUsername.Text,
-                    .Password = Me.T_TargetPassword.Text
-                    }
-
-                    If IsNothing(Me.TestedTargetSetting) = False Then
-                        If Me.TestedTargetSetting.Tested = True Then
-                            If Me.TestedTargetSetting.SQLDB = TargetSettings.SQLDB And Me.TestedTargetSetting.FilePath = TargetSettings.FilePath And Me.TestedTargetSetting.Servername = TargetSettings.Servername And Me.TestedTargetSetting.Servertype = TargetSettings.Servertype And Me.TestedTargetSetting.ConnMode = TargetSettings.ConnMode And Me.TestedTargetSetting.User = TargetSettings.User And Me.TestedTargetSetting.Password = TargetSettings.Password Then
-                                Exit Sub
+                        If IsNothing(Me.TestedTargetSetting) = False Then
+                            If Me.TestedTargetSetting.Tested = True Then
+                                If Me.TestedTargetSetting.Servername = TargetSettings.Servername And Me.TestedTargetSetting.Servertype = TargetSettings.Servertype And Me.TestedTargetSetting.ConnMode = TargetSettings.ConnMode Then
+                                    Exit Sub
+                                End If
                             End If
                         End If
+
+                        Dim Log As New LOG With {
+                            .Testmode = True
+                        }
+                        Module1.Core.CurrentLog = Log
+                        Dim SQL As New MyDataConnector With {
+                            .Setting = TargetSettings,
+                            .SQLLog = Log
+                        }
+
+                        SQL.CreateSQLCon()
+                        Me.TestedTargetSetting = TargetSettings
+                        Me.TestedTargetSetting.Tested = True
+                        'At the moment only MS-SQL, so just one connection object to check...
+                        If IsNothing(SQL.SQLCon) = True Then
+                            PB_Target.BackColor = Drawing.Color.Red
+                        Else
+                            PB_Target.BackColor = Drawing.Color.Green
+                            Me.TestedTargetSetting.Worked = True
+                            Me.TargetSQL = SQL
+                        End If
+                    Else
+                        If Me.T_TargetUsername.Text <> "" And Me.T_TargetPassword.Text <> "" Then
+                            Dim TargetSettings As New SQLServerSettings With {
+                            .Servertype = Me.C_TargetServerType.Text,
+                            .Servername = Me.T_TargetServerAdress.Text,
+                            .FilePath = Me.T_TargetPath.Text,
+                            .SQLDB = Me.T_TargetDB.Text,
+                            .ConnMode = Me.C_TargetConnectionType.Text,
+                            .User = Me.T_TargetUsername.Text,
+                            .Password = Me.T_TargetPassword.Text
+                            }
+
+                            If IsNothing(Me.TestedTargetSetting) = False Then
+                                If Me.TestedTargetSetting.Tested = True Then
+                                    If Me.TestedTargetSetting.SQLDB = TargetSettings.SQLDB And Me.TestedTargetSetting.FilePath = TargetSettings.FilePath And Me.TestedTargetSetting.Servername = TargetSettings.Servername And Me.TestedTargetSetting.Servertype = TargetSettings.Servertype And Me.TestedTargetSetting.ConnMode = TargetSettings.ConnMode And Me.TestedTargetSetting.User = TargetSettings.User And Me.TestedTargetSetting.Password = TargetSettings.Password Then
+                                        Exit Sub
+                                    End If
+                                End If
+                            End If
+
+                            Dim Log As New LOG With {
+                                .Testmode = True
+                            }
+                            Module1.Core.CurrentLog = Log
+                            Dim SQL As New MyDataConnector With {
+                                .Setting = TargetSettings,
+                                .SQLLog = Log
+                            }
+
+                            SQL.CreateSQLCon()
+                            Me.TestedTargetSetting = TargetSettings
+                            Me.TestedTargetSetting.Tested = True
+                            Select Case TargetSettings.Servertype
+                                Case "MS-SQL"
+                                    If IsNothing(SQL.SQLCon) = True Then
+                                        PB_Target.BackColor = Drawing.Color.Red
+                                    Else
+                                        PB_Target.BackColor = Drawing.Color.Green
+                                        Me.TestedTargetSetting.Worked = True
+                                        Me.TargetSQL = SQL
+                                    End If
+                                Case "MySQL"
+                                    If IsNothing(SQL.MySQLCon) = True Then
+                                        PB_Target.BackColor = Drawing.Color.Red
+                                    Else
+                                        PB_Target.BackColor = Drawing.Color.Green
+                                        Me.TestedTargetSetting.Worked = True
+                                        Me.TargetSQL = SQL
+                                    End If
+                                Case "Access"
+                                    If IsNothing(SQL.AccessCon) = True Then
+                                        PB_Target.BackColor = Drawing.Color.Red
+                                    Else
+                                        PB_Target.BackColor = Drawing.Color.Green
+                                        Me.TestedTargetSetting.Worked = True
+                                        Me.TargetSQL = SQL
+                                    End If
+                            End Select
+                        End If
                     End If
+            End Select
 
-                    Dim Log As New LOG With {
-                        .Testmode = True
-                    }
-                    Module1.Core.CurrentLog = Log
-                    Dim SQL As New MyDataConnector With {
-                        .Setting = TargetSettings,
-                        .SQLLog = Log
-                    }
-
-                    SQL.CreateSQLCon()
-                    Me.TestedTargetSetting = TargetSettings
-                    Me.TestedTargetSetting.Tested = True
-                    Select Case TargetSettings.Servertype
-                        Case "MS-SQL"
-                            If IsNothing(SQL.SQLCon) = True Then
-                                PB_Target.BackColor = Drawing.Color.Red
-                            Else
-                                PB_Target.BackColor = Drawing.Color.Green
-                                Me.TestedTargetSetting.Worked = True
-                                Me.TargetSQL = SQL
-                            End If
-                        Case "MySQL"
-                            If IsNothing(SQL.MySQLCon) = True Then
-                                PB_Target.BackColor = Drawing.Color.Red
-                            Else
-                                PB_Target.BackColor = Drawing.Color.Green
-                                Me.TestedTargetSetting.Worked = True
-                                Me.TargetSQL = SQL
-                            End If
-                        Case "Access"
-                            If IsNothing(SQL.AccessCon) = True Then
-                                PB_Target.BackColor = Drawing.Color.Red
-                            Else
-                                PB_Target.BackColor = Drawing.Color.Green
-                                Me.TestedTargetSetting.Worked = True
-                                Me.TargetSQL = SQL
-                            End If
-                    End Select
-                End If
-            End If
         End If
     End Sub
 
@@ -1593,29 +1621,50 @@
                 Me.IsIdentity_offline.Visible = True
             End If
             Dim i As Integer = 0
-            For Each Mapping In OpenENV.Mappings
-                Me.MappingGrid.Rows.Add()
-                Me.MappingGrid.Rows(i).Cells(0).Value = Mapping.Sourcename
-                Me.MappingGrid.Rows(i).Cells(1).Value = Mapping.Targetname
-                Me.MappingGrid.Rows(i).Cells(2).Value = Mapping.Sourcetype
-                Me.MappingGrid.Rows(i).Cells(3).Value = Mapping.Targettype
-                Me.MappingGrid.Rows(i).Cells(4).Value = Mapping.Separator
-                Me.MappingGrid.Rows(i).Cells(5).Value = Mapping.SeperatorDirection
-                Me.MappingGrid.Rows(i).Cells(6).Value = Mapping.StaticValue
-                Me.MappingGrid.Rows(i).Cells(7).Value = Mapping.UseAsIdentifier
+            Me.MappingGrid.SelectAll()
+            Me.MappingGrid.ClearSelection()
+            Me.MappingGrid_Offline.SelectAll()
+            Me.MappingGrid_Offline.ClearSelection()
 
-                Me.MappingGrid_Offline.Rows.Add()
-                Me.MappingGrid_Offline.Rows(i).Cells(0).Value = Mapping.Sourcename
-                Me.MappingGrid_Offline.Rows(i).Cells(1).Value = Mapping.Targetname
-                Me.MappingGrid_Offline.Rows(i).Cells(2).Value = Mapping.Sourcetype
-                Me.MappingGrid_Offline.Rows(i).Cells(3).Value = Mapping.Targettype
-                Me.MappingGrid_Offline.Rows(i).Cells(4).Value = Mapping.Separator
-                Me.MappingGrid_Offline.Rows(i).Cells(5).Value = Mapping.SeperatorDirection
-                Me.MappingGrid_Offline.Rows(i).Cells(6).Value = Mapping.StaticValue
-                Me.MappingGrid_Offline.Rows(i).Cells(7).Value = Mapping.UseAsIdentifier
+            If Me.OnlineConfig = True Then
+                Me.MappingGrid.Visible = True
+                Me.MappingGrid_Offline.Visible = False
+            Else
+                Me.MappingGrid.Visible = False
+                Me.MappingGrid_Offline.Visible = True
+            End If
+
+            For Each Mapping In OpenENV.Mappings
+                Try
+                    Me.MappingGrid.Rows.Add()
+                        Me.MappingGrid.Rows(i).Cells("SourceColumn").Value = Mapping.Sourcename
+                        Me.MappingGrid.Rows(i).Cells("TargetColumn").Value = Mapping.Targetname
+                        Me.MappingGrid.Rows(i).Cells("SourceType").Value = Mapping.Sourcetype
+                        Me.MappingGrid.Rows(i).Cells("TargetType").Value = Mapping.Targettype
+                        Me.MappingGrid.Rows(i).Cells("Seperator").Value = Mapping.Separator
+                        Me.MappingGrid.Rows(i).Cells("StaticValue").Value = Mapping.SeperatorDirection
+                        Me.MappingGrid.Rows(i).Cells("StaticValue").Value = Mapping.StaticValue
+                        Me.MappingGrid.Rows(i).Cells("IsIdentity").Value = Mapping.UseAsIdentifier
+
+                    Me.MappingGrid_Offline.Rows.Add()
+                        Me.MappingGrid_Offline.Rows(i).Cells("SourceColumn_offline").Value = Mapping.Sourcename
+                        Me.MappingGrid_Offline.Rows(i).Cells("TargetColumn_offline").Value = Mapping.Targetname
+                        Me.MappingGrid_Offline.Rows(i).Cells("SourceType_Offline").Value = Mapping.Sourcetype
+                        Me.MappingGrid_Offline.Rows(i).Cells("TargetType_Offline").Value = Mapping.Targettype
+                        Me.MappingGrid_Offline.Rows(i).Cells("Seperator_Offline").Value = Mapping.Separator
+                        Me.MappingGrid_Offline.Rows(i).Cells("StaticValue_Offline").Value = Mapping.SeperatorDirection
+                        Me.MappingGrid_Offline.Rows(i).Cells("StaticValue_Offline").Value = Mapping.StaticValue
+                        Me.MappingGrid_Offline.Rows(i).Cells("IsIdentity_Offline").Value = Mapping.UseAsIdentifier
+
+
+
+                Catch ex As Exception
+                    System.Console.WriteLine(ex.Message)
+                End Try
                 i = i + 1
             Next
             Me.MappingGrid.Refresh()
+            Me.MappingGrid_Offline.Refresh()
             Me.Refresh()
         End If
     End Sub

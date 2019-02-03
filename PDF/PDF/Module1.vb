@@ -226,11 +226,11 @@ Module Module1
         Core.JobEndTime = mytime
         Log.Write(1, "Job ended at " & mytime)
 
-        Dim Jobtime As Long = DateDiff(DateInterval.Second, Core.JobStartTime, Core.JobEndTime)
-        Dim Sekunden As Long = Jobtime Mod 60
-        Dim Minuten As Long = Jobtime / 60
-        Dim Stunden As Long = Minuten / 60
-        Dim Tage As Long = Stunden / 24
+        Dim Jobtime As TimeSpan = Core.JobEndTime - Core.JobStartTime
+        Dim Sekunden As Long = Jobtime.Seconds
+        Dim Minuten As Long = Jobtime.Minutes
+        Dim Stunden As Long = Jobtime.Hours
+        Dim Tage As Long = Jobtime.Days
         Log.Write(1, "Job took " & Tage & " days " & Stunden & " hours " & Minuten & " minutes " & Sekunden & " seconds.")
 
     End Sub

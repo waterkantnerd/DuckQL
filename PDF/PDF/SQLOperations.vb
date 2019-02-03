@@ -213,6 +213,14 @@ Public Class SQLOperations
                                 Daten.Mapping = Mapping
                                 Reihe.Spalten.AddLast(Daten)
                             End If
+
+                            'If Target is XML, the SourceTablenme will define the Startelement of the XML
+                            If Reihe.Table = "" Then
+                                If Target.Servertype = "XML" Then
+                                    Reihe.Table = SQL.Setting.SQLTable
+                                End If
+                            End If
+
                             Log.Write(1, "Row " & i & " from " & Max & " has beend added to data core")
                             Module1.Core.Reihen.AddLast(Reihe)
                         End If
@@ -355,11 +363,14 @@ Public Class SQLOperations
                     .Indentation = 4
                 }
                 XMLobj.WriteStartDocument()
+                Dim y As Integer = 0
+                XMLobj.WriteStartElement("Rows")
                 For Each Reihe In Module1.Core.Reihen
                     With XMLobj
                         .WriteStartElement(Reihe.Table)
                         For Each Daten In Reihe.Spalten
                             .WriteAttributeString(Daten.Mapping.Targetname, Daten.Wert)
+
                         Next
                         .WriteEndElement()
                     End With

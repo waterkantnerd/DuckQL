@@ -102,6 +102,14 @@ Partial Class Konfiguration
         Me.T_TargetTable = New System.Windows.Forms.TextBox()
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog()
         Me.MappingGrid = New System.Windows.Forms.DataGridView()
+        Me.SourceColumn = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.TargetColumn = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.SourceType = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.TargetType = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.Seperator = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.PartOfSubstring = New System.Windows.Forms.DataGridViewComboBoxColumn()
+        Me.StaticValue = New System.Windows.Forms.DataGridViewTextBoxColumn()
+        Me.IsIdentity = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.B_Save = New System.Windows.Forms.Button()
         Me.C_DebugLog = New System.Windows.Forms.CheckBox()
         Me.C_Silent = New System.Windows.Forms.CheckBox()
@@ -110,6 +118,10 @@ Partial Class Konfiguration
         Me.C_CheckConsistency = New System.Windows.Forms.CheckBox()
         Me.C_IDlessBatch = New System.Windows.Forms.CheckBox()
         Me.MappingGrid_Offline = New System.Windows.Forms.DataGridView()
+        Me.MultipleIdentifier = New System.Windows.Forms.CheckBox()
+        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
+        Me.L_OrderID = New System.Windows.Forms.Label()
+        Me.B_Load = New System.Windows.Forms.Button()
         Me.SourceColumn_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SourceXPath = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.TargetColumn_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -120,18 +132,6 @@ Partial Class Konfiguration
         Me.StaticValue_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.XMLAttribute = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.IsIdentity_offline = New System.Windows.Forms.DataGridViewCheckBoxColumn()
-        Me.MultipleIdentifier = New System.Windows.Forms.CheckBox()
-        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
-        Me.L_OrderID = New System.Windows.Forms.Label()
-        Me.B_Load = New System.Windows.Forms.Button()
-        Me.SourceColumn = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.TargetColumn = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.SourceType = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.TargetType = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.Seperator = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.PartOfSubstring = New System.Windows.Forms.DataGridViewComboBoxColumn()
-        Me.StaticValue = New System.Windows.Forms.DataGridViewTextBoxColumn()
-        Me.IsIdentity = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -931,6 +931,71 @@ Partial Class Konfiguration
         Me.MappingGrid.TabIndex = 30
         Me.ToolTipKonfig.SetToolTip(Me.MappingGrid, "Enter the mappings between source and target tables")
         '
+        'SourceColumn
+        '
+        Me.SourceColumn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.SourceColumn.HeaderText = "Source Column"
+        Me.SourceColumn.Name = "SourceColumn"
+        Me.SourceColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.SourceColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.SourceColumn.Width = 101
+        '
+        'TargetColumn
+        '
+        Me.TargetColumn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.TargetColumn.HeaderText = "Target Column"
+        Me.TargetColumn.Name = "TargetColumn"
+        Me.TargetColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.TargetColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.TargetColumn.Width = 97
+        '
+        'SourceType
+        '
+        Me.SourceType.HeaderText = "Source Type"
+        Me.SourceType.Name = "SourceType"
+        Me.SourceType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.SourceType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.SourceType.Width = 66
+        '
+        'TargetType
+        '
+        Me.TargetType.HeaderText = "Target Type"
+        Me.TargetType.Name = "TargetType"
+        Me.TargetType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.TargetType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
+        Me.TargetType.Width = 62
+        '
+        'Seperator
+        '
+        Me.Seperator.HeaderText = "Seperator"
+        Me.Seperator.Name = "Seperator"
+        Me.Seperator.Width = 82
+        '
+        'PartOfSubstring
+        '
+        Me.PartOfSubstring.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.PartOfSubstring.HeaderText = "Part Of Substring"
+        Me.PartOfSubstring.Items.AddRange(New Object() {"left", "right"})
+        Me.PartOfSubstring.Name = "PartOfSubstring"
+        Me.PartOfSubstring.Width = 92
+        '
+        'StaticValue
+        '
+        Me.StaticValue.HeaderText = "Static Value for Target Column"
+        Me.StaticValue.Name = "StaticValue"
+        Me.StaticValue.ToolTipText = "If there is no fitting source, you can set a static value, which will be set for " &
+    "every row, here."
+        Me.StaticValue.Width = 133
+        '
+        'IsIdentity
+        '
+        Me.IsIdentity.HeaderText = "Use as Identity Column"
+        Me.IsIdentity.Name = "IsIdentity"
+        Me.IsIdentity.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
+        Me.IsIdentity.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
+        Me.IsIdentity.Visible = False
+        Me.IsIdentity.Width = 137
+        '
         'B_Save
         '
         Me.B_Save.Location = New System.Drawing.Point(1007, 842)
@@ -1010,6 +1075,40 @@ Partial Class Konfiguration
         Me.MappingGrid_Offline.TabIndex = 51
         Me.ToolTipKonfig.SetToolTip(Me.MappingGrid_Offline, "Enter the mappings between source and target tables")
         '
+        'MultipleIdentifier
+        '
+        Me.MultipleIdentifier.AutoSize = True
+        Me.MultipleIdentifier.Location = New System.Drawing.Point(128, 36)
+        Me.MultipleIdentifier.Name = "MultipleIdentifier"
+        Me.MultipleIdentifier.Size = New System.Drawing.Size(119, 17)
+        Me.MultipleIdentifier.TabIndex = 52
+        Me.MultipleIdentifier.Text = "Multiple Identifier"
+        Me.ToolTipKonfig.SetToolTip(Me.MultipleIdentifier, "Multiple Identifier: If you need more than one column as unique Identifier use th" &
+        "is. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You'll need to define the Identifier Columns in the Mapping Grid below. ")
+        Me.MultipleIdentifier.UseVisualStyleBackColor = True
+        '
+        'OpenFileDialog1
+        '
+        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
+        '
+        'L_OrderID
+        '
+        Me.L_OrderID.AutoSize = True
+        Me.L_OrderID.Location = New System.Drawing.Point(13, 40)
+        Me.L_OrderID.Name = "L_OrderID"
+        Me.L_OrderID.Size = New System.Drawing.Size(54, 13)
+        Me.L_OrderID.TabIndex = 48
+        Me.L_OrderID.Text = "Order ID:"
+        '
+        'B_Load
+        '
+        Me.B_Load.Location = New System.Drawing.Point(12, 842)
+        Me.B_Load.Name = "B_Load"
+        Me.B_Load.Size = New System.Drawing.Size(194, 31)
+        Me.B_Load.TabIndex = 49
+        Me.B_Load.Text = "Load Configuration..."
+        Me.B_Load.UseVisualStyleBackColor = True
+        '
         'SourceColumn_Offline
         '
         Me.SourceColumn_Offline.HeaderText = "Source Column"
@@ -1058,7 +1157,7 @@ Partial Class Konfiguration
         '
         Me.PartOfSubstring_Offline.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.PartOfSubstring_Offline.HeaderText = "Part Of Substring"
-        Me.PartOfSubstring_Offline.Items.AddRange(New Object() {"left", "right"})
+        Me.PartOfSubstring_Offline.Items.AddRange(New Object() {"left", "right", " "})
         Me.PartOfSubstring_Offline.Name = "PartOfSubstring_Offline"
         Me.PartOfSubstring_Offline.Width = 92
         '
@@ -1085,105 +1184,6 @@ Partial Class Konfiguration
         Me.IsIdentity_offline.Name = "IsIdentity_offline"
         Me.IsIdentity_offline.Visible = False
         Me.IsIdentity_offline.Width = 118
-        '
-        'MultipleIdentifier
-        '
-        Me.MultipleIdentifier.AutoSize = True
-        Me.MultipleIdentifier.Location = New System.Drawing.Point(128, 36)
-        Me.MultipleIdentifier.Name = "MultipleIdentifier"
-        Me.MultipleIdentifier.Size = New System.Drawing.Size(119, 17)
-        Me.MultipleIdentifier.TabIndex = 52
-        Me.MultipleIdentifier.Text = "Multiple Identifier"
-        Me.ToolTipKonfig.SetToolTip(Me.MultipleIdentifier, "Multiple Identifier: If you need more than one column as unique Identifier use th" &
-        "is. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You'll need to define the Identifier Columns in the Mapping Grid below. ")
-        Me.MultipleIdentifier.UseVisualStyleBackColor = True
-        '
-        'OpenFileDialog1
-        '
-        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
-        '
-        'L_OrderID
-        '
-        Me.L_OrderID.AutoSize = True
-        Me.L_OrderID.Location = New System.Drawing.Point(13, 40)
-        Me.L_OrderID.Name = "L_OrderID"
-        Me.L_OrderID.Size = New System.Drawing.Size(54, 13)
-        Me.L_OrderID.TabIndex = 48
-        Me.L_OrderID.Text = "Order ID:"
-        '
-        'B_Load
-        '
-        Me.B_Load.Location = New System.Drawing.Point(12, 842)
-        Me.B_Load.Name = "B_Load"
-        Me.B_Load.Size = New System.Drawing.Size(194, 31)
-        Me.B_Load.TabIndex = 49
-        Me.B_Load.Text = "Load Configuration..."
-        Me.B_Load.UseVisualStyleBackColor = True
-        '
-        'SourceColumn
-        '
-        Me.SourceColumn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.SourceColumn.HeaderText = "Source Column"
-        Me.SourceColumn.Name = "SourceColumn"
-        Me.SourceColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.SourceColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.SourceColumn.Width = 101
-        '
-        'TargetColumn
-        '
-        Me.TargetColumn.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.TargetColumn.HeaderText = "Target Column"
-        Me.TargetColumn.Name = "TargetColumn"
-        Me.TargetColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.TargetColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.TargetColumn.Width = 97
-        '
-        'SourceType
-        '
-        Me.SourceType.HeaderText = "Source Type"
-        Me.SourceType.Name = "SourceType"
-        Me.SourceType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.SourceType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.SourceType.Width = 66
-        '
-        'TargetType
-        '
-        Me.TargetType.HeaderText = "Target Type"
-        Me.TargetType.Name = "TargetType"
-        Me.TargetType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.TargetType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.TargetType.Width = 62
-        '
-        'Seperator
-        '
-        Me.Seperator.HeaderText = "Seperator"
-        Me.Seperator.Name = "Seperator"
-        Me.Seperator.Width = 82
-        '
-        'PartOfSubstring
-        '
-        Me.PartOfSubstring.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.PartOfSubstring.HeaderText = "Part Of Substring"
-        Me.PartOfSubstring.Items.AddRange(New Object() {"left", "right"})
-        Me.PartOfSubstring.Name = "PartOfSubstring"
-        Me.PartOfSubstring.Width = 92
-        '
-        'StaticValue
-        '
-        Me.StaticValue.HeaderText = "Static Value for Target Column"
-        Me.StaticValue.Name = "StaticValue"
-        Me.StaticValue.ToolTipText = "If there is no fitting source, you can set a static value, which will be set for " &
-    "every row, here."
-        Me.StaticValue.Width = 133
-        '
-        'IsIdentity
-        '
-        Me.IsIdentity.HeaderText = "Use as Identity Column"
-        Me.IsIdentity.Name = "IsIdentity"
-        Me.IsIdentity.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.IsIdentity.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.IsIdentity.Visible = False
-        Me.IsIdentity.Width = 137
         '
         'Konfiguration
         '
@@ -1314,6 +1314,15 @@ Partial Class Konfiguration
     Friend WithEvents C_IDlessBatch As Windows.Forms.CheckBox
     Friend WithEvents MappingGrid_Offline As Windows.Forms.DataGridView
     Friend WithEvents B_TargetSaveFile As Windows.Forms.Button
+    Friend WithEvents MultipleIdentifier As Windows.Forms.CheckBox
+    Friend WithEvents SourceColumn As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents TargetColumn As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents SourceType As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents TargetType As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents StaticValue As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents IsIdentity As Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents SourceColumn_Offline As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents SourceXPath As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents TargetColumn_Offline As Windows.Forms.DataGridViewTextBoxColumn
@@ -1324,13 +1333,4 @@ Partial Class Konfiguration
     Friend WithEvents StaticValue_Offline As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents XMLAttribute As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents IsIdentity_offline As Windows.Forms.DataGridViewCheckBoxColumn
-    Friend WithEvents MultipleIdentifier As Windows.Forms.CheckBox
-    Friend WithEvents SourceColumn As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents TargetColumn As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents SourceType As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents TargetType As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents StaticValue As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents IsIdentity As Windows.Forms.DataGridViewCheckBoxColumn
 End Class
