@@ -54,7 +54,7 @@ Public Class Daten
     End Function
 
     Public Function GetMapping() As Boolean
-        ' This function detects if the user has defined a mapping.
+        ' This function detects if the user has defined a mapping. Legacy - only for XML Load needed
         Dim MappingFound As Boolean = False
         Dim ENV As ENV = Module1.Core.CurrentENV
         Dim Mappings(ENV.Mappings.Count) As Mapping

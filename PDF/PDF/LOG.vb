@@ -5,8 +5,18 @@ Imports System.IO
 Public Class LOG
     Public Logpath As String = System.AppDomain.CurrentDomain.BaseDirectory()
     Public Logfile As String = "Undefinied.log"
+    Public ErrLogFile As String = "ERR_" & Me.Logfile
     Public Testmode As Boolean = False
     Private CurrENV As ENV
+    Private LogLines As New LinkedList(Of String)
+    Private LogLinesErr As New LinkedList(Of String)
+    Public ProgramEnd As Boolean = False
+    Private t As New Threading.Thread(AddressOf Logger)
+    Private FCheck As New Threading.Thread(AddressOf FileSizeChecker)
+    Private EventHandle As New System.Threading.EventWaitHandle(True, Threading.EventResetMode.ManualReset)
+    Private LogEventID As Long = 0
+    Private LogFileSize As Long = 0
+    Private ErrLogFileSize As Long = 0
 
     Public Function CTOR() As Boolean
         CTOR = True
@@ -14,16 +24,102 @@ Public Class LOG
 
     Public Sub SetENV(EnvoirementObject As ENV)
         Me.CurrENV = EnvoirementObject
+        Me.Logpath = Module1.Core.CurrentENV.GetLogPath
+        Me.Logfile = Module1.Core.CurrentENV.GetName & ".log"
+        If Logpath.LastIndexOf("\") = Logpath.Length Then
+        Else
+            Logpath = Logpath & "\"
+        End If
+        Me.ErrLogFile = "ERR_" & Me.Logfile
+    End Sub
+
+    Public Sub StartLogger()
+        t.Start()
+        FCheck.Start()
+    End Sub
+
+    Private Sub FileSizeChecker()
+        'This Thread refreshes the filesize
+        While ProgramEnd = False
+            Me.ErrLogFileSize = CheckSize(Me.Logpath & Me.ErrLogFile)
+            Me.LogFileSize = CheckSize(Me.Logpath & Me.Logfile)
+            System.Threading.Thread.Sleep(5000)
+        End While
     End Sub
 
 
-    Public Function Write(sCode As Integer, sMessage As String) As Boolean
+    Private Sub Logger()
+        While ProgramEnd = False
+            EventHandle.WaitOne()
+            If Me.LogLines.Count > 1000 Or Me.LogLinesErr.Count > 1000 Then
+                WriteToFile()
+            End If
+        End While
+        WriteToFile()
+    End Sub
+
+    Private Sub WriteToFile()
+
+
+        Try
+            If Me.ErrLogFileSize > 20000000 Then
+                LogRename(Me.ErrLogFile, Me.Logpath)
+            End If
+        Catch ex As Exception
+            System.Console.WriteLine("Log Line 50:" & ex.Message)
+        End Try
+        Try
+            SyncLock EventHandle
+                Dim myWriter As New StreamWriter(Logpath & ErrLogFile, True)
+                For Each Line In Me.LogLinesErr
+                    myWriter.WriteLine(Line)
+
+                Next
+                myWriter.Close()
+                Me.LogLinesErr.Clear()
+            End SyncLock
+        Catch ex As Exception
+            System.Console.WriteLine("Log Line 64:" & ex.Message)
+        End Try
+
+
+        Try
+            If Me.LogFileSize > 20000000 Then
+                LogRename(Me.Logfile, Me.Logpath)
+            End If
+        Catch ex As Exception
+            System.Console.WriteLine("Log Line 74:" & ex.Message)
+        End Try
+        Try
+            SyncLock EventHandle
+                Dim LogWriter As New StreamWriter(Logpath & Logfile, True)
+                Dim i As Integer = 0
+                For Each Line In Me.LogLines
+                    LogWriter.WriteLine(Line)
+                Next
+
+                Me.LogLines.Clear()
+
+                LogWriter.Close()
+            End SyncLock
+        Catch ex As Exception
+            System.Console.WriteLine("Log Line 89:" & ex.Message)
+        End Try
+    End Sub
+
+    Public Function Write(ByVal sCode As Integer, ByVal sMessage As String, Optional ByVal ForceWriteToFile As Boolean = False) As Boolean
+        Try
+            Me.LogEventID = Me.LogEventID + 1
+        Catch ex As Exception
+            System.Console.WriteLine(ex.Message)
+        End Try
+
+
         If Me.Testmode = True Then
             Write = True
             Exit Function
         End If
-        Me.Logpath = Module1.Core.CurrentENV.GetLogPath
-        Me.Logfile = Module1.Core.CurrentENV.GetName & ".log"
+
         Write = False
         If Logpath.LastIndexOf("\") = Logpath.Length - 1 Then
         Else
@@ -34,53 +130,71 @@ Public Class LOG
         Else
             Me.Logfile = CurrENV.GetName & ".log"
         End If
-        ' Before every access to the log file, the log check if it's >20 MB.
-        Try
-            If CheckSize(Me.Logpath & Me.Logfile) > 20000000 Then
-                LogRename(Me.Logfile, Me.Logpath)
-            End If
-        Catch ex As Exception
 
-        End Try
 
+        ' ToDO: SyncLock Uses a lot of CPU Time!
         Select Case CurrENV.LogLevel
             ' The user can define how much log output he/she needs. At the moment there are two options: Debug Level and Error Log.
             Case 0
                 'Log Level 0 = Just write the Errors (...and hope there are none ;-))
                 If sCode = 0 Then
                     Try
-                        Dim myWriter As New StreamWriter(Logpath & Logfile, True)
-                        myWriter.WriteLine(sCode & " - " & Now & " - " & CurrENV.GetName & " - " & sMessage)
-                        myWriter.Close()
-                        System.Console.WriteLine(Now & "-" & CurrENV.GetName & "-" & sMessage)
+                        If CurrENV.LogSilent = True Then
+                        Else
+                            System.Console.WriteLine(Me.LogEventID & " - " & sCode & " - " & Now & " - " & sMessage)
+                        End If
+                        SyncLock EventHandle
+                            Me.LogLinesErr.AddLast(Me.LogEventID & " - " & sCode & " - " & Now & " - " & CurrENV.GetName & " - " & sMessage)
+                        End SyncLock
+                        If ForceWriteToFile = True Then
+                            Me.WriteToFile()
+                        End If
                     Catch ex As Exception
                         System.Console.WriteLine(ex.Message)
-                        System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
+                        System.Console.WriteLine(Me.LogEventID & "-" & Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
+                        Exit Function
+                    End Try
+                Else
+
+                End If
+            Case 1
+                If sCode = 0 Then
+                    'Log Level 1 = Give me the complete debug --> caution this is a lot of noise.
+                    Try
+                        If CurrENV.LogSilent = True Then
+                        Else
+                            System.Console.WriteLine(Me.LogEventID & " - " & sCode & " - " & Now & " - " & sMessage)
+                        End If
+                        SyncLock EventHandle
+                            Me.LogLinesErr.AddLast(Me.LogEventID & " - " & sCode & " - " & Now & " - " & CurrENV.GetName & " - " & sMessage)
+                        End SyncLock
+                        If ForceWriteToFile = True Then
+                            Me.WriteToFile()
+                        End If
+                    Catch ex As Exception
+                        System.Console.WriteLine(ex.Message)
+                        System.Console.WriteLine(Me.LogEventID & "-" & Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
                         Exit Function
                     End Try
                 Else
                     If CurrENV.LogSilent = True Then
                     Else
-                        System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
+                        Try
+                            System.Console.WriteLine(Me.LogEventID & " - " & sCode & " - " & Now & " - " & sMessage)
+                            SyncLock EventHandle
+                                Me.LogLines.AddLast(Me.LogEventID & " - " & sCode & " - " & Now & " - " & CurrENV.GetName & " - " & sMessage)
+                            End SyncLock
+                            If ForceWriteToFile = True Then
+                                Me.WriteToFile()
+                            End If
+                        Catch ex As Exception
+                            System.Console.WriteLine(ex.Message)
+                            System.Console.WriteLine(Me.LogEventID & "-" & Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
+                            Exit Function
+                        End Try
                     End If
                 End If
-            Case 1
-                'Log Level 1 = Give me the complete debug --> caution this is a lot of noise.
-                Try
-                    Dim myWriter As New StreamWriter(Logpath & Logfile, True)
-                    myWriter.WriteLine(sCode & " - " & Now & " - " & CurrENV.GetName & " - " & sMessage)
-                    myWriter.Close()
-                    If CurrENV.LogSilent = True Then
-                    Else
-                        System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
-                    End If
-                Catch ex As Exception
-                    System.Console.WriteLine(ex.Message)
-                    System.Console.WriteLine(Now & "-" & CurrENV.OrderID & "-" & CurrENV.GetName & "-" & sMessage)
-                    Exit Function
-                End Try
         End Select
-
         Write = True
     End Function
 

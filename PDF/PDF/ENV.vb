@@ -12,6 +12,7 @@ Public Class ENV
     Public HasMultipleIdentifiers As Boolean = False 'If this is true the program will lookup the Identifier Columns in the Mappings.
 
 
+
     Public FilterColumn As String
     Public FilterType As String
     Public FilterValue As String

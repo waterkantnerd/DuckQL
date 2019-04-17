@@ -11,12 +11,11 @@ Imports MySql.Data
 Imports MySql.Data.MySqlClient
 
 Public Class MyDataConnector
-    Private myConn As SqlConnection
+    'Private myConn As SqlConnection
     Private myCmd As SqlCommand
     Private myReader As SqlDataReader
     Private results As String
     Public SQLCon As SqlConnection
-    Protected RC As DataTable
     Public ENV As ENV
     Public SQLLog As LOG
 
@@ -38,6 +37,8 @@ Public Class MyDataConnector
 
     Public TableSchema As New TableSchema
     Public Tables As New LinkedList(Of TableSchema)
+
+    Private ConnectionCount As Integer = 0
 
     '--------------------------------------------------Initializing the class-------------------------------------------------
     Public Sub SetENV(ENV)
@@ -79,21 +80,21 @@ Public Class MyDataConnector
         SQLLog.Write(1, "Connecting to SQL Server...")
         Try
             'Create a Connection object.
-            myConn = New SqlConnection("Initial Catalog=" & sDB & ";" &
+            SQLCon = New SqlConnection("Initial Catalog=" & sDB & ";" &
                     "Data Source=" & sServer & ";User Id=" & sUser & "; Password=" & sPw & ";")
             'Create a Command object.
-            myCmd = myConn.CreateCommand
+            myCmd = SQLCon.CreateCommand
             myCmd.CommandText = "USE " & sDB
 
-            myConn.Open()
+            SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
-            ConnectDBByUser = myConn
+            ConnectDBByUser = SQLCon
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & Err.Description)
             ConnectDBByUser = Nothing
             Exit Function
         End Try
-        myConn.Close()
+        SQLCon.Close()
     End Function
     '------------------------------------------------------------------------------------------------------------------------
 
@@ -104,20 +105,20 @@ Public Class MyDataConnector
         SQLLog.Write(1, "Connecting to SQL Server...")
         Try
             'Create a Connection object.
-            Me.myConn = New SqlConnection("Server=" & sServer & ";Database=" & sDB & ";Trusted_Connection=True;;")
+            Me.SQLCon = New SqlConnection("Server=" & sServer & ";Database=" & sDB & ";Trusted_Connection=True;;")
             'Create a Command object.
-            myCmd = myConn.CreateCommand
+            myCmd = SQLCon.CreateCommand
             myCmd.CommandText = "USE " & sDB
 
-            myConn.Open()
+            SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
-            ConnectDBTrusted = myConn
+            ConnectDBTrusted = SQLCon
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBTrusted = Nothing
             Exit Function
         End Try
-        myConn.Close()
+        SQLCon.Close()
     End Function
     '------------------------------------------------------------------------------------------------------------------------
 
@@ -302,10 +303,10 @@ Public Class MyDataConnector
             Case Else
                 SQLLog.Write(1, Setting.Servertype & " choosen no Dataconnection neccessary.")
         End Select
-
     End Sub
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    '----------------------------------------------------> Add SQL Connection Handler!!!!
 
     '--------------------------------------------------Query and Data Handling---------------------------------------------------------------------------------------
     ' Here it all gets a bit messed up... but it works ;)
@@ -359,13 +360,30 @@ Public Class MyDataConnector
                 Return ds
             Case "MySQL"
                 Try
-                    If MySQLCon.State = ConnectionState.Open Then
-                        MySQLCon.Close()
+                    Dim TmpCon As New MySqlConnection
+
+                    If Not MySQLCon.State = ConnectionState.Open Or Not MySQLCon.State = ConnectionState.Closed Then
+                        SQLLog.Write(1, "Main Connection is working, creating temporary connection...")
+                        Select Case Setting.ConnMode
+                            Case "Normal"
+                                TmpCon = ConnectMySQL(Setting.Servername, Setting.SQLDB, Setting.User, Setting.Password)
+                        End Select
+                        If TmpCon.State = ConnectionState.Open Then
+                            TmpCon.Close()
+                        End If
+                        Dim dataadapter As New MySqlDataAdapter(SQLrq, TmpCon)
+                        Dim ds As New DataSet
+                        dataadapter.Fill(ds)
+                        CreateDataAdapter = ds
+                    Else
+                        If MySQLCon.State = ConnectionState.Open Then
+                            MySQLCon.Close()
+                        End If
+                        Dim dataadapter As New MySqlDataAdapter(SQLrq, MySQLCon)
+                        Dim ds As New DataSet
+                        dataadapter.Fill(ds)
+                        CreateDataAdapter = ds
                     End If
-                    Dim dataadapter As New MySqlDataAdapter(SQLrq, MySQLCon)
-                    Dim ds As New DataSet
-                    dataadapter.Fill(ds)
-                    CreateDataAdapter = ds
                     Exit Function
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
@@ -400,6 +418,137 @@ Public Class MyDataConnector
         CreateDataAdapter = Nothing
     End Function
 
+    Public Async Function ExecuteQueryAsync(SQLQueryBlock As SQLQueryBlock) As Task(Of Boolean)
+        'Writes one ore more querys asynchron to database
+        'Note: No XML Datafile handling here, since the XML Datafiles are handled in the SQLoperations-Class
+        Dim Res As String = ""
+
+        Dim RowsAffected As Integer = 0
+
+        SQLLog.Write(1, "Executing Query " & SQLQueryBlock.GetQueryString)
+
+        Select Case Setting.Servertype
+        ' Of course diffenrent Products need differnt objects here as well.
+        ' SQLrq is the query variable
+            Case "MSSQL"
+                Try
+                    If SQLCon.State = ConnectionState.Open Then
+                        SQLCon.Close()
+                    End If
+                    myCmd.CommandText = SQLQueryBlock.GetQueryString
+                    SQLCon.Open()
+                    SQLQueryBlock.HasBeenSendToSQLServer = True
+                    RowsAffected = Await myCmd.ExecuteNonQueryAsync
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    SQLCon.Close()
+                    Return True
+                Catch e As Exception
+                    SQLQueryBlock.e = e
+                    SQLQueryBlock.Success = False
+
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLQueryBlock.GetQueryString)
+                    SQLCon.Close()
+                    Return False
+                    Exit Function
+                End Try
+            Case "MS-SQL"
+                Try
+                    If SQLCon.State = ConnectionState.Open Then
+                        SQLCon.Close()
+                    End If
+                    myCmd.CommandText = SQLQueryBlock.GetQueryString
+                    SQLCon.Open()
+                    SQLQueryBlock.HasBeenSendToSQLServer = True
+                    RowsAffected = Await myCmd.ExecuteNonQueryAsync
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    SQLCon.Close()
+                    Return True
+                Catch e As Exception
+                    SQLQueryBlock.e = e
+                    SQLQueryBlock.Success = False
+
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLQueryBlock.GetQueryString)
+                    SQLCon.Close()
+                    Return False
+                    Exit Function
+                End Try
+            Case "MySQL"
+                Try
+                    If MySQLCon.State = ConnectionState.Open Then
+                        MySQLCon.Close()
+                    End If
+
+                    MySQLcmd.CommandText = SQLQueryBlock.GetQueryString
+                    MySQLCon.Open()
+                    If SQLQueryBlock.SQLqueryRunning = True Then
+                        Return False
+                    Else
+                        SQLQueryBlock.SQLqueryRunning = True
+                    End If
+                    SQLQueryBlock.HasBeenSendToSQLServer = True
+                    MySQLcmd.Connection = MySQLCon
+                    RowsAffected = Await MySQLcmd.ExecuteNonQueryAsync
+                    SQLQueryBlock.SQLqueryRunning = False
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    MySQLCon.Close()
+                    Return True
+                Catch e As Exception
+                    SQLQueryBlock.e = e
+                    SQLQueryBlock.Success = False
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLQueryBlock.GetQueryString)
+                    MySQLCon.Close()
+                    Return False
+                    Exit Function
+                End Try
+            Case "Access"
+                Try
+                    If AccessCon.State = ConnectionState.Open Then
+                        AccessCon.Close()
+                    End If
+                    AccessCmd.CommandText = SQLQueryBlock.GetQueryString
+                    AccessCon.Open()
+                    SQLQueryBlock.HasBeenSendToSQLServer = True
+                    RowsAffected = Await AccessCmd.ExecuteNonQueryAsync
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    AccessCon.Close()
+                    Return True
+                Catch e As Exception
+                    SQLQueryBlock.e = e
+                    SQLQueryBlock.Success = False
+
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLQueryBlock.GetQueryString)
+                    AccessCon.Close()
+                    Return False
+                    Exit Function
+                End Try
+            Case "CSV"
+                Try
+                    If CSVCon.State = ConnectionState.Open Then
+                        CSVCon.Close()
+                    End If
+                    CSVCmd.CommandText = SQLQueryBlock.GetQueryString
+                    CSVCon.Open()
+                    SQLQueryBlock.HasBeenSendToSQLServer = True
+                    RowsAffected = Await CSVCmd.ExecuteNonQueryAsync
+                    SQLLog.Write(1, RowsAffected & " Row(s) affected.")
+                    CSVCon.Close()
+                    Return True
+                Catch e As Exception
+                    SQLQueryBlock.e = e
+                    SQLQueryBlock.Success = False
+
+                    SQLLog.Write(0, e.Message & " - Query was: " & SQLQueryBlock.GetQueryString)
+                    CSVCon.Close()
+                    Return False
+                    Exit Function
+                End Try
+            Case Else
+                SQLLog.Write(0, "Execute Query - Unknown (Target) Servertype. 0 Querys were send.")
+                Return Nothing
+        End Select
+        RowsAffected = 0
+    End Function
+
     Public Function ExecuteQuery(SQLrq As String) As Boolean
         'Writes one ore more querys to database
         'Note: No XML Datafile handling here, since the XML Datafiles are handled in the SQLoperations-Class
@@ -412,37 +561,37 @@ Public Class MyDataConnector
         ' SQLrq is the query variable
             Case "MSSQL"
                 Try
-                    If myConn.State = ConnectionState.Open Then
-                        myConn.Close()
+                    If SQLCon.State = ConnectionState.Open Then
+                        SQLCon.Close()
                     End If
                     myCmd.CommandText = SQLrq
-                    myConn.Open()
+                    SQLCon.Open()
                     RowsAffected = myCmd.ExecuteNonQuery
                     SQLLog.Write(1, RowsAffected & " Row(s) affected.")
-                    myConn.Close()
+                    SQLCon.Close()
                     ExecuteQuery = True
                 Catch e As Exception
                     ExecuteQuery = False
                     SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
-                    myConn.Close()
+                    SQLCon.Close()
                     Exit Function
                 End Try
             Case "MS-SQL"
                 Try
-                    If myConn.State = ConnectionState.Open Then
-                        myConn.Close()
+                    If SQLCon.State = ConnectionState.Open Then
+                        SQLCon.Close()
                     End If
                     myCmd.CommandText = SQLrq
-                    myConn.Open()
+                    SQLCon.Open()
 
                     RowsAffected = myCmd.ExecuteNonQuery
                     SQLLog.Write(1, RowsAffected & " Row(s) affected.")
-                    myConn.Close()
+                    SQLCon.Close()
                     ExecuteQuery = True
                 Catch e As Exception
                     ExecuteQuery = False
                     SQLLog.Write(0, e.Message & " - Query was: " & SQLrq)
-                    myConn.Close()
+                    SQLCon.Close()
                     Exit Function
                 End Try
             Case "MySQL"
@@ -512,16 +661,21 @@ Public Class MyDataConnector
     ' I think this is a very elegant and simple way to mask text, dates and NULL values.
     ' On this way Querys a much easier to read and write. 
 
-    Public Function CSQL(SQL_Attribut As String, Optional VariableType As String = "String") As String
+    Public Function CSQL(ByVal SQL_Attribut As String, Optional ByVal VariableType As String = "String") As String
         ' This function gets a value and a target data type
         ' and masks the value, so that is sql inline for using it within the query
+
+        If IsNothing(VariableType) = True Then
+            VariableType = "String"
+        End If
+
         If IsNothing(SQL_Attribut) Or SQL_Attribut = vbNullString Then
             CSQL = "NULL"
             Exit Function
         Else
-            Select Case VariableType
+            Select Case VariableType.ToUpper
 
-                Case "String", "8"
+                Case "STRING", "8"
                     If InStr(1, SQL_Attribut, "\") <> 0 Then
                         SQL_Attribut = Replace(CStr(SQL_Attribut), "\", "\\")
                     Else
@@ -536,7 +690,7 @@ Public Class MyDataConnector
                         Exit Function
                     End If
 
-                Case "Integer", "Double", "Float", "3", "int32", "int64"
+                Case "INTEGER", "DOUBLE", "FLOAT", "3", "INT32", "INT64"
                     If IsNumeric(SQL_Attribut) Then
                         CSQL = CStr(SQL_Attribut)
                         Exit Function
@@ -545,7 +699,7 @@ Public Class MyDataConnector
                         Exit Function
                     End If
 
-                Case "Boolean"
+                Case "BOOLEAN"
                     If IsNumeric(SQL_Attribut) Then
                         If CBool(SQL_Attribut) Then
                             CSQL = "TRUE"
@@ -565,7 +719,7 @@ Public Class MyDataConnector
                         End Select
                     End If
 
-                Case "Date"
+                Case "DATE"
                     If IsDate(SQL_Attribut) Then
                         CSQL = Format(CDate(SQL_Attribut), "\#mm\/dd\/yyyy\#")
                         Exit Function
@@ -573,7 +727,7 @@ Public Class MyDataConnector
                         CSQL = "'" & SQL_Attribut & "'"
                         Exit Function
                     End If
-                Case "Time", "4"
+                Case "TIME", "4"
                     If IsDate(SQL_Attribut) Then
                         CSQL = Format(CDate(SQL_Attribut), "\#hh:mm:ss#\")
                         Exit Function
@@ -581,7 +735,7 @@ Public Class MyDataConnector
                         CSQL = "'" & SQL_Attribut & "'"
                         Exit Function
                     End If
-                Case "DateTime", "7"
+                Case "DATETIME", "7"
                     If IsDate(SQL_Attribut) Then
                         Select Case Setting.Servertype
                             Case "MySQL"

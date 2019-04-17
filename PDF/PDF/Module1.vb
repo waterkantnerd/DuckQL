@@ -165,6 +165,7 @@ Module Module1
             ' initializes the log object
             Log.SetENV(EnvoirementObject)
             EnvoirementObject.SetTimeStamp()
+            Log.StartLogger()
         Catch ex As Exception
             System.Console.WriteLine(ex.Message)
             Exit Sub
@@ -206,9 +207,6 @@ Module Module1
         ' loads data from the datasource
         LadeDatenVonQuelle()
         ' writes data to targed
-
-
-
         SchreibeDatenInZiel()
 
         If Core.CurrentENV.ConsistenceCheck = True Then
@@ -216,6 +214,7 @@ Module Module1
             If ConsistenceCheck() = True Then
             Else
                 Log.Write(0, "Warning! Job was not consistent. Source and Target rows are not equal.")
+
             End If
         Else
 
@@ -226,13 +225,14 @@ Module Module1
         Core.JobEndTime = mytime
         Log.Write(1, "Job ended at " & mytime)
 
+        'Calculate Job Time
         Dim Jobtime As TimeSpan = Core.JobEndTime - Core.JobStartTime
         Dim Sekunden As Long = Jobtime.Seconds
         Dim Minuten As Long = Jobtime.Minutes
         Dim Stunden As Long = Jobtime.Hours
         Dim Tage As Long = Jobtime.Days
         Log.Write(1, "Job took " & Tage & " days " & Stunden & " hours " & Minuten & " minutes " & Sekunden & " seconds.")
-
+        Log.ProgramEnd = True
     End Sub
 
     Private Function ConsistenceCheck() As Boolean
@@ -247,9 +247,9 @@ Module Module1
             Exit Function
         End If
 
-        Dim SQLopSource As New SQLOperations
+        Dim SQLopSource As New DataOperations
         SQLopSource.Setup(Source)
-        Dim SQLopTarget As New SQLOperations
+        Dim SQLopTarget As New DataOperations
         SQLopTarget.Setup(Target)
         Dim SourceRows As Long = SQLopSource.CountRows
         Dim TargetRows As Long = SQLopTarget.CountRows
@@ -260,10 +260,30 @@ Module Module1
         Else
             Log.Write(1, "Source Rows=" & SourceRows & " != Target Rows=" & TargetRows)
             Consistent = False
+            CheckForMissingRecords(SQLopSource, SQLopTarget)
         End If
 
         ConsistenceCheck = Consistent
     End Function
+
+    Private Sub CheckForMissingRecords(Source As DataOperations, Target As DataOperations)
+        'Auxallary Sub ToDo: DELETE THIS SUB!
+        Dim SourceDS As DataSet = Source.GetDataSet()
+        Dim TargetDS As DataSet = Target.GetDataSet()
+        Dim MissingRowID As Integer = 0
+
+        For Each Item In SourceDS.Tables(0).Rows()
+            Dim TargetRow() As DataRow = TargetDS.Tables(0).Select("id=" & Item(0).ToString & "")
+            If TargetRow.Count = 0 Then
+                Core.CurrentLog.Write(1, "!!!! FAIL !!!!")
+                Core.CurrentLog.Write(1, "Source " & Item(0).ToString & " | Target --- FAIL")
+                MissingRowID = CInt(Item(0).ToString)
+
+            Else
+                Core.CurrentLog.Write(1, "Source " & Item(0).ToString & " | Target " & TargetRow(0).Item(0) & " --- SUCCESS")
+            End If
+        Next
+    End Sub
 
     Private Sub LadeDatenVonQuelle()
         '----------------------------------------------Summary----------------------------------------------------------------------------------------------------
@@ -276,7 +296,7 @@ Module Module1
         ' One Layer for generic database operations and types, like querys, sql connectors, etc. which is in the sql class.
         ' However the program specific logic is in the sql operations class. 
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
-        Dim SQLop As New SQLOperations
+        Dim SQLop As New DataOperations
         Dim Log As LOG = Core.CurrentLog
 
         Dim Connector As MyDataConnector = GetConnector("source")
@@ -306,7 +326,7 @@ Module Module1
         '----------------------------------------------Summary----------------------------------------------------------------------------------------------------
         ' This sub writes data from the program core to the target database
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
-        Dim SQLop As New SQLOperations
+        Dim SQLop As New DataOperations
         Dim Log As LOG = Core.CurrentLog
         Dim Connector As MyDataConnector = GetConnector("target")
         If IsNothing(Connector) Then

@@ -8,6 +8,8 @@
     Public Servertype As String
     Public FilePath As String
     Public BatchQueryAllowed As Boolean = True
+    Public MaxConnections As Integer = 0    'ToDo: Do I really need this?
+    Public Max_Paket As Integer = 524288000 'MAX Packet Size depending on Target Server Configuration --> For Bulk Updloads... ToDo: Add this in Configuration Dialog...
     '-----------------------------------------------------------------
 
     '-------------Tablesettings---------------------------------------
@@ -45,10 +47,4 @@
     Public Tested As Boolean = False
     Public Worked As Boolean = False
     '-----------------------------------------------------------------
-
-
-
-
-
-
 End Class
