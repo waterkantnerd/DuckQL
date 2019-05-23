@@ -14,7 +14,6 @@ Public Class MyDataConnector
     'Private myConn As SqlConnection
     Private myCmd As SqlCommand
     Private myReader As SqlDataReader
-    Private results As String
     Public SQLCon As SqlConnection
     Public ENV As ENV
     Public SQLLog As LOG
@@ -37,8 +36,6 @@ Public Class MyDataConnector
 
     Public TableSchema As New TableSchema
     Public Tables As New LinkedList(Of TableSchema)
-
-    Private ConnectionCount As Integer = 0
 
     '--------------------------------------------------Initializing the class-------------------------------------------------
     Public Sub SetENV(ENV)
@@ -306,8 +303,6 @@ Public Class MyDataConnector
     End Sub
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    '----------------------------------------------------> Add SQL Connection Handler!!!!
-
     '--------------------------------------------------Query and Data Handling---------------------------------------------------------------------------------------
     ' Here it all gets a bit messed up... but it works ;)
     ' I grew up in an Access/VBA environment, so the Recordset Object was top of the line for me.
@@ -418,6 +413,122 @@ Public Class MyDataConnector
         CreateDataAdapter = Nothing
     End Function
 
+    Public Sub CopyDataToMSSQL()
+        If SQLCon.State = ConnectionState.Open Then
+            SQLCon.Close()
+        End If
+        SQLCon.Open()
+
+        Using BulkCopy As New SqlBulkCopy(SQLCon) With {
+            .NotifyAfter = Me.Setting.NotificationRows,
+            .BatchSize = Me.Setting.Max_Paket
+        }
+
+            If Me.Setting.UpdateAllowed = True Then
+                If Me.Setting.TmpTableAllowed = True Then
+                    BulkCopy.DestinationTableName = Me.Setting.TmpSQLTable
+                Else
+                    SQLLog.Write(0, "Config ERROR: No TmpTables allowed for BULK Update")
+                End If
+            Else
+                BulkCopy.DestinationTableName = Me.Setting.SQLTable
+            End If
+
+            AddHandler BulkCopy.SqlRowsCopied, AddressOf BulkRowsCopied_Notifier
+            For Each Mapping In Module1.Core.Mappings
+                Dim BCMapping As New SqlBulkCopyColumnMapping With {
+                    .DestinationColumn = Mapping.Targetname,
+                    .DestinationOrdinal = Mapping.TargetOrdinal,
+                    .SourceColumn = Mapping.Targetname,
+                    .SourceOrdinal = Mapping.SourceOrdinal
+                }
+                BulkCopy.ColumnMappings.Add(BCMapping)
+            Next
+            Try
+                BulkCopy.WriteToServer(Module1.Core.TargetDataTable)
+            Catch ex As Exception
+                SQLLog.Write(0, "Error while syncing data to sql server: " & ex.Message)
+            End Try
+            BulkCopy.Close()
+        End Using
+        If SQLCon.State = ConnectionState.Open Then
+            SQLCon.Close()
+        End If
+
+        If Me.Setting.UpdateAllowed = True Then
+            If Me.Setting.TmpTableAllowed = True Then
+                MergeMSSQLTables()
+            Else
+                SQLLog.Write(0, "Config ERROR: No TmpTables allowed for BULK Update")
+            End If
+        End If
+
+
+    End Sub
+
+    Private Sub MergeMSSQLTables()
+        Dim SB As New System.Text.StringBuilder
+
+        SB.Append("MERGE " & Me.Setting.SQLTable & " AS TARGET")
+        SB.Append("USING " & Me.Setting.TmpSQLTable & " As SOURCE")
+        For Each Column In Me.TableSchema.Columns
+            If Column.IsKey Then
+                SB.Append("On (TARGET." & Column.Name & " = SOURCE." & Column.Name)
+            End If
+        Next
+        SB.Append(")")
+        SB.Append(" WHEN MATCHED AND ")
+        Dim i As Integer = 0
+        For Each Column In ENV.Mappings
+            If i + 1 = ENV.Mappings.Count Then
+                SB.Append("Target." & Column.Targetname & "<>" & "SOURCE." & Column.Targetname)
+            Else
+                SB.Append("Target." & Column.Targetname & "<>" & "SOURCE." & Column.Targetname & " OR ")
+            End If
+        Next
+        i = 0
+        SB.Append(" THEN UPDATE SET ")
+        For Each Column In ENV.Mappings
+            If i + 1 = ENV.Mappings.Count Then
+                SB.Append("Target." & Column.Targetname & "=" & "SOURCE." & Column.Targetname)
+            Else
+                SB.Append("Target." & Column.Targetname & "=" & "SOURCE." & Column.Targetname & ",")
+            End If
+        Next
+        i = 0
+        If Me.Setting.InsertAllowed = True Then
+            SB.Append(" WHEN Not MATCHED BY TARGET THEN INSERT (")
+            For Each Column In ENV.Mappings
+                If i + 1 = ENV.Mappings.Count Then
+                    SB.Append(Column.Targetname)
+                Else
+                    SB.Append(Column.Targetname & ",")
+                End If
+            Next
+            i = 0
+            SB.Append(") VALUES (")
+            For Each Column In ENV.Mappings
+                If i + 1 = ENV.Mappings.Count Then
+                    SB.Append("SOURCE." & Column.Targetname)
+                Else
+                    SB.Append("SOURCE." & Column.Targetname & ",")
+                End If
+            Next
+            SB.Append(")")
+        End If
+        If Me.Setting.DeleteAllowed = True Then
+            SB.Append(" WHEN NOT MATCHED BY SOURCE ")
+            SB.Append(" THEN DELETE ")
+        End If
+        ExecuteQuery(SB.ToString)
+    End Sub
+
+
+    Private Sub BulkRowsCopied_Notifier(Sender As Object, e As SqlRowsCopiedEventArgs)
+        SQLLog.Write(1, e.RowsCopied & " rows copied to SQL Server")
+    End Sub
+
+
     Public Async Function ExecuteQueryAsync(SQLQueryBlock As SQLQueryBlock) As Task(Of Boolean)
         'Writes one ore more querys asynchron to database
         'Note: No XML Datafile handling here, since the XML Datafiles are handled in the SQLoperations-Class
@@ -429,7 +540,6 @@ Public Class MyDataConnector
 
         Select Case Setting.Servertype
         ' Of course diffenrent Products need differnt objects here as well.
-        ' SQLrq is the query variable
             Case "MSSQL"
                 Try
                     If SQLCon.State = ConnectionState.Open Then
@@ -653,7 +763,6 @@ Public Class MyDataConnector
         End Select
         RowsAffected = 0
     End Function
-
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     '---------------------------------------------------------Masking Strings and Dates------------------------------------------------------------------------------
@@ -759,6 +868,8 @@ Public Class MyDataConnector
         Dim DT As New DataTable
         Dim Fieldlist As New List(Of String)
 
+        'ToDo: Do we really need to load a 150GB Table?  
+
         '---------------------------------Depending on the product----------------------------------------------------
         Select Case Setting.Servertype
             Case "MS-SQL"
@@ -819,7 +930,6 @@ Public Class MyDataConnector
         End Select
         '------------------------------------------------------------------------------------------------------------------------------------------
 
-
         Dim myField As DataRow
         Dim myFieldProperty As DataColumn
         TableSchema.Columns.Clear()
@@ -834,6 +944,10 @@ Public Class MyDataConnector
                         Column.MergeDataType()
                 End Select
             Next
+            Column.SchemaInfo = myField
+            Column.SchemaCaption = DT.Columns
+            Dim SchemaInfo As String = ""
+            SQLLog.Write(1, SchemaInfo)
             TableSchema.Columns.AddLast(Column)
         Next
     End Sub
@@ -849,8 +963,9 @@ Public Class MyDataConnector
                 TmpTables = SQLCon.GetSchema("Tables")
                 For Each Row In TmpTables.Rows
                     If Row("TABLE_TYPE").ToString.ToUpper = "BASE TABLE" Then
-                        Dim TBS As New TableSchema
-                        TBS.TableName = Row("TABLE_NAME".ToString)
+                        Dim TBS As New TableSchema With {
+                            .TableName = Row("TABLE_NAME".ToString)
+                        }
                         Tables.AddLast(TBS)
                     Else
                     End If
@@ -864,8 +979,9 @@ Public Class MyDataConnector
                 TmpTables = SQLCon.GetSchema("Tables")
                 For Each Row In TmpTables.Rows
                     If Row("TABLE_TYPE").ToString.ToUpper = "TABLE" Then
-                        Dim TBS As New TableSchema
-                        TBS.TableName = Row("TABLE_NAME".ToString)
+                        Dim TBS As New TableSchema With {
+                            .TableName = Row("TABLE_NAME".ToString)
+                        }
                         Tables.AddLast(TBS)
                     Else
                     End If
@@ -879,8 +995,9 @@ Public Class MyDataConnector
                 TmpTables = MySQLCon.GetSchema("Tables")
                 For Each Row In TmpTables.Rows
                     If Row("TABLE_TYPE").ToString.ToUpper = "BASE TABLE" Then
-                        Dim TBS As New TableSchema
-                        TBS.TableName = Row("TABLE_NAME".ToString)
+                        Dim TBS As New TableSchema With {
+                            .TableName = Row("TABLE_NAME".ToString)
+                        }
                         Tables.AddLast(TBS)
                     Else
                     End If
@@ -894,8 +1011,9 @@ Public Class MyDataConnector
                 TmpTables = AccessCon.GetSchema("Tables")
                 For Each Row In TmpTables.Rows
                     If Row("TABLE_TYPE").ToString.ToUpper = "TABLE" Then
-                        Dim TBS As New TableSchema
-                        TBS.TableName = Row("TABLE_NAME".ToString)
+                        Dim TBS As New TableSchema With {
+                            .TableName = Row("TABLE_NAME".ToString)
+                        }
                         Tables.AddLast(TBS)
                     Else
                     End If
@@ -909,8 +1027,9 @@ Public Class MyDataConnector
                 TmpTables = CSVCon.GetSchema("Tables")
                 For Each Row In TmpTables.Rows
                     If Row("TABLE_TYPE").ToString.ToUpper = "TABLE" Then
-                        Dim TBS As New TableSchema
-                        TBS.TableName = Row("TABLE_NAME".ToString)
+                        Dim TBS As New TableSchema With {
+                            .TableName = Row("TABLE_NAME".ToString)
+                        }
                         Tables.AddLast(TBS)
                     Else
                     End If
@@ -918,5 +1037,24 @@ Public Class MyDataConnector
                 CSVCon.Close()
         End Select
     End Sub
+
+    Public Function GetColumnSchema(ByVal ColumnName As String) As ColumnSchema
+        For Each Schema In Me.TableSchema.Columns
+            If Schema.Name = ColumnName Then
+                Return Schema
+            End If
+        Next
+        Return Nothing
+    End Function
+
+    Public Function CountPKs() As Integer
+        Dim PKs As Integer = 0
+        For Each Schema In Me.TableSchema.Columns
+            If Schema.IsKey = True Then
+                PKs = PKs + 1
+            End If
+        Next
+        Return PKs
+    End Function
 
 End Class

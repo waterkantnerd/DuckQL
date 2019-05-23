@@ -1,7 +1,7 @@
 ﻿'----------------------------------------------Explanation Core (Summary)-------------------------------------------------------------------------
 ' Core is the central storrage for the program.
 '----------------------------------------------------------------------------------------------------------------------------------------------------------
-Public Class Core
+Public Class Core : Implements IDisposable
     Public CurrentENV As ENV                        ' Environment Object
     Public CurrentLog As LOG                        ' Log Object 
     Public SQLServer As New LinkedList(Of MyDataConnector)      ' List of all SQL Server Objects. At the moment you only need two (source and target), but I plan to extend this to multiple sources/targets
@@ -14,23 +14,37 @@ Public Class Core
     Public JobEndTime As Date
     Public MaxLayers As Integer = 0 'If you convert a xml 2 csv you have to know the maximum of layers of an row, to prevent dataloss. -> will be written to the header
     Public Files As New LinkedList(Of String)       ' List of Files that should be process. -> Will be filled if a directory with flatfiles should be processed
-    Public QueryCountWorked As Long = 100000000
     Private QueryBlockID As Integer = 0
     Public Mappings(256) As Mapping
     Public NoSourceMappings(256) As Mapping
     Public SourceMappings(256) As Mapping
+    Public SourceIndex As DataSet
     Public TargetIndex As DataSet                   ' The DataSet to check if a row already exists on target
     Public TargetDataTable As New DataTable         ' For Bulk Uploads to MS-SQL Servers...
     Public NoRowsInTargetTable As Boolean = False   ' This minimizes the checks if a row already exists in target db
     Public QueryBlock As New System.Threading.EventWaitHandle(True, Threading.EventResetMode.ManualReset)
-    Public AllQueryBlocksFinished = False
-    Public DataTransferFinished = False
+    Public AllQueryBlocksFinished As Boolean = False
+    Public DataTransferFinished As Boolean = False
+    Public RowHandle As New System.Threading.EventWaitHandle(True, Threading.EventResetMode.ManualReset)
 
-    Public Sub QueryBlockHandler()
+
+    Public Async Sub QueryBlockHandler()
         While DataTransferFinished = False
             If Me.AllQueryBlocksFinished = True Then
             Else
                 CheckQueryBlocks()
+            End If
+            If SQLCommands.Count = 0 Then
+            Else
+                For Each QB In SQLCommands
+                    If QB.SQLqueryRunning = False Then
+                        If QB.HasBeenSendToSQLServer = False Then
+                            Dim Success As Boolean
+                            CurrentLog.Write(1, "Sending Query Block " & QB.QBID & " to server...")
+                            Success = Await QB.SendToSQLServer()
+                        End If
+                    End If
+                Next
             End If
         End While
     End Sub
@@ -66,7 +80,7 @@ Public Class Core
         Me.SessionStamp = Now() & " - " & i
     End Sub
 
-    Public Sub Clear()
+    Public Sub Dispose() Implements IDisposable.Dispose
         Me.CurrentENV = Nothing
         Me.CurrentLog = Nothing
         Me.SQLServer.Clear()
@@ -79,7 +93,17 @@ Public Class Core
         Me.JobEndTime = Nothing
         Me.QueryBlockID = 0
         Me.Files.Clear()
-
+        Me.QueryBlockID = 0
+        Me.QueryBlock.Dispose()
+        ReDim Mappings(256)
+        ReDim NoSourceMappings(256)
+        ReDim SourceMappings(256)
+        TargetIndex.Dispose()
+        TargetDataTable.Dispose()
+        NoRowsInTargetTable = False
+        AllQueryBlocksFinished = False
+        DataTransferFinished = False
+        GC.SuppressFinalize(Me)
     End Sub
 
     Public Function GetTarget() As MyDataConnector

@@ -15,4 +15,7 @@ Public Class Mapping
     Public XMLAttributeName As String = ""
     Public XPath As String = ""
     Public UseAsIdentifier As Boolean = False
+    Public SourceOrdinal As Integer = 0
+    Public TargetOrdinal As Integer = 0
+
 End Class

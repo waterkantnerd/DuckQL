@@ -60,7 +60,7 @@ Public Class XMLFiles
         Try
             Dim XMLReader As Xml.XmlReader _
           = New Xml.XmlTextReader(sPath)
-
+            ' ToDo: Harmonize ToUpper or ToLower and TRUE & YES on boolean values
             ' Reading from XML File
             With XMLReader
 
@@ -148,17 +148,32 @@ Public Class XMLFiles
                                                 Case "StringPart"
                                                     Setting.StringPart = .Value
                                                 Case "InsertAllowed"
-                                                    If .Value = "YES" Or .Value = "True" Then
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
                                                         Setting.InsertAllowed = True
                                                     Else
                                                         Setting.InsertAllowed = False
                                                     End If
                                                 Case "UpdateAllowed"
-                                                    If .Value = "YES" Or .Value = "True" Then
+                                                    If .Value.ToLower = "yes" Or .Value = "true" Then
                                                         Setting.UpdateAllowed = True
                                                     Else
                                                         Setting.UpdateAllowed = False
                                                     End If
+                                                Case "TmpTableAllowed"
+                                                    Dim MyVal As String = .Value
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
+                                                        Setting.TmpTableAllowed = True
+                                                    Else
+                                                        Setting.TmpTableAllowed = False
+                                                    End If
+                                                Case "UseOwnTmpTable"
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
+                                                        Setting.UseOwnTmpTable = True
+                                                    Else
+                                                        Setting.UseOwnTmpTable = False
+                                                    End If
+                                                Case "PredefinedTmpTableName"
+                                                    Setting.PredefinedTmpTable = .Value
                                                 Case "Servertype"
                                                     Setting.Servertype = .Value
                                                 Case "SessionTimestampField"
@@ -332,6 +347,9 @@ Public Class XMLFiles
             .WriteAttributeString("StringPart", Target.StringPart)
             .WriteAttributeString("InsertAllowed", Target.InsertAllowed)
             .WriteAttributeString("UpdateAllowed", Target.UpdateAllowed)
+            .WriteAttributeString("TmpTableAllowed", Target.TmpTableAllowed)
+            .WriteAttributeString("UseOwnTmpTable", Target.UseOwnTmpTable)
+            .WriteAttributeString("PredefinedTmpTableName", Target.PredefinedTmpTable)
             .WriteAttributeString("Servertype", Target.Servertype)
             .WriteEndElement()
 

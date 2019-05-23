@@ -116,9 +116,31 @@ Public Class Reihe
         If SQL.Setting.BatchQueryAllowed = True Then
             Select Case SQL.Setting.Servertype
                 Case "MSSQL"
-                    MakeDefaultUpdateString()
+                    SyncLock Module1.Core.RowHandle
+                        Log.Write(1, "Using MS-SQL BULK-update string mode...")
+                        Dim DTRow As DataRow = Module1.Core.TargetDataTable.NewRow
+                        For Each Spalte In Spalten
+                            If Spalte.Wert = "" Then
+                                DTRow(Spalte.Mapping.Targetname) = DBNull.Value
+                            Else
+                                DTRow(Spalte.Mapping.Targetname) = Spalte.Wert
+                            End If
+                        Next
+                        Module1.Core.TargetDataTable.Rows.Add(DTRow)
+                    End SyncLock
                 Case "MS-SQL"
-                    MakeDefaultUpdateString()
+                    SyncLock Module1.Core.RowHandle
+                        Log.Write(1, "Using MS-SQL BULK-update string mode...")
+                        Dim DTRow As DataRow = Module1.Core.TargetDataTable.NewRow
+                        For Each Spalte In Spalten
+                            If Spalte.Wert = "" Then
+                                DTRow(Spalte.Mapping.Targetname) = DBNull.Value
+                            Else
+                                DTRow(Spalte.Mapping.Targetname) = Spalte.Wert
+                            End If
+                        Next
+                        Module1.Core.TargetDataTable.Rows.Add(DTRow)
+                    End SyncLock
                 Case "MySQL"
                     SB.Append("(")
                     Dim i As Integer = 0
@@ -235,15 +257,18 @@ Public Class Reihe
                     Me.InsertString = SB.ToString
                 Case "MS-SQL"
                     'This preprares a MS-SQL Bulk Insert with a Data Table
-                    Log.Write(1, "Using MS-SQL BULK-insert string mode...")
-                    Dim DTRow As DataRow = Module1.Core.TargetDataTable.NewRow
-                    For Each Spalte In Spalten
-                        Dim DColumn As New DataColumn With {
-                            .ColumnName = Spalte.Mapping.Targetname
-                        }
-                        DTRow(DColumn) = Spalte.Wert
-                    Next
-                    Module1.Core.TargetDataTable.Rows.Add(DTRow)
+                    SyncLock Module1.Core.RowHandle
+                        Log.Write(1, "Using MS-SQL BULK-insert string mode...")
+                        Dim DTRow As DataRow = Module1.Core.TargetDataTable.NewRow
+                        For Each Spalte In Spalten
+                            If Spalte.Wert = "" Then
+                                DTRow(Spalte.Mapping.Targetname) = DBNull.Value
+                            Else
+                                DTRow(Spalte.Mapping.Targetname) = Spalte.Wert
+                            End If
+                        Next
+                        Module1.Core.TargetDataTable.Rows.Add(DTRow)
+                    End SyncLock
                 Case "MSSQL"
                     'This preprares a MS-SQL Bulk Insert with a Data Table
                     Log.Write(1, "Using MS-SQL BULK-insert string mode...")

@@ -8,8 +8,8 @@ Public Class LOG
     Public ErrLogFile As String = "ERR_" & Me.Logfile
     Public Testmode As Boolean = False
     Private CurrENV As ENV
-    Private LogLines As New LinkedList(Of String)
-    Private LogLinesErr As New LinkedList(Of String)
+    Private ReadOnly LogLines As New LinkedList(Of String)
+    Private ReadOnly LogLinesErr As New LinkedList(Of String)
     Public ProgramEnd As Boolean = False
     Private t As New Threading.Thread(AddressOf Logger)
     Private FCheck As New Threading.Thread(AddressOf FileSizeChecker)

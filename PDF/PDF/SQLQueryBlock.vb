@@ -43,19 +43,20 @@
         End Select
     End Sub
 
-    Public Async Sub SendToSQLServer()
+    Public Async Function SendToSQLServer() As Task(Of Boolean)
         Dim Target As MyDataConnector = Module1.Core.GetTarget
 
         If IsNothing(Target) Then
             LOG.Write(0, "Could not get any target connector. Will not send a query to target.")
-            Exit Sub
+            Return Nothing
         End If
         LOG.Write(1, "Sending QueryBlock " & QBID & " to server")
         Dim SQLTask As Task(Of Boolean) = Target.ExecuteQueryAsync(Me)
         Success = Await SQLTask
 
         LOG.Write(1, "Received QueryBlock " & QBID & " from server with result " & Success)
-    End Sub
+        Return Success
+    End Function
 
     Public Sub CopyQueryToBlock(Query As SQLQuery)
         Querys.AddLast(Query)
@@ -148,7 +149,7 @@
             Case "MSSQL"
                 'MSSQL is using a DS for BULK Methods...
             Case Else
-
+                'BULK Methods for other connectors have not been defined...
         End Select
         Return Nothing
     End Function

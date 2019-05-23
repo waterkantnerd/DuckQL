@@ -118,10 +118,6 @@ Partial Class Konfiguration
         Me.C_CheckConsistency = New System.Windows.Forms.CheckBox()
         Me.C_IDlessBatch = New System.Windows.Forms.CheckBox()
         Me.MappingGrid_Offline = New System.Windows.Forms.DataGridView()
-        Me.MultipleIdentifier = New System.Windows.Forms.CheckBox()
-        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
-        Me.L_OrderID = New System.Windows.Forms.Label()
-        Me.B_Load = New System.Windows.Forms.Button()
         Me.SourceColumn_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SourceXPath = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.TargetColumn_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -132,6 +128,14 @@ Partial Class Konfiguration
         Me.StaticValue_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.XMLAttribute = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.IsIdentity_offline = New System.Windows.Forms.DataGridViewCheckBoxColumn()
+        Me.MultipleIdentifier = New System.Windows.Forms.CheckBox()
+        Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
+        Me.L_OrderID = New System.Windows.Forms.Label()
+        Me.B_Load = New System.Windows.Forms.Button()
+        Me.C_TempTable = New System.Windows.Forms.CheckBox()
+        Me.l_PredefinedTmpTable = New System.Windows.Forms.Label()
+        Me.C_PredefinedTmpTable = New System.Windows.Forms.ComboBox()
+        Me.C_ownTmpTable = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -521,6 +525,10 @@ Partial Class Konfiguration
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.C_ownTmpTable)
+        Me.GroupBox2.Controls.Add(Me.l_PredefinedTmpTable)
+        Me.GroupBox2.Controls.Add(Me.C_PredefinedTmpTable)
+        Me.GroupBox2.Controls.Add(Me.C_TempTable)
         Me.GroupBox2.Controls.Add(Me.B_TargetSaveFile)
         Me.GroupBox2.Controls.Add(Me.L_TargetIDDatatype)
         Me.GroupBox2.Controls.Add(Me.C_TargetIDDatatype)
@@ -975,7 +983,7 @@ Partial Class Konfiguration
         '
         Me.PartOfSubstring.FlatStyle = System.Windows.Forms.FlatStyle.Flat
         Me.PartOfSubstring.HeaderText = "Part Of Substring"
-        Me.PartOfSubstring.Items.AddRange(New Object() {"left", "right"})
+        Me.PartOfSubstring.Items.AddRange(New Object() {"left", "right", " "})
         Me.PartOfSubstring.Name = "PartOfSubstring"
         Me.PartOfSubstring.Width = 92
         '
@@ -1075,40 +1083,6 @@ Partial Class Konfiguration
         Me.MappingGrid_Offline.TabIndex = 51
         Me.ToolTipKonfig.SetToolTip(Me.MappingGrid_Offline, "Enter the mappings between source and target tables")
         '
-        'MultipleIdentifier
-        '
-        Me.MultipleIdentifier.AutoSize = True
-        Me.MultipleIdentifier.Location = New System.Drawing.Point(128, 36)
-        Me.MultipleIdentifier.Name = "MultipleIdentifier"
-        Me.MultipleIdentifier.Size = New System.Drawing.Size(119, 17)
-        Me.MultipleIdentifier.TabIndex = 52
-        Me.MultipleIdentifier.Text = "Multiple Identifier"
-        Me.ToolTipKonfig.SetToolTip(Me.MultipleIdentifier, "Multiple Identifier: If you need more than one column as unique Identifier use th" &
-        "is. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You'll need to define the Identifier Columns in the Mapping Grid below. ")
-        Me.MultipleIdentifier.UseVisualStyleBackColor = True
-        '
-        'OpenFileDialog1
-        '
-        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
-        '
-        'L_OrderID
-        '
-        Me.L_OrderID.AutoSize = True
-        Me.L_OrderID.Location = New System.Drawing.Point(13, 40)
-        Me.L_OrderID.Name = "L_OrderID"
-        Me.L_OrderID.Size = New System.Drawing.Size(54, 13)
-        Me.L_OrderID.TabIndex = 48
-        Me.L_OrderID.Text = "Order ID:"
-        '
-        'B_Load
-        '
-        Me.B_Load.Location = New System.Drawing.Point(12, 842)
-        Me.B_Load.Name = "B_Load"
-        Me.B_Load.Size = New System.Drawing.Size(194, 31)
-        Me.B_Load.TabIndex = 49
-        Me.B_Load.Text = "Load Configuration..."
-        Me.B_Load.UseVisualStyleBackColor = True
-        '
         'SourceColumn_Offline
         '
         Me.SourceColumn_Offline.HeaderText = "Source Column"
@@ -1184,6 +1158,83 @@ Partial Class Konfiguration
         Me.IsIdentity_offline.Name = "IsIdentity_offline"
         Me.IsIdentity_offline.Visible = False
         Me.IsIdentity_offline.Width = 118
+        '
+        'MultipleIdentifier
+        '
+        Me.MultipleIdentifier.AutoSize = True
+        Me.MultipleIdentifier.Location = New System.Drawing.Point(128, 36)
+        Me.MultipleIdentifier.Name = "MultipleIdentifier"
+        Me.MultipleIdentifier.Size = New System.Drawing.Size(119, 17)
+        Me.MultipleIdentifier.TabIndex = 52
+        Me.MultipleIdentifier.Text = "Multiple Identifier"
+        Me.ToolTipKonfig.SetToolTip(Me.MultipleIdentifier, "Multiple Identifier: If you need more than one column as unique Identifier use th" &
+        "is. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You'll need to define the Identifier Columns in the Mapping Grid below. ")
+        Me.MultipleIdentifier.UseVisualStyleBackColor = True
+        '
+        'OpenFileDialog1
+        '
+        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
+        '
+        'L_OrderID
+        '
+        Me.L_OrderID.AutoSize = True
+        Me.L_OrderID.Location = New System.Drawing.Point(13, 40)
+        Me.L_OrderID.Name = "L_OrderID"
+        Me.L_OrderID.Size = New System.Drawing.Size(54, 13)
+        Me.L_OrderID.TabIndex = 48
+        Me.L_OrderID.Text = "Order ID:"
+        '
+        'B_Load
+        '
+        Me.B_Load.Location = New System.Drawing.Point(12, 842)
+        Me.B_Load.Name = "B_Load"
+        Me.B_Load.Size = New System.Drawing.Size(194, 31)
+        Me.B_Load.TabIndex = 49
+        Me.B_Load.Text = "Load Configuration..."
+        Me.B_Load.UseVisualStyleBackColor = True
+        '
+        'C_TempTable
+        '
+        Me.C_TempTable.AutoSize = True
+        Me.C_TempTable.Location = New System.Drawing.Point(22, 289)
+        Me.C_TempTable.Name = "C_TempTable"
+        Me.C_TempTable.Size = New System.Drawing.Size(129, 17)
+        Me.C_TempTable.TabIndex = 54
+        Me.C_TempTable.Text = "Use temporary table"
+        Me.ToolTipKonfig.SetToolTip(Me.C_TempTable, "Use temporary table: INSERTS all Data into a temporaray table and merges it after" &
+        "wards (very fast on large datasets).")
+        Me.C_TempTable.UseVisualStyleBackColor = True
+        '
+        'l_PredefinedTmpTable
+        '
+        Me.l_PredefinedTmpTable.AutoSize = True
+        Me.l_PredefinedTmpTable.Location = New System.Drawing.Point(204, 320)
+        Me.l_PredefinedTmpTable.Name = "l_PredefinedTmpTable"
+        Me.l_PredefinedTmpTable.Size = New System.Drawing.Size(141, 13)
+        Me.l_PredefinedTmpTable.TabIndex = 55
+        Me.l_PredefinedTmpTable.Text = "Use predefined tmp table:"
+        '
+        'C_PredefinedTmpTable
+        '
+        Me.C_PredefinedTmpTable.FormattingEnabled = True
+        Me.C_PredefinedTmpTable.Location = New System.Drawing.Point(351, 317)
+        Me.C_PredefinedTmpTable.Name = "C_PredefinedTmpTable"
+        Me.C_PredefinedTmpTable.Size = New System.Drawing.Size(215, 21)
+        Me.C_PredefinedTmpTable.TabIndex = 56
+        Me.ToolTipKonfig.SetToolTip(Me.C_PredefinedTmpTable, "Type: The datatype of your identifier column")
+        '
+        'C_ownTmpTable
+        '
+        Me.C_ownTmpTable.AutoSize = True
+        Me.C_ownTmpTable.Location = New System.Drawing.Point(22, 319)
+        Me.C_ownTmpTable.Name = "C_ownTmpTable"
+        Me.C_ownTmpTable.Size = New System.Drawing.Size(163, 17)
+        Me.C_ownTmpTable.TabIndex = 57
+        Me.C_ownTmpTable.Text = "Create your own tmp Table"
+        Me.ToolTipKonfig.SetToolTip(Me.C_ownTmpTable, "Create your own tmp Table: The program creates it's own temporary table and drops" &
+        " it afterwards. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "IMPORTANT: The SQL User has to have sufficient rights for crea" &
+        "ting and dropping tables!!")
+        Me.C_ownTmpTable.UseVisualStyleBackColor = True
         '
         'Konfiguration
         '
@@ -1315,14 +1366,6 @@ Partial Class Konfiguration
     Friend WithEvents MappingGrid_Offline As Windows.Forms.DataGridView
     Friend WithEvents B_TargetSaveFile As Windows.Forms.Button
     Friend WithEvents MultipleIdentifier As Windows.Forms.CheckBox
-    Friend WithEvents SourceColumn As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents TargetColumn As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents SourceType As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents TargetType As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
-    Friend WithEvents StaticValue As Windows.Forms.DataGridViewTextBoxColumn
-    Friend WithEvents IsIdentity As Windows.Forms.DataGridViewCheckBoxColumn
     Friend WithEvents SourceColumn_Offline As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents SourceXPath As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents TargetColumn_Offline As Windows.Forms.DataGridViewTextBoxColumn
@@ -1333,4 +1376,16 @@ Partial Class Konfiguration
     Friend WithEvents StaticValue_Offline As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents XMLAttribute As Windows.Forms.DataGridViewTextBoxColumn
     Friend WithEvents IsIdentity_offline As Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents SourceColumn As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents TargetColumn As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents SourceType As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents TargetType As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents Seperator As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents PartOfSubstring As Windows.Forms.DataGridViewComboBoxColumn
+    Friend WithEvents StaticValue As Windows.Forms.DataGridViewTextBoxColumn
+    Friend WithEvents IsIdentity As Windows.Forms.DataGridViewCheckBoxColumn
+    Friend WithEvents C_ownTmpTable As Windows.Forms.CheckBox
+    Friend WithEvents l_PredefinedTmpTable As Windows.Forms.Label
+    Friend WithEvents C_PredefinedTmpTable As Windows.Forms.ComboBox
+    Friend WithEvents C_TempTable As Windows.Forms.CheckBox
 End Class

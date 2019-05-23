@@ -145,7 +145,7 @@ Module Module1
         '------------------------------------------------Summary--------------------------------------------------------------------------------------------------------
         ' This Routine is tidying up everything, so that the next jobfile can be processed.
         '---------------------------------------------------------------------------------------------------------------------------------------------------------------
-        Core.Clear()
+        Core.Dispose()
 
     End Sub
 
@@ -173,6 +173,7 @@ Module Module1
 
         Try
             ' initilizes the sql object and tests the connection to the sql servers
+            Log.Write(1, "DuckQL by waterkantnerd v. " & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & My.Application.Info.Version.Build)
             For Each SQLSetting In Core.CurrentENV.SQLServer
                 Dim SQL As New MyDataConnector
                 SQL.SetENV(Core.CurrentENV)
@@ -202,8 +203,24 @@ Module Module1
         ' Initilizes the log object for this sub
         Dim Log As LOG = Core.CurrentLog
         Dim mytime As Date = Now()
+        Dim Target As MyDataConnector = Core.GetTarget
         Log.Write(1, "Job started at " & mytime)
         Core.JobStartTime = mytime
+        Core.CreateSessionStamp()
+
+        '----------------------------------------Create a TMP Table for MS-SQL Upsert Method-----------------------------------------------------------------------
+        If Target.Setting.Servertype = "MSSQL" Or Target.Setting.Servertype = "MS-SQL" Then
+            If Target.Setting.TmpTableAllowed = True Then
+                If Target.Setting.UseOwnTmpTable = True Then
+                    Log.Write(1, "Found that a temporary table should be used...")
+                    Log.Write(1, "Creating a temporary table...")
+                    Dim DD As New DataDefinitions
+                    DD.CreateTmpTable()
+                End If
+            End If
+        End If
+        '----------------------------------------------------------------------------------------------------------------------------------------------------------
+
         ' loads data from the datasource
         LadeDatenVonQuelle()
         ' writes data to targed
@@ -219,6 +236,20 @@ Module Module1
         Else
 
         End If
+
+        '----------------------------------------Drop TMP Table ---------------------------------------------------------------------------------------------------
+        If Target.Setting.Servertype = "MSSQL" Or Target.Setting.Servertype = "MS-SQL" Then
+            If Target.Setting.TmpTableAllowed = True Then
+                If Target.Setting.UseOwnTmpTable = True Then
+                    Log.Write(1, "Found that a temporary table should be used...")
+                    Log.Write(1, "Creating a temporary table...")
+                    Dim DD As New DataDefinitions
+                    DD.DropTmpTable()
+                End If
+            End If
+        End If
+        '----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
         Log.Write(1, "Batch done...")
         mytime = Now()
@@ -260,7 +291,7 @@ Module Module1
         Else
             Log.Write(1, "Source Rows=" & SourceRows & " != Target Rows=" & TargetRows)
             Consistent = False
-            CheckForMissingRecords(SQLopSource, SQLopTarget)
+            'CheckForMissingRecords(SQLopSource, SQLopTarget)
         End If
 
         ConsistenceCheck = Consistent

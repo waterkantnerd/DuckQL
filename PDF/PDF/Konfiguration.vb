@@ -440,6 +440,15 @@
             TargetSettings.DeleteAllowed = False
         End If
 
+        If Me.C_TempTable.Checked = True Then
+            TargetSettings.TmpTableAllowed = True
+            If Me.C_ownTmpTable.Checked = True Then
+                TargetSettings.UseOwnTmpTable = True
+            Else
+                TargetSettings.PredefinedTmpTable = Me.C_ownTmpTable.Text
+            End If
+        End If
+
         ENV.SQLServer.AddLast(SourceSettings)
         ENV.SQLServer.AddLast(TargetSettings)
 
@@ -858,7 +867,9 @@
                                     ErrorMessages.AddLast("Missing Target Type on Line " & Rows + 1)
                                 End If
                             Case "Seperator"
-                                If IsNothing(MappingGrid.Item(Columns, Rows).Value) = False Then
+                                If IsNothing(MappingGrid.Item(Columns, Rows).Value) = True Or MappingGrid.Item(Columns, Rows).Value = "" Then
+                                    SeperatorChecked = False
+                                Else
                                     SeperatorChecked = True
                                 End If
                             Case "PartOfSubstring"
@@ -1611,6 +1622,9 @@
                         Me.C_InsertAllowed.Checked = Setting.InsertAllowed
                         Me.C_UpdateAllowed.Checked = Setting.UpdateAllowed
                         Me.C_DeleteAllowed.Checked = Setting.DeleteAllowed
+                        Me.C_TempTable.Checked = Setting.TmpTableAllowed
+                        Me.C_ownTmpTable.Checked = Setting.UseOwnTmpTable
+                        Me.C_PredefinedTmpTable.Text = Setting.PredefinedTmpTable
                 End Select
             Next
 
