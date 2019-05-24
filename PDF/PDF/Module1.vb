@@ -180,6 +180,18 @@ Module Module1
                 SQL.SQLLog = (Core.CurrentLog)
                 SQL.Setting = SQLSetting
                 SQL.CreateSQLCon()
+                If SQL.ConnectionTestSuccessful = False Then
+                    Select Case SQL.Setting.Servertype
+                        Case "XML"
+                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
+                        Case "CSV"
+                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
+                        Case "Access"
+                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
+                        Case Else
+                            Log.Write(0, "Could not connect to the specified Host " & SQL.Setting.Servername)
+                    End Select
+                End If
                 Core.SQLServer.AddLast(SQL)
             Next
         Catch ex As Exception

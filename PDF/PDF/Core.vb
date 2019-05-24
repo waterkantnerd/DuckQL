@@ -26,6 +26,7 @@ Public Class Core : Implements IDisposable
     Public AllQueryBlocksFinished As Boolean = False
     Public DataTransferFinished As Boolean = False
     Public RowHandle As New System.Threading.EventWaitHandle(True, Threading.EventResetMode.ManualReset)
+    Public ReihenQueueHandle As New System.Threading.EventWaitHandle(True, Threading.EventResetMode.ManualReset)
 
 
     Public Async Sub QueryBlockHandler()

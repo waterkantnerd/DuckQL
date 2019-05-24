@@ -203,6 +203,10 @@ Public Class DataOperations
                 End If
 
                 .Mapping = Module1.Core.Mappings(i)
+                If IsNothing(.Mapping.StaticValue) = True Or .Mapping.StaticValue = "" Then
+                Else
+                    .Wert = .Mapping.StaticValue
+                End If
                 .MapDaten()
                 If Module1.Core.CurrentENV.HasMultipleIdentifiers = True Then
                     If Module1.Core.Mappings(i).UseAsIdentifier = True Then
@@ -308,11 +312,14 @@ Public Class DataOperations
 
         End Select
 
+        '-> Todo: Racecondition!!!
         Log.Write(1, "Row " & CurrentRow & " from " & MaxRows & " has beend added to data core")
         If IsNothing(Reihe) Then
             Log.Write(0, "WARNING empty row detected on " & CurrentRow & " !!")
         Else
-            Module1.Core.Reihen.Enqueue(Reihe)
+            SyncLock Module1.Core.ReihenQueueHandle
+                Module1.Core.Reihen.Enqueue(Reihe)
+            End SyncLock
         End If
 
 
@@ -380,7 +387,10 @@ Public Class DataOperations
                         End If
                         If Reihe.IsComplete Then
                             'If a row is complete, it should be written into core
-                            Module1.Core.Reihen.Enqueue(Reihe)
+                            SyncLock Module1.Core.ReihenQueueHandle
+                                Module1.Core.Reihen.Enqueue(Reihe)
+                            End SyncLock
+
                             Reihe = New Reihe
                             Reihe.SetUp(SQL, TargetSQL)
                         End If
@@ -595,41 +605,64 @@ Public Class DataOperations
             Log.Write(1, "NOTE: Target Table is empty --> Only INSERT Statements will be used")
         End If
 
-        If SQL.Setting.Servertype = "MS-SQL" Or SQL.Setting.Servertype = "MSSQL" Then
-            If Module1.Core.TargetDataTable.Rows.Count > 0 Then
-                While CheckRowCompletion() = False
-                    Log.Write(1, "Waiting 5 Seconds for Row to fill...")
+        If Module1.Core.TargetDataTable.Rows.Count > 0 Then
+            While CheckRowCompletion() = False
+                Log.Write(1, "Waiting 5 Seconds for Row to fill...")
+                System.Threading.Thread.Sleep(5000)
+            End While
+            SQL.CopyDataToMSSQL()
+        Else
+            Dim i As Long = 0
+            While Module1.Core.Reihen.Count > 0
+                Dim y As Integer = 0
+                While IsNothing(Module1.Core.Reihen.Peek) = True
+                    If y = 3 Then
+                        Log.Write(1, "Putting Row back on queue...")
+                        Dim TmpReihe As Reihe = Module1.Core.Reihen.Dequeue
+                        SyncLock Module1.Core.ReihenQueueHandle
+                            Module1.Core.Reihen.Enqueue(TmpReihe)
+
+                        End SyncLock
+                    Else
+                        Log.Write(1, "I have " & Module1.Core.Reihen.Count & " Rows left")
+                        Log.Write(1, "Waiting 5 Seconds for Row to fill...")
+                        System.Threading.Thread.Sleep(5000)
+                    End If
+                    y = y + 1
+                End While
+
+                Dim Reihe As Reihe = Module1.Core.Reihen.Dequeue
+
+
+                While Reihe.IsComplete = False Or Reihe.LookedUp = False
+                    Log.Write(1, "Waiting for Row to finish...")
                     System.Threading.Thread.Sleep(5000)
                 End While
-                SQL.CopyDataToMSSQL()
-            Else
-                Dim i As Long = 0
-                While Module1.Core.Reihen.Count > 0
-                    Dim y As Integer = 0
-                    While IsNothing(Module1.Core.Reihen.Peek) = True
-                        If y = 3 Then
-                            Log.Write(1, "Putting Row back on queue...")
-                            Dim TmpReihe As Reihe = Module1.Core.Reihen.Dequeue
-                            Module1.Core.Reihen.Enqueue(TmpReihe)
+                'The Program checks only for an existing ID if IDless Batch Mode is deactivated
+
+                'If it can't find Records with the corresponding ID OR IDless Batch Mode is activated, the programs creates an insert string (if allowed)
+                If ENV.IDLessBatch = True Or Module1.Core.NoRowsInTargetTable = True Then
+                    If Setting.InsertAllowed = True Then
+                        Log.Write(1, "So far the Identifier didn't exist --> INSERT")
+                        If SQL.Setting.Servertype = "Access" Or SQL.Setting.BatchQueryAllowed = False Then
+                            SQL.ExecuteQuery(Reihe.InsertString)
                         Else
-                            Log.Write(1, "I have " & Module1.Core.Reihen.Count & " Rows left")
-                            Log.Write(1, "Waiting 5 Seconds for Row to fill...")
-                            System.Threading.Thread.Sleep(5000)
+                            Select Case SQL.Setting.Servertype
+                                Case "MySQL"
+                                    Me.AddQueryToINSERTBlock(Reihe)
+                                Case "MSSQL"
+                                        'This is already handled while creating the INSERT String --> Data Table in Core
+                                Case "MS-SQL"
+                                    'This is already handled while creating the INSERT String --> Data Table in Core
+                                Case Else
+                                    Me.AddQueryToINSERTBlock(Reihe)
+                            End Select
                         End If
-                        y = y + 1
-                    End While
-
-                    Dim Reihe As Reihe = Module1.Core.Reihen.Dequeue
-
-
-                    While Reihe.IsComplete = False Or Reihe.LookedUp = False
-                        Log.Write(1, "Waiting for Row to finish...")
-                        System.Threading.Thread.Sleep(5000)
-                    End While
-                    'The Program checks only for an existing ID if IDless Batch Mode is deactivated
-
-                    'If it can't find Records with the corresponding ID OR IDless Batch Mode is activated, the programs creates an insert string (if allowed)
-                    If ENV.IDLessBatch = True Or Module1.Core.NoRowsInTargetTable = True Then
+                    Else
+                        Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
+                    End If
+                Else
+                    If Reihe.Found = False Then
                         If Setting.InsertAllowed = True Then
                             Log.Write(1, "So far the Identifier didn't exist --> INSERT")
                             If SQL.Setting.Servertype = "Access" Or SQL.Setting.BatchQueryAllowed = False Then
@@ -639,7 +672,7 @@ Public Class DataOperations
                                     Case "MySQL"
                                         Me.AddQueryToINSERTBlock(Reihe)
                                     Case "MSSQL"
-                                        'This is already handled while creating the INSERT String --> Data Table in Core
+                                'This is already handled while creating the INSERT String --> Data Table in Core
                                     Case "MS-SQL"
                                         'This is already handled while creating the INSERT String --> Data Table in Core
                                     Case Else
@@ -650,43 +683,21 @@ Public Class DataOperations
                             Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
                         End If
                     Else
-                        If Reihe.Found = False Then
-                            If Setting.InsertAllowed = True Then
-                                Log.Write(1, "So far the Identifier didn't exist --> INSERT")
-                                If SQL.Setting.Servertype = "Access" Or SQL.Setting.BatchQueryAllowed = False Then
-                                    SQL.ExecuteQuery(Reihe.InsertString)
-                                Else
-                                    Select Case SQL.Setting.Servertype
-                                        Case "MySQL"
-                                            Me.AddQueryToINSERTBlock(Reihe)
-                                        Case "MSSQL"
-                                'This is already handled while creating the INSERT String --> Data Table in Core
-                                        Case "MS-SQL"
-                                            'This is already handled while creating the INSERT String --> Data Table in Core
-                                        Case Else
-                                            Me.AddQueryToINSERTBlock(Reihe)
-                                    End Select
-                                End If
+                        If Setting.UpdateAllowed = True Then
+                            Log.Write(1, "Identifier already exists --> UPDATE")
+                            Reihe.MakeUpdateString()
+                            If SQL.Setting.Servertype = "Access" Then
+                                SQL.ExecuteQuery(Reihe.UpdateString)
                             Else
-                                Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
+                                Me.AddQueryToUPDATEBlock(Reihe)
                             End If
                         Else
-                            If Setting.UpdateAllowed = True Then
-                                Log.Write(1, "Identifier already exists --> UPDATE")
-                                Reihe.MakeUpdateString()
-                                If SQL.Setting.Servertype = "Access" Then
-                                    SQL.ExecuteQuery(Reihe.UpdateString)
-                                Else
-                                    Me.AddQueryToUPDATEBlock(Reihe)
-                                End If
-                            Else
-                                Log.Write(1, "Identifier already exists --> UPDATE not allowed!")
-                            End If
+                            Log.Write(1, "Identifier already exists --> UPDATE not allowed!")
                         End If
                     End If
-                    i = i + 1
-                End While
-            End If
+                End If
+                i = i + 1
+            End While
         End If
 
         SyncLock Module1.Core.QueryBlock
