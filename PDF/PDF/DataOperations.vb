@@ -202,10 +202,19 @@ Public Class DataOperations
                     .Wert = ResultRow(Columns(i)).ToString
                 End If
 
-                .Mapping = Module1.Core.Mappings(i)
-                If IsNothing(.Mapping.StaticValue) = True Or .Mapping.StaticValue = "" Then
+                Daten.Mapping = Module1.Core.Mappings(i)
+                If IsNothing(Daten.Mapping) Then
+                    If IsNothing(Module1.Core.Mappings(i)) Then
+                        Log.Write(0, "AAAHHHHHHHH!")
+                    End If
+                End If
+
+                If IsNothing(Daten.Mapping.StaticValue) = True Then
                 Else
-                    .Wert = .Mapping.StaticValue
+                    If .Mapping.StaticValue = "" Then
+                    Else
+                        .Wert = .Mapping.StaticValue
+                    End If
                 End If
                 .MapDaten()
                 If Module1.Core.CurrentENV.HasMultipleIdentifiers = True Then
