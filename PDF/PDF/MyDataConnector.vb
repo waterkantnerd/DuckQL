@@ -37,6 +37,8 @@ Public Class MyDataConnector
     Public TableSchema As New TableSchema
     Public Tables As New LinkedList(Of TableSchema)
 
+    Public ConnectionTestSuccessful As Boolean = False
+
     '--------------------------------------------------Initializing the class-------------------------------------------------
     Public Sub SetENV(ENV)
         Me.ENV = ENV
@@ -64,6 +66,7 @@ Public Class MyDataConnector
             SQLLog.Write(1, "Connected with " & sServer & "\" & sDB)
             MySQLCon.Close()
             ConnectMySQL = MySQLCon
+            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, ex.Message)
             ConnectMySQL = Nothing
@@ -86,6 +89,7 @@ Public Class MyDataConnector
             SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
             ConnectDBByUser = SQLCon
+            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & Err.Description)
             ConnectDBByUser = Nothing
@@ -110,6 +114,7 @@ Public Class MyDataConnector
             SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
             ConnectDBTrusted = SQLCon
+            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBTrusted = Nothing
@@ -136,6 +141,7 @@ Public Class MyDataConnector
             Me.AccessCon.Open()
             SQLLog.Write(1, "Established connection to:" & Path)
             ConnectDBAccess = Me.AccessCon
+            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBAccess = Nothing
@@ -189,6 +195,7 @@ Public Class MyDataConnector
             Me.CSVCon.Open()
             SQLLog.Write(1, "Established connection to:" & Path)
             ConnectDBCSV = Me.CSVCon
+            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBCSV = Nothing
@@ -234,6 +241,7 @@ Public Class MyDataConnector
             headerString = headerString & "," & vbCrLf
             myWriter.WriteLine(headerString)
             myWriter.Close()
+            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR while rewriting csv file: " & ex.Message)
             Exit Sub

@@ -146,7 +146,7 @@ Module Module1
         ' This Routine is tidying up everything, so that the next jobfile can be processed.
         '---------------------------------------------------------------------------------------------------------------------------------------------------------------
         Core.Dispose()
-
+        Core = Nothing
     End Sub
 
     Private Sub Start(EnvoirementObject As ENV)
@@ -157,7 +157,10 @@ Module Module1
         ' If everything runs smoothly here, it'll jump into the "custom code" routine.
         Dim Log As New LOG
 
-
+        If IsNothing(Core) Then
+            Dim NewCore As New Core
+            Core = NewCore
+        End If
         ' initializes the central program core
         Core.CoreStart(EnvoirementObject, Log)
 
@@ -180,6 +183,19 @@ Module Module1
                 SQL.SQLLog = (Core.CurrentLog)
                 SQL.Setting = SQLSetting
                 SQL.CreateSQLCon()
+                If SQL.ConnectionTestSuccessful = False Then
+                    Select Case SQL.Setting.Servertype
+                        Case "XML"
+                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
+                        Case "CSV"
+                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
+                        Case "Access"
+                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
+                        Case Else
+                            Log.Write(0, "Could not connect to the specified Host " & SQL.Setting.Servername)
+                    End Select
+                    Exit Sub
+                End If
                 Core.SQLServer.AddLast(SQL)
             Next
         Catch ex As Exception

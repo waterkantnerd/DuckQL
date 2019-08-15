@@ -53,15 +53,15 @@ Public Class Reihe
             For Each Column In Me.IDSpalten
                 If Column.Mapping.UseAsIdentifier = True Then
                     If SB.ToString = "" Then
-                        SB.Append(Column.Mapping.Targetname & "=" & Target.CSQL(Column.Wert, Column.Mapping.Targettype))
+                        SB.Append(Column.Mapping.Targetname & "=" & Me.Target.CSQL(Column.Wert, Column.Mapping.Targettype))
                     Else
                         SB.Append(" AND ")
-                        SB.Append(Column.Mapping.Targetname & "=" & Target.CSQL(Column.Wert, Column.Mapping.Targettype))
+                        SB.Append(Column.Mapping.Targetname & "=" & Me.Target.CSQL(Column.Wert, Column.Mapping.Targettype))
                     End If
                 End If
             Next
         Else
-            SB.Append(Me.Target.Setting.IDColumn & "=" & Target.CSQL(Me.IDValue, Me.IDValueDataType))
+            SB.Append(Me.Target.Setting.IDColumn & "=" & Me.Target.CSQL(Me.IDValue, Me.IDValueDataType))
         End If
 
         Return SB.ToString
