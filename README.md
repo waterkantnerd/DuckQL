@@ -12,6 +12,6 @@ The program is useable from the command line. The core function (transfering dat
 To create such an xml file a added a gui, so you can setup your configuration without reading 200 pages of documentation (that I don't 
 have to write).
 
-To start the configuration GUI use the parameter -c, i.e. [Path\]sqlduck.exe -c. If you have a preconfigured xml file you can directly run
-the program by using the path to your xml (folder), i.e. [Path\]sqlduck.exe [PATH] or more specific: 
-C:\Users\waterkantnerd\sqlduck.exe "C:\Users\waterkantnerd\sqlduck\My SQLDuck XML-Jobs\"
+To start the configuration GUI use the parameter -c, i.e. [Path\]duckql.exe -c. If you have a preconfigured xml file you can directly run
+the program by using the path to your xml (folder), i.e. [Path\]duckql.exe [PATH] or more specific: 
+C:\Users\waterkantnerd\sqlduck.exe "C:\Users\waterkantnerd\sqlduck\My duckQL XML-Jobs\"
