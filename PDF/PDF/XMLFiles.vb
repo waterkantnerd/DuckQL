@@ -154,7 +154,7 @@ Public Class XMLFiles
                                                         Setting.InsertAllowed = False
                                                     End If
                                                 Case "UpdateAllowed"
-                                                    If .Value.ToLower = "yes" Or .Value = "true" Then
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
                                                         Setting.UpdateAllowed = True
                                                     Else
                                                         Setting.UpdateAllowed = False

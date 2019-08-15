@@ -76,6 +76,7 @@ Public Class DataOperations
             Exit Sub
         End If
         Module1.Core.SourceIndex = DS
+        Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Module1.Core.LoadChecker))
         Dim Max As Long = DS.Tables(0).Rows.Count - 1
         Log.Write(1, Max & " rows found")
         Try
@@ -97,8 +98,10 @@ Public Class DataOperations
                     Dim RowObj As New RowObj
                     RowObj.SetUp(Reihe, DS.Tables(0).Columns, ResultRow, Max, i)
                     Log.Write(1, "Row " & i & " has ID value " & Reihe.IDValue)
-                    Dim t As New Threading.Thread(AddressOf SetUpSQLRow)
-                    t.Start(RowObj)
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf SetUpSQLRow), RowObj)
+
+                    'Dim t As New Threading.Thread(AddressOf SetUpSQLRow)
+                    't.Start(RowObj)
                 End If
                 i = i + 1
             Next
@@ -224,8 +227,10 @@ Public Class DataOperations
         If Module1.Core.NoRowsInTargetTable = True Then
             Reihe.LookedUp = True
         Else
-            Dim t As New System.Threading.Thread(AddressOf Reihe.FindInTarget)
-            t.Start()
+            Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.FindInTarget))
+
+            'Dim t As New System.Threading.Thread(AddressOf Reihe.FindInTarget)
+            't.Start()
         End If
 
 
@@ -270,44 +275,64 @@ Public Class DataOperations
             End If
         End If
 
+        'Wait for Lookup on Target to finish
+        While Reihe.LookedUp = False
+            System.Threading.Thread.Sleep(100)
+        End While
+
         Select Case Target.Servertype
             Case "MSSQL"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
             Case "MS-SQL"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
             Case "MySQL"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
 
             Case "Access"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
             Case Else
 
         End Select
 
+        'Wait for Reihe to finish it Insert/Update Strings
+        While Reihe.StringsDone = False
+            System.Threading.Thread.Sleep(100)
+        End While
+
+        'Setting Proccessed bit to Signal that this row is complete
+        Reihe.Proccessed = True
         Log.Write(1, "Row " & CurrentRow & " from " & MaxRows & " has beend added to data core")
         If IsNothing(Reihe) Then
             Log.Write(0, "WARNING empty row detected on " & CurrentRow & " !!")
@@ -578,6 +603,10 @@ Public Class DataOperations
         Dim SQLrq As String = ""
 
         'ToDo: UPDATE Handling of Query Blocks for MySQL + INSERT & UPDATE Handling for MS-SQL
+        While Module1.Core.LoadProccessHasFinished = False
+            Log.Write(1, "Waiting 5 Seconds to finish loading process")
+            System.Threading.Thread.Sleep(5000)
+        End While
 
         Log.Write(1, "Writing to Target...")
         If ENV.IDLessBatch = True Then
@@ -587,8 +616,9 @@ Public Class DataOperations
         End If
 
         If SQL.Setting.BatchQueryAllowed = True Then
-            Dim k As New System.Threading.Thread(AddressOf Module1.Core.QueryBlockHandler)
-            k.Start()
+            Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Module1.Core.QueryBlockHandler))
+            'Dim k As New System.Threading.Thread(AddressOf Module1.Core.QueryBlockHandler)
+            'k.Start()
         End If
 
         If Module1.Core.NoRowsInTargetTable = True Then
@@ -724,14 +754,15 @@ Public Class DataOperations
         If Module1.Core.Reihen.Count = RowCount Then
             For Each Row In Module1.Core.Reihen
                 If IsNothing(Row) Then
-                    Log.Write(1, "Row " & i & " hasn't been proccessed yet...")
-                    Return False
-                End If
-                If Row.IsComplete = True Then
-                    Log.Write(1, "Row " & i & " looks fine...")
+                    Log.Write(1, "WARNING! Row " & i & " IS NULL")
+                    'Return False
                 Else
-                    Log.Write(1, "Row " & i & " has not been finished by now...")
-                    Return False
+                    If Row.IsComplete = True Then
+                        Log.Write(1, "Row " & i & " looks fine...")
+                    Else
+                        Log.Write(1, "Row " & i & " has not been finished by now...")
+                        Return False
+                    End If
                 End If
                 i = i + 1
             Next

@@ -426,7 +426,7 @@ Public Class MyDataConnector
 
             If Me.Setting.UpdateAllowed = True Then
                 If Me.Setting.TmpTableAllowed = True Then
-                    BulkCopy.DestinationTableName = Me.Setting.TmpSQLTable
+                    BulkCopy.DestinationTableName = "[" & Me.Setting.TmpSQLTable & "]"
                 Else
                     SQLLog.Write(0, "Config ERROR: No TmpTables allowed for BULK Update")
                 End If
@@ -469,50 +469,63 @@ Public Class MyDataConnector
     Private Sub MergeMSSQLTables()
         Dim SB As New System.Text.StringBuilder
 
-        SB.Append("MERGE " & Me.Setting.SQLTable & " AS TARGET")
-        SB.Append("USING " & Me.Setting.TmpSQLTable & " As SOURCE")
-        For Each Column In Me.TableSchema.Columns
-            If Column.IsKey Then
-                SB.Append("On (TARGET." & Column.Name & " = SOURCE." & Column.Name)
-            End If
-        Next
+        SB.Append("MERGE [" & Me.Setting.SQLTable & "] AS TARGET ")
+        SB.Append("USING [" & Me.Setting.TmpSQLTable & "] As SOURCE ")
+        If Me.TableSchema.HasDBKeyColumns = True Then                                               'By default the predefined Key Columns of the Tableschema will be used
+            For Each Column In Me.TableSchema.Columns                                               'If these Keys are not available, the program uses the Columns that have been
+                If Column.IsKey Then                                                                'defined as Identifier by the user    
+                    SB.Append("On (TARGET.[" & Column.Name & "] = SOURCE.[" & Column.Name & "]")
+                End If
+            Next
+        Else
+            For Each Column In Me.TableSchema.Columns
+                If Column.IsUserDefinedIdentifier Then
+                    SB.Append("On (TARGET.[" & Column.Name & "] = SOURCE.[" & Column.Name & "]")
+                End If
+            Next
+        End If
+
         SB.Append(")")
         SB.Append(" WHEN MATCHED AND ")
         Dim i As Integer = 0
         For Each Column In ENV.Mappings
             If i + 1 = ENV.Mappings.Count Then
-                SB.Append("Target." & Column.Targetname & "<>" & "SOURCE." & Column.Targetname)
+                SB.Append("Target.[" & Column.Targetname & "] <> " & "SOURCE.[" & Column.Targetname & "]")
             Else
-                SB.Append("Target." & Column.Targetname & "<>" & "SOURCE." & Column.Targetname & " OR ")
+                SB.Append("Target.[" & Column.Targetname & "] <>" & "SOURCE.[" & Column.Targetname & "] OR ")
             End If
+            i = i + 1
         Next
         i = 0
         SB.Append(" THEN UPDATE SET ")
         For Each Column In ENV.Mappings
             If i + 1 = ENV.Mappings.Count Then
-                SB.Append("Target." & Column.Targetname & "=" & "SOURCE." & Column.Targetname)
+                SB.Append("Target.[" & Column.Targetname & "] = " & "SOURCE.[" & Column.Targetname & "]")
             Else
-                SB.Append("Target." & Column.Targetname & "=" & "SOURCE." & Column.Targetname & ",")
+                SB.Append("Target.[" & Column.Targetname & "] = " & "SOURCE.[" & Column.Targetname & "],")
             End If
+            i = i + 1
         Next
         i = 0
         If Me.Setting.InsertAllowed = True Then
             SB.Append(" WHEN Not MATCHED BY TARGET THEN INSERT (")
             For Each Column In ENV.Mappings
                 If i + 1 = ENV.Mappings.Count Then
-                    SB.Append(Column.Targetname)
+                    SB.Append("[" & Column.Targetname & "]")
                 Else
-                    SB.Append(Column.Targetname & ",")
+                    SB.Append("[" & Column.Targetname & "], ")
                 End If
+                i = i + 1
             Next
             i = 0
             SB.Append(") VALUES (")
             For Each Column In ENV.Mappings
                 If i + 1 = ENV.Mappings.Count Then
-                    SB.Append("SOURCE." & Column.Targetname)
+                    SB.Append("SOURCE.[" & Column.Targetname & "]")
                 Else
-                    SB.Append("SOURCE." & Column.Targetname & ",")
+                    SB.Append("SOURCE.[" & Column.Targetname & "], ")
                 End If
+                i = i + 1
             Next
             SB.Append(")")
         End If
@@ -520,6 +533,7 @@ Public Class MyDataConnector
             SB.Append(" WHEN NOT MATCHED BY SOURCE ")
             SB.Append(" THEN DELETE ")
         End If
+        SB.Append(";")
         ExecuteQuery(SB.ToString)
     End Sub
 

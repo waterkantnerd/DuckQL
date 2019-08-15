@@ -97,4 +97,22 @@
             Return False
         End If
     End Function
+
+    Public Function IsUserDefinedIdentifier() As Boolean
+        If Module1.Core.CurrentENV.HasMultipleIdentifiers = False Then
+            Dim Target As MyDataConnector = Module1.Core.GetTarget
+            If Target.Setting.IDColumn.ToLower = Me.Name.ToLower Then
+                Return True
+            End If
+        Else
+            For Each Mapping In Module1.Core.CurrentENV.Mappings
+                If Mapping.Targetname.ToLower = Me.Name Then
+                    If Mapping.UseAsIdentifier = True Then
+                        Return True
+                    End If
+                End If
+            Next
+        End If
+        Return False
+    End Function
 End Class

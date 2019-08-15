@@ -18,6 +18,8 @@ Public Class Reihe
     Public Found As Boolean = False
     Public LookedUp As Boolean = False
     Private Log As LOG = Module1.Core.CurrentLog
+    Public Proccessed As Boolean = False
+    Public StringsDone As Boolean = False
 
 
     Public Sub FindInTarget()
@@ -160,7 +162,7 @@ Public Class Reihe
         Else
             MakeDefaultUpdateString()
         End If
-
+        Me.StringsDone = True
     End Sub
 
     Private Sub MakeDefaultUpdateString()
@@ -196,6 +198,7 @@ Public Class Reihe
             Case Else
                 MakeSQLInsertString()
         End Select
+        Me.StringsDone = True
     End Sub
 
     Private Sub MakeCSVInsertString()

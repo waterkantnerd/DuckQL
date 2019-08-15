@@ -63,6 +63,10 @@ Partial Class Konfiguration
         Me.T_SourceAdress = New System.Windows.Forms.TextBox()
         Me.T_SourceFilterColumn = New System.Windows.Forms.TextBox()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.C_ownTmpTable = New System.Windows.Forms.CheckBox()
+        Me.l_PredefinedTmpTable = New System.Windows.Forms.Label()
+        Me.C_PredefinedTmpTable = New System.Windows.Forms.ComboBox()
+        Me.C_TempTable = New System.Windows.Forms.CheckBox()
         Me.B_TargetSaveFile = New System.Windows.Forms.Button()
         Me.L_TargetIDDatatype = New System.Windows.Forms.Label()
         Me.C_TargetIDDatatype = New System.Windows.Forms.ComboBox()
@@ -132,10 +136,6 @@ Partial Class Konfiguration
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.L_OrderID = New System.Windows.Forms.Label()
         Me.B_Load = New System.Windows.Forms.Button()
-        Me.C_TempTable = New System.Windows.Forms.CheckBox()
-        Me.l_PredefinedTmpTable = New System.Windows.Forms.Label()
-        Me.C_PredefinedTmpTable = New System.Windows.Forms.ComboBox()
-        Me.C_ownTmpTable = New System.Windows.Forms.CheckBox()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -244,7 +244,7 @@ Partial Class Konfiguration
         Me.L_SourceIDDataType.AutoSize = True
         Me.L_SourceIDDataType.Location = New System.Drawing.Point(336, 152)
         Me.L_SourceIDDataType.Name = "L_SourceIDDataType"
-        Me.L_SourceIDDataType.Size = New System.Drawing.Size(32, 13)
+        Me.L_SourceIDDataType.Size = New System.Drawing.Size(33, 13)
         Me.L_SourceIDDataType.TabIndex = 49
         Me.L_SourceIDDataType.Text = "Type:"
         '
@@ -334,7 +334,7 @@ Partial Class Konfiguration
         Me.Label9.AutoSize = True
         Me.Label9.Location = New System.Drawing.Point(9, 201)
         Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(61, 13)
+        Me.Label9.Size = New System.Drawing.Size(62, 13)
         Me.Label9.TabIndex = 19
         Me.Label9.Text = "Filter Type:"
         '
@@ -352,7 +352,7 @@ Partial Class Konfiguration
         Me.Label7.AutoSize = True
         Me.Label7.Location = New System.Drawing.Point(9, 126)
         Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(36, 13)
+        Me.Label7.Size = New System.Drawing.Size(37, 13)
         Me.Label7.TabIndex = 17
         Me.Label7.Text = "Table:"
         '
@@ -361,7 +361,7 @@ Partial Class Konfiguration
         Me.L_SourceConnectionType.AutoSize = True
         Me.L_SourceConnectionType.Location = New System.Drawing.Point(277, 49)
         Me.L_SourceConnectionType.Name = "L_SourceConnectionType"
-        Me.L_SourceConnectionType.Size = New System.Drawing.Size(95, 13)
+        Me.L_SourceConnectionType.Size = New System.Drawing.Size(96, 13)
         Me.L_SourceConnectionType.TabIndex = 16
         Me.L_SourceConnectionType.Text = "Connection Type:"
         Me.L_SourceConnectionType.Visible = False
@@ -409,7 +409,7 @@ Partial Class Konfiguration
         Me.Label2.AutoSize = True
         Me.Label2.Location = New System.Drawing.Point(9, 22)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(66, 13)
+        Me.Label2.Size = New System.Drawing.Size(67, 13)
         Me.Label2.TabIndex = 12
         Me.Label2.Text = "Server Type:"
         '
@@ -571,6 +571,49 @@ Partial Class Konfiguration
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Target"
         '
+        'C_ownTmpTable
+        '
+        Me.C_ownTmpTable.AutoSize = True
+        Me.C_ownTmpTable.Location = New System.Drawing.Point(22, 319)
+        Me.C_ownTmpTable.Name = "C_ownTmpTable"
+        Me.C_ownTmpTable.Size = New System.Drawing.Size(164, 17)
+        Me.C_ownTmpTable.TabIndex = 57
+        Me.C_ownTmpTable.Text = "Create your own tmp Table"
+        Me.ToolTipKonfig.SetToolTip(Me.C_ownTmpTable, "Create your own tmp Table: The program creates it's own temporary table and drops" &
+        " it afterwards. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "IMPORTANT: The SQL User has to have sufficient rights for crea" &
+        "ting and dropping tables!!")
+        Me.C_ownTmpTable.UseVisualStyleBackColor = True
+        '
+        'l_PredefinedTmpTable
+        '
+        Me.l_PredefinedTmpTable.AutoSize = True
+        Me.l_PredefinedTmpTable.Location = New System.Drawing.Point(204, 320)
+        Me.l_PredefinedTmpTable.Name = "l_PredefinedTmpTable"
+        Me.l_PredefinedTmpTable.Size = New System.Drawing.Size(141, 13)
+        Me.l_PredefinedTmpTable.TabIndex = 55
+        Me.l_PredefinedTmpTable.Text = "Use predefined tmp table:"
+        '
+        'C_PredefinedTmpTable
+        '
+        Me.C_PredefinedTmpTable.FormattingEnabled = True
+        Me.C_PredefinedTmpTable.Location = New System.Drawing.Point(351, 317)
+        Me.C_PredefinedTmpTable.Name = "C_PredefinedTmpTable"
+        Me.C_PredefinedTmpTable.Size = New System.Drawing.Size(215, 21)
+        Me.C_PredefinedTmpTable.TabIndex = 56
+        Me.ToolTipKonfig.SetToolTip(Me.C_PredefinedTmpTable, "Type: The datatype of your identifier column")
+        '
+        'C_TempTable
+        '
+        Me.C_TempTable.AutoSize = True
+        Me.C_TempTable.Location = New System.Drawing.Point(22, 289)
+        Me.C_TempTable.Name = "C_TempTable"
+        Me.C_TempTable.Size = New System.Drawing.Size(129, 17)
+        Me.C_TempTable.TabIndex = 54
+        Me.C_TempTable.Text = "Use temporary table"
+        Me.ToolTipKonfig.SetToolTip(Me.C_TempTable, "Use temporary table: INSERTS all Data into a temporaray table and merges it after" &
+        "wards (very fast on large datasets).")
+        Me.C_TempTable.UseVisualStyleBackColor = True
+        '
         'B_TargetSaveFile
         '
         Me.B_TargetSaveFile.Font = New System.Drawing.Font("Segoe UI Light", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
@@ -588,7 +631,7 @@ Partial Class Konfiguration
         Me.L_TargetIDDatatype.AutoSize = True
         Me.L_TargetIDDatatype.Location = New System.Drawing.Point(337, 152)
         Me.L_TargetIDDatatype.Name = "L_TargetIDDatatype"
-        Me.L_TargetIDDatatype.Size = New System.Drawing.Size(32, 13)
+        Me.L_TargetIDDatatype.Size = New System.Drawing.Size(33, 13)
         Me.L_TargetIDDatatype.TabIndex = 50
         Me.L_TargetIDDatatype.Text = "Type:"
         '
@@ -655,7 +698,7 @@ Partial Class Konfiguration
         Me.C_DeleteAllowed.AutoSize = True
         Me.C_DeleteAllowed.Location = New System.Drawing.Point(461, 269)
         Me.C_DeleteAllowed.Name = "C_DeleteAllowed"
-        Me.C_DeleteAllowed.Size = New System.Drawing.Size(106, 17)
+        Me.C_DeleteAllowed.Size = New System.Drawing.Size(107, 17)
         Me.C_DeleteAllowed.TabIndex = 29
         Me.C_DeleteAllowed.Text = "DELETE allowed"
         Me.ToolTipKonfig.SetToolTip(Me.C_DeleteAllowed, "DELETE allowed: Check if you want that rows, that not exists in you source will b" &
@@ -667,7 +710,7 @@ Partial Class Konfiguration
         Me.C_UpdateAllowed.AutoSize = True
         Me.C_UpdateAllowed.Location = New System.Drawing.Point(260, 269)
         Me.C_UpdateAllowed.Name = "C_UpdateAllowed"
-        Me.C_UpdateAllowed.Size = New System.Drawing.Size(109, 17)
+        Me.C_UpdateAllowed.Size = New System.Drawing.Size(110, 17)
         Me.C_UpdateAllowed.TabIndex = 28
         Me.C_UpdateAllowed.Text = "UPDATE allowed"
         Me.ToolTipKonfig.SetToolTip(Me.C_UpdateAllowed, "UPDATE allowed: Check if you want existing rows to be updated")
@@ -678,7 +721,7 @@ Partial Class Konfiguration
         Me.C_InsertAllowed.AutoSize = True
         Me.C_InsertAllowed.Location = New System.Drawing.Point(81, 266)
         Me.C_InsertAllowed.Name = "C_InsertAllowed"
-        Me.C_InsertAllowed.Size = New System.Drawing.Size(105, 17)
+        Me.C_InsertAllowed.Size = New System.Drawing.Size(106, 17)
         Me.C_InsertAllowed.TabIndex = 27
         Me.C_InsertAllowed.Text = "INSERT allowed"
         Me.ToolTipKonfig.SetToolTip(Me.C_InsertAllowed, "INSERT allowed: Check if you want new values to be added to your source.")
@@ -751,7 +794,7 @@ Partial Class Konfiguration
         Me.Label21.AutoSize = True
         Me.Label21.Location = New System.Drawing.Point(10, 231)
         Me.Label21.Name = "Label21"
-        Me.Label21.Size = New System.Drawing.Size(96, 13)
+        Me.Label21.Size = New System.Drawing.Size(97, 13)
         Me.Label21.TabIndex = 38
         Me.Label21.Text = "Time Stamp Field:"
         '
@@ -779,7 +822,7 @@ Partial Class Konfiguration
         Me.Label13.AutoSize = True
         Me.Label13.Location = New System.Drawing.Point(10, 125)
         Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(36, 13)
+        Me.Label13.Size = New System.Drawing.Size(37, 13)
         Me.Label13.TabIndex = 36
         Me.Label13.Text = "Table:"
         '
@@ -807,7 +850,7 @@ Partial Class Konfiguration
         Me.L_TargetConnectionType.AutoSize = True
         Me.L_TargetConnectionType.Location = New System.Drawing.Point(278, 48)
         Me.L_TargetConnectionType.Name = "L_TargetConnectionType"
-        Me.L_TargetConnectionType.Size = New System.Drawing.Size(95, 13)
+        Me.L_TargetConnectionType.Size = New System.Drawing.Size(96, 13)
         Me.L_TargetConnectionType.TabIndex = 35
         Me.L_TargetConnectionType.Text = "Connection Type:"
         Me.L_TargetConnectionType.Visible = False
@@ -882,7 +925,7 @@ Partial Class Konfiguration
         Me.Label18.AutoSize = True
         Me.Label18.Location = New System.Drawing.Point(10, 21)
         Me.Label18.Name = "Label18"
-        Me.Label18.Size = New System.Drawing.Size(66, 13)
+        Me.Label18.Size = New System.Drawing.Size(67, 13)
         Me.Label18.TabIndex = 31
         Me.Label18.Text = "Server Type:"
         '
@@ -955,7 +998,7 @@ Partial Class Konfiguration
         Me.TargetColumn.Name = "TargetColumn"
         Me.TargetColumn.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.TargetColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic
-        Me.TargetColumn.Width = 97
+        Me.TargetColumn.Width = 98
         '
         'SourceType
         '
@@ -963,7 +1006,7 @@ Partial Class Konfiguration
         Me.SourceType.Name = "SourceType"
         Me.SourceType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.SourceType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.SourceType.Width = 66
+        Me.SourceType.Width = 67
         '
         'TargetType
         '
@@ -971,7 +1014,7 @@ Partial Class Konfiguration
         Me.TargetType.Name = "TargetType"
         Me.TargetType.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.TargetType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.TargetType.Width = 62
+        Me.TargetType.Width = 64
         '
         'Seperator
         '
@@ -993,7 +1036,7 @@ Partial Class Konfiguration
         Me.StaticValue.Name = "StaticValue"
         Me.StaticValue.ToolTipText = "If there is no fitting source, you can set a static value, which will be set for " &
     "every row, here."
-        Me.StaticValue.Width = 133
+        Me.StaticValue.Width = 134
         '
         'IsIdentity
         '
@@ -1066,7 +1109,7 @@ Partial Class Konfiguration
         Me.C_IDlessBatch.AutoSize = True
         Me.C_IDlessBatch.Location = New System.Drawing.Point(253, 36)
         Me.C_IDlessBatch.Name = "C_IDlessBatch"
-        Me.C_IDlessBatch.Size = New System.Drawing.Size(92, 17)
+        Me.C_IDlessBatch.Size = New System.Drawing.Size(91, 17)
         Me.C_IDlessBatch.TabIndex = 50
         Me.C_IDlessBatch.Text = "ID-less Batch"
         Me.ToolTipKonfig.SetToolTip(Me.C_IDlessBatch, resources.GetString("C_IDlessBatch.ToolTip"))
@@ -1103,7 +1146,7 @@ Partial Class Konfiguration
         Me.TargetColumn_Offline.HeaderText = "Target Column"
         Me.TargetColumn_Offline.Name = "TargetColumn_Offline"
         Me.TargetColumn_Offline.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
-        Me.TargetColumn_Offline.Width = 97
+        Me.TargetColumn_Offline.Width = 98
         '
         'SourceType_Offline
         '
@@ -1111,7 +1154,7 @@ Partial Class Konfiguration
         Me.SourceType_Offline.Name = "SourceType_Offline"
         Me.SourceType_Offline.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.SourceType_Offline.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.SourceType_Offline.Width = 66
+        Me.SourceType_Offline.Width = 67
         '
         'TargetType_Offline
         '
@@ -1119,7 +1162,7 @@ Partial Class Konfiguration
         Me.TargetType_Offline.Name = "TargetType_Offline"
         Me.TargetType_Offline.Resizable = System.Windows.Forms.DataGridViewTriState.[True]
         Me.TargetType_Offline.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable
-        Me.TargetType_Offline.Width = 62
+        Me.TargetType_Offline.Width = 64
         '
         'Seperator_Offline
         '
@@ -1141,7 +1184,7 @@ Partial Class Konfiguration
         Me.StaticValue_Offline.Name = "StaticValue_Offline"
         Me.StaticValue_Offline.ToolTipText = "If there is no fitting source, you can set a static value, which will be set for " &
     "every row, here."
-        Me.StaticValue_Offline.Width = 133
+        Me.StaticValue_Offline.Width = 134
         '
         'XMLAttribute
         '
@@ -1171,10 +1214,6 @@ Partial Class Konfiguration
         "is. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You'll need to define the Identifier Columns in the Mapping Grid below. ")
         Me.MultipleIdentifier.UseVisualStyleBackColor = True
         '
-        'OpenFileDialog1
-        '
-        Me.OpenFileDialog1.FileName = "OpenFileDialog1"
-        '
         'L_OrderID
         '
         Me.L_OrderID.AutoSize = True
@@ -1192,49 +1231,6 @@ Partial Class Konfiguration
         Me.B_Load.TabIndex = 49
         Me.B_Load.Text = "Load Configuration..."
         Me.B_Load.UseVisualStyleBackColor = True
-        '
-        'C_TempTable
-        '
-        Me.C_TempTable.AutoSize = True
-        Me.C_TempTable.Location = New System.Drawing.Point(22, 289)
-        Me.C_TempTable.Name = "C_TempTable"
-        Me.C_TempTable.Size = New System.Drawing.Size(129, 17)
-        Me.C_TempTable.TabIndex = 54
-        Me.C_TempTable.Text = "Use temporary table"
-        Me.ToolTipKonfig.SetToolTip(Me.C_TempTable, "Use temporary table: INSERTS all Data into a temporaray table and merges it after" &
-        "wards (very fast on large datasets).")
-        Me.C_TempTable.UseVisualStyleBackColor = True
-        '
-        'l_PredefinedTmpTable
-        '
-        Me.l_PredefinedTmpTable.AutoSize = True
-        Me.l_PredefinedTmpTable.Location = New System.Drawing.Point(204, 320)
-        Me.l_PredefinedTmpTable.Name = "l_PredefinedTmpTable"
-        Me.l_PredefinedTmpTable.Size = New System.Drawing.Size(141, 13)
-        Me.l_PredefinedTmpTable.TabIndex = 55
-        Me.l_PredefinedTmpTable.Text = "Use predefined tmp table:"
-        '
-        'C_PredefinedTmpTable
-        '
-        Me.C_PredefinedTmpTable.FormattingEnabled = True
-        Me.C_PredefinedTmpTable.Location = New System.Drawing.Point(351, 317)
-        Me.C_PredefinedTmpTable.Name = "C_PredefinedTmpTable"
-        Me.C_PredefinedTmpTable.Size = New System.Drawing.Size(215, 21)
-        Me.C_PredefinedTmpTable.TabIndex = 56
-        Me.ToolTipKonfig.SetToolTip(Me.C_PredefinedTmpTable, "Type: The datatype of your identifier column")
-        '
-        'C_ownTmpTable
-        '
-        Me.C_ownTmpTable.AutoSize = True
-        Me.C_ownTmpTable.Location = New System.Drawing.Point(22, 319)
-        Me.C_ownTmpTable.Name = "C_ownTmpTable"
-        Me.C_ownTmpTable.Size = New System.Drawing.Size(163, 17)
-        Me.C_ownTmpTable.TabIndex = 57
-        Me.C_ownTmpTable.Text = "Create your own tmp Table"
-        Me.ToolTipKonfig.SetToolTip(Me.C_ownTmpTable, "Create your own tmp Table: The program creates it's own temporary table and drops" &
-        " it afterwards. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "IMPORTANT: The SQL User has to have sufficient rights for crea" &
-        "ting and dropping tables!!")
-        Me.C_ownTmpTable.UseVisualStyleBackColor = True
         '
         'Konfiguration
         '
