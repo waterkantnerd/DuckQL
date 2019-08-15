@@ -15,29 +15,31 @@ Public Class MyDataConnector
     Private myCmd As SqlCommand
     Private myReader As SqlDataReader
     Public SQLCon As SqlConnection
+    Private CurrentSQLDataadapter As SqlDataAdapter
     Public ENV As ENV
     Public SQLLog As LOG
 
     Public MySQLCon As MySqlConnection
     Private MySQLcmd As New MySqlCommand
     Private mySQLReader As MySqlDataReader
+    Private CurrentMySQLDataadapter As MySqlDataAdapter
 
     Public AccessCon As OleDb.OleDbConnection
     Private AccessCmd As OleDb.OleDbCommand
     Private AccessReader As OleDb.OleDbDataReader
+    Private CurrentAccessDataadapter As OleDb.OleDbDataAdapter
 
     'CSV could work with Access Object as well, but I implemented a more strict sepearation, in order to have a better overview and handling of the code
     Public CSVCon As OleDb.OleDbConnection
     Private CSVCmd As OleDb.OleDbCommand
     Private CSVReader As OleDb.OleDbDataReader
+    Private CurrentCSVDataadapter As OleDb.OleDbDataAdapter
 
     Public Setting As SQLServerSettings
     Public Testmode As Boolean = False
 
     Public TableSchema As New TableSchema
     Public Tables As New LinkedList(Of TableSchema)
-
-    Public ConnectionTestSuccessful As Boolean = False
 
     '--------------------------------------------------Initializing the class-------------------------------------------------
     Public Sub SetENV(ENV)
@@ -66,7 +68,6 @@ Public Class MyDataConnector
             SQLLog.Write(1, "Connected with " & sServer & "\" & sDB)
             MySQLCon.Close()
             ConnectMySQL = MySQLCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, ex.Message)
             ConnectMySQL = Nothing
@@ -89,7 +90,6 @@ Public Class MyDataConnector
             SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
             ConnectDBByUser = SQLCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & Err.Description)
             ConnectDBByUser = Nothing
@@ -114,7 +114,6 @@ Public Class MyDataConnector
             SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
             ConnectDBTrusted = SQLCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBTrusted = Nothing
@@ -141,7 +140,6 @@ Public Class MyDataConnector
             Me.AccessCon.Open()
             SQLLog.Write(1, "Established connection to:" & Path)
             ConnectDBAccess = Me.AccessCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBAccess = Nothing
@@ -195,7 +193,6 @@ Public Class MyDataConnector
             Me.CSVCon.Open()
             SQLLog.Write(1, "Established connection to:" & Path)
             ConnectDBCSV = Me.CSVCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBCSV = Nothing
@@ -241,7 +238,6 @@ Public Class MyDataConnector
             headerString = headerString & "," & vbCrLf
             myWriter.WriteLine(headerString)
             myWriter.Close()
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR while rewriting csv file: " & ex.Message)
             Exit Sub
@@ -333,6 +329,7 @@ Public Class MyDataConnector
                 Try
                     dataadapter.Fill(ds, Module1.Core.CurrentENV.GetName())
                     SQLCon.Close()
+                    Me.CurrentSQLDataadapter = dataadapter
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                     CreateDataAdapter = Nothing
@@ -354,6 +351,7 @@ Public Class MyDataConnector
                 Try
                     dataadapter.Fill(ds, Module1.Core.CurrentENV.GetName())
                     SQLCon.Close()
+                    Me.CurrentSQLDataadapter = dataadapter
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                     CreateDataAdapter = Nothing
@@ -378,6 +376,7 @@ Public Class MyDataConnector
                         Dim ds As New DataSet
                         dataadapter.Fill(ds)
                         CreateDataAdapter = ds
+                        Me.CurrentMySQLDataadapter = dataadapter
                     Else
                         If MySQLCon.State = ConnectionState.Open Then
                             MySQLCon.Close()
@@ -386,6 +385,7 @@ Public Class MyDataConnector
                         Dim ds As New DataSet
                         dataadapter.Fill(ds)
                         CreateDataAdapter = ds
+                        Me.CurrentMySQLDataadapter = dataadapter
                     End If
                     Exit Function
                 Catch ex As Exception
@@ -400,6 +400,7 @@ Public Class MyDataConnector
                     Dim ds As New DataSet
                     dataadapter.Fill(ds)
                     CreateDataAdapter = ds
+                    Me.CurrentAccessDataadapter = dataadapter
                     Exit Function
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
@@ -413,12 +414,85 @@ Public Class MyDataConnector
                     Dim ds As New DataSet
                     dataadapter.Fill(ds)
                     CreateDataAdapter = ds
+                    Me.CurrentCSVDataadapter = dataadapter
                     Exit Function
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                 End Try
         End Select
         CreateDataAdapter = Nothing
+    End Function
+
+    Public Function WriteDataset(DS As DataSet) As Integer
+        Dim RowsChanged As Integer = 0
+        Select Case Setting.Servertype
+            Case "MSSQL"
+                Try
+                    SQLCon.Open()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+                Try
+                    CurrentSQLDataadapter.TableMappings.Add(Setting.SQLTable, DS.Tables(0).TableName)
+                    RowsChanged = CurrentSQLDataadapter.Update(DS, Setting.SQLTable)
+                    SQLCon.Close()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "MS-SQL"
+                Try
+                    SQLCon.Open()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+                Try
+                    Dim builder As SqlCommandBuilder = New SqlCommandBuilder(CurrentSQLDataadapter)
+                    builder.QuotePrefix = "["
+                    builder.QuoteSuffix = "]"
+                    builder.SetAllValues = True
+                    SQLLog.Write(1, builder.GetInsertCommand().CommandText)
+                    CurrentSQLDataadapter.TableMappings.Add(Setting.SQLTable, DS.Tables(0).TableName)
+                    RowsChanged = CurrentSQLDataadapter.Update(DS, Setting.SQLTable)
+                    SQLCon.Close()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "MySQL"
+                Try
+                    If MySQLCon.State = ConnectionState.Open Then
+                        MySQLCon.Close()
+                    End If
+                    RowsChanged = CurrentMySQLDataadapter.Update(DS, Setting.SQLTable)
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "Access"
+                Try
+                    If AccessCon.State = ConnectionState.Open Then
+                        AccessCon.Close()
+                    End If
+                    RowsChanged = CurrentAccessDataadapter.Update(DS, Setting.SQLTable)
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "CSV"
+                Try
+                    If CSVCon.State = ConnectionState.Open Then
+                        CSVCon.Close()
+                    End If
+                    RowsChanged = CurrentCSVDataadapter.Update(DS, Setting.SQLTable)
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+        End Select
+        Return RowsChanged
     End Function
 
     Public Sub CopyDataToMSSQL()

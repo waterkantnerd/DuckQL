@@ -146,7 +146,7 @@ Module Module1
         ' This Routine is tidying up everything, so that the next jobfile can be processed.
         '---------------------------------------------------------------------------------------------------------------------------------------------------------------
         Core.Dispose()
-        Core = Nothing
+
     End Sub
 
     Private Sub Start(EnvoirementObject As ENV)
@@ -155,12 +155,9 @@ Module Module1
         ' It loads the ENV into the core programm, so that is available from every part of the program, it initializes the log object which handles the log output
         ' and, most important, it tries to connect to the sql servers.
         ' If everything runs smoothly here, it'll jump into the "custom code" routine.
-        Dim Log As New LOG
+        Dim Log As New Log
 
-        If IsNothing(Core) Then
-            Dim NewCore As New Core
-            Core = NewCore
-        End If
+
         ' initializes the central program core
         Core.CoreStart(EnvoirementObject, Log)
 
@@ -176,6 +173,13 @@ Module Module1
 
         Try
             ' initilizes the sql object and tests the connection to the sql servers
+            System.Console.WriteLine(" _______   __    __    ______  __  ___   ______       __      ")
+            System.Console.WriteLine("|       \ |  |  |  |  /      ||  |/  /  /  __  \     |  |     ")
+            System.Console.WriteLine("|  .--.  ||  |  |  | |  ,----'|  '  /  |  |  |  |    |  |     ")
+            System.Console.WriteLine("|  |  |  ||  |  |  | |  |     |    <   |  |  |  |    |  |     ")
+            System.Console.WriteLine("|  '--'  ||  `--'  | |  `----.|  .  \  |  `--'  '--. |  `----.")
+            System.Console.WriteLine("|_______/  \______/   \______||__|\__\  \_____\_____\|_______|")
+
             Log.Write(1, "DuckQL by waterkantnerd v. " & My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & My.Application.Info.Version.Build)
             For Each SQLSetting In Core.CurrentENV.SQLServer
                 Dim SQL As New MyDataConnector
@@ -183,19 +187,6 @@ Module Module1
                 SQL.SQLLog = (Core.CurrentLog)
                 SQL.Setting = SQLSetting
                 SQL.CreateSQLCon()
-                If SQL.ConnectionTestSuccessful = False Then
-                    Select Case SQL.Setting.Servertype
-                        Case "XML"
-                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
-                        Case "CSV"
-                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
-                        Case "Access"
-                            Log.Write(0, "Could not connect to the specified Datafile " & SQL.Setting.FilePath)
-                        Case Else
-                            Log.Write(0, "Could not connect to the specified Host " & SQL.Setting.Servername)
-                    End Select
-                    Exit Sub
-                End If
                 Core.SQLServer.AddLast(SQL)
             Next
         Catch ex As Exception
@@ -217,7 +208,7 @@ Module Module1
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
 
         ' Initilizes the log object for this sub
-        Dim Log As LOG = Core.CurrentLog
+        Dim Log As Log = Core.CurrentLog
         Dim mytime As Date = Now()
         Dim Target As MyDataConnector = Core.GetTarget
         Log.Write(1, "Job started at " & mytime)
@@ -286,7 +277,7 @@ Module Module1
         Dim Consistent As Boolean = False
         Dim Source As MyDataConnector = GetConnector("source")
         Dim Target As MyDataConnector = GetConnector("target")
-        Dim Log As LOG = Core.CurrentLog
+        Dim Log As Log = Core.CurrentLog
 
         If IsNothing(Source) Or IsNothing(Target) Then
             Log.Write(0, "Could not findet Source- or Target Connector. Can not check consistency!")
@@ -344,7 +335,7 @@ Module Module1
         ' However the program specific logic is in the sql operations class. 
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
         Dim SQLop As New DataOperations
-        Dim Log As LOG = Core.CurrentLog
+        Dim Log As Log = Core.CurrentLog
 
         Dim Connector As MyDataConnector = GetConnector("source")
 
@@ -374,7 +365,7 @@ Module Module1
         ' This sub writes data from the program core to the target database
         '---------------------------------------------------------------------------------------------------------------------------------------------------------
         Dim SQLop As New DataOperations
-        Dim Log As LOG = Core.CurrentLog
+        Dim Log As Log = Core.CurrentLog
         Dim Connector As MyDataConnector = GetConnector("target")
         If IsNothing(Connector) Then
             Log.Write(0, "Critical Error - Could not read Target Job Connector vom Job File!")
