@@ -88,7 +88,6 @@ Public Class DataOperations
 
                 End If
             Next
-            i = i + 1
         Next
         Dim MyRows() As DataRow = DS.Tables(0).Select
         For Each Row In MyRows
@@ -124,22 +123,21 @@ Public Class DataOperations
         DS.Tables(0).Merge(Core.Targetdata)
 
         Dim Column As DataColumn
-        Dim Columns(1) As DataColumn
+        Dim Columns(0) As DataColumn
         For Each Column In DS.Tables(0).Columns
             If Core.CurrentENV.HasMultipleIdentifiers = False Then
                 If Column.ColumnName = Target.IDColumn Then
-                    Columns(0) = Column
-                    DS.Tables(0).PrimaryKey = Columns
+                    'Column.Unique = True
+                    'Columns(0) = Column
+                    'DS.Tables(0).PrimaryKey = Columns
                 End If
             Else
                 For Each Mapping In Core.Mappings
-                    If Column.ColumnName = Mapping.Targetname Then
+                    If Column.ColumnName.ToLower = Mapping.Targetname.ToLower Then
 
                     End If
                 Next
             End If
-
-
         Next
 
         MyRows = Core.Targetdata.Select()
@@ -147,7 +145,8 @@ Public Class DataOperations
         For Each Row In MyRows
             Log.Write(1, Row.RowState)
         Next
-        TargetSQL.WriteDataset(DS)
+        Dim ChangedRows As Integer = TargetSQL.WriteDataset(DS)
+        Core.LoadProccessHasFinished = True
         'Module1.Core.SourceIndex = DS
         'Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Module1.Core.LoadChecker))
         'Dim Max As Long = DS.Tables(0).Rows.Count - 1
