@@ -111,12 +111,18 @@ Public Class XMLFiles
                                                     Setting.FilePath = .Value
                                                 Case "Database"
                                                     Setting.SQLDB = .Value
+                                                Case "Index"
+                                                    Setting.Index = .Value
                                                 Case "Username"
                                                     Setting.User = .Value
                                                 Case "Password"
                                                     Setting.Password = .Value
+                                                Case "APIKey"
+                                                    Setting.APIKey = .Value
                                                 Case "ConnMode"
                                                     Setting.ConnMode = .Value
+                                                Case "Port"
+                                                    Setting.Port = .Value
                                                 Case "Table"
                                                     Setting.SQLTable = .Value
                                                 Case "IDColumn"
@@ -158,6 +164,30 @@ Public Class XMLFiles
                                                         Setting.UpdateAllowed = True
                                                     Else
                                                         Setting.UpdateAllowed = False
+                                                    End If
+                                                Case "DeleteAllowed"
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
+                                                        Setting.DeleteAllowed = True
+                                                    Else
+                                                        Setting.DeleteAllowed = False
+                                                    End If
+                                                Case "UpdateItems"
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
+                                                        Setting.UpdateItems = True
+                                                    Else
+                                                        Setting.UpdateItems = False
+                                                    End If
+                                                Case "DeleteItems"
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
+                                                        Setting.DeleteItems = True
+                                                    Else
+                                                        Setting.DeleteItems = False
+                                                    End If
+                                                Case "DropIndex"
+                                                    If .Value.ToLower = "yes" Or .Value.ToLower = "true" Then
+                                                        Setting.DropIndex = True
+                                                    Else
+                                                        Setting.DropIndex = False
                                                     End If
                                                 Case "TmpTableAllowed"
                                                     Dim MyVal As String = .Value
@@ -309,8 +339,11 @@ Public Class XMLFiles
             .WriteAttributeString("SQL-Server-Adress", Source.Servername)
             .WriteAttributeString("Filepath", Source.FilePath)
             .WriteAttributeString("Database", Source.SQLDB)
+            .WriteAttributeString("Index", Source.Index)
             .WriteAttributeString("Username", Source.User)
             .WriteAttributeString("Password", Source.Password)
+            .WriteAttributeString("APIKey", Source.APIKey)
+            .WriteAttributeString("Port", Source.Port)
             .WriteAttributeString("ConnMode", Source.ConnMode)
             .WriteAttributeString("Table", Source.SQLTable)
             .WriteAttributeString("IDColumn", Source.IDColumn)
@@ -335,9 +368,12 @@ Public Class XMLFiles
             .WriteAttributeString("SQL-Server-Adress", Target.Servername)
             .WriteAttributeString("Filepath", Target.FilePath)
             .WriteAttributeString("Database", Target.SQLDB)
+            .WriteAttributeString("Index", Target.Index)
             .WriteAttributeString("Username", Target.User)
             .WriteAttributeString("Password", Target.Password)
             .WriteAttributeString("ConnMode", Target.ConnMode)
+            .WriteAttributeString("APIKey", Target.APIKey)
+            .WriteAttributeString("Port", Target.Port)
             .WriteAttributeString("Table", Target.SQLTable)
             .WriteAttributeString("SessionTimestampField", Target.SessionTimestampField)
             .WriteAttributeString("IDColumn", Target.IDColumn)
@@ -347,6 +383,10 @@ Public Class XMLFiles
             .WriteAttributeString("StringPart", Target.StringPart)
             .WriteAttributeString("InsertAllowed", Target.InsertAllowed)
             .WriteAttributeString("UpdateAllowed", Target.UpdateAllowed)
+            .WriteAttributeString("DeleteAllowed", Target.DeleteAllowed)
+            .WriteAttributeString("DropIndex", Target.DropIndex)
+            .WriteAttributeString("UpdateItems", Target.UpdateItems)
+            .WriteAttributeString("DeleteItems", Target.DeleteItems)
             .WriteAttributeString("TmpTableAllowed", Target.TmpTableAllowed)
             .WriteAttributeString("UseOwnTmpTable", Target.UseOwnTmpTable)
             .WriteAttributeString("PredefinedTmpTableName", Target.PredefinedTmpTable)

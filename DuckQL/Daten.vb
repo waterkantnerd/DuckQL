@@ -53,23 +53,33 @@ Public Class Daten
         IsTargetIDColumn = Found
     End Function
 
-    Public Function GetMapping() As Boolean
-        ' This function detects if the user has defined a mapping. Legacy - only for XML Load needed
+    Public Function GetMapping(Optional LookForTargetnames As Boolean = False) As Boolean
+        ' This function detects if the user has defined a mapping. 
         Dim MappingFound As Boolean = False
         Dim ENV As ENV = Module1.Core.CurrentENV
         Dim Mappings(ENV.Mappings.Count) As Mapping
         ENV.Mappings.CopyTo(Mappings, 0)
         Dim i As Integer = 0
         While i < ENV.Mappings.Count
-            If Mappings(i).Sourcename.Equals(Me.SourceKey) Then
-                Me.Mapping = Mappings(i)
-                i = ENV.Mappings.Count
-                MappingFound = True
-                Return MappingFound
+            If LookForTargetnames = False Then
+                If Mappings(i).Sourcename.Equals(Me.SourceKey) Then
+                    Me.Mapping = Mappings(i)
+                    i = ENV.Mappings.Count
+                    MappingFound = True
+                    Return MappingFound
+                End If
+                i = i + 1
+            Else
+                If Mappings(i).Targetname.Equals(Me.SourceKey) Then
+                    Me.Mapping = Mappings(i)
+                    i = ENV.Mappings.Count
+                    MappingFound = True
+                    Return MappingFound
+                End If
+                i = i + 1
             End If
-            i = i + 1
         End While
-        GetMapping = MappingFound
+        Return MappingFound
     End Function
 
     Public Sub CheckAndSetMaxOccurance()

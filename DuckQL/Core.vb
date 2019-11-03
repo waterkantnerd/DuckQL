@@ -123,7 +123,7 @@ Public Class Core : Implements IDisposable
         ReDim Mappings(256)
         ReDim NoSourceMappings(256)
         ReDim SourceMappings(256)
-        TargetIndex.Dispose()
+        'TargetIndex.Dispose()
         TargetDataTable.Dispose()
         NoRowsInTargetTable = False
         AllQueryBlocksFinished = False

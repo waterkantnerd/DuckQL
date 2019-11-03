@@ -9,6 +9,8 @@ Imports System.IO
 Imports MySql
 Imports MySql.Data
 Imports MySql.Data.MySqlClient
+Imports Nest
+Imports Elasticsearch.Net
 
 Public Class MyDataConnector
     'Private myConn As SqlConnection
@@ -34,6 +36,11 @@ Public Class MyDataConnector
     Private CSVCmd As OleDb.OleDbCommand
     Private CSVReader As OleDb.OleDbDataReader
     Private CurrentCSVDataadapter As OleDb.OleDbDataAdapter
+
+    Private ELClient As ElasticClient
+    Private ELNode As Uri
+    Private ELConfig As ConnectionSettings
+
 
     Public Setting As SQLServerSettings
     Public Testmode As Boolean = False
@@ -301,10 +308,37 @@ Public Class MyDataConnector
                     Case Else
                         Me.CSVCon = ConnectDBCSV(Setting.FilePath, Setting.SQLDB)
                 End Select
+            Case "Elastic Search"
+                ConnectToElasticSearch()
             Case Else
                 SQLLog.Write(1, Setting.Servertype & " choosen no Dataconnection neccessary.")
         End Select
     End Sub
+
+    Private Function ConnectToElasticSearch() As Boolean
+
+        Dim TMPNode As New Uri(Setting.Servername)
+        Dim TMPConfig As New ConnectionSettings(TMPNode)
+        TMPConfig.DefaultIndex(Setting.SQLTable)
+        Dim Client As New ElasticClient(TMPConfig)
+
+        Dim response As PingResponse = Client.Ping
+
+        If response.IsValid = True Then
+            Me.ELClient = Client
+            Me.ELConfig = TMPConfig
+            Me.ELNode = TMPNode
+
+            SQLLog.Write(1, "Connected to " & Setting.Servername)
+            Return True
+        Else
+            SQLLog.Write(0, response.OriginalException.Message)
+        End If
+
+
+        Return False
+    End Function
+
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     '--------------------------------------------------Query and Data Handling---------------------------------------------------------------------------------------
@@ -419,6 +453,14 @@ Public Class MyDataConnector
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                 End Try
+
+            Case "Elastic Search"
+                Try
+
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                End Try
+
         End Select
         CreateDataAdapter = Nothing
     End Function
@@ -491,6 +533,8 @@ Public Class MyDataConnector
                     SQLLog.Write(0, ex.Message)
                     Return Nothing
                 End Try
+            Case "Elastic Search"
+
         End Select
         Return RowsChanged
     End Function
@@ -748,11 +792,19 @@ Public Class MyDataConnector
                     Return False
                     Exit Function
                 End Try
+            Case "Elastic Search"
+                Try
+
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return False
+                End Try
             Case Else
                 SQLLog.Write(0, "Execute Query - Unknown (Target) Servertype. 0 Querys were send.")
                 Return Nothing
         End Select
         RowsAffected = 0
+        Return RowsAffected
     End Function
 
     Public Function ExecuteQuery(SQLrq As String) As Boolean
@@ -853,12 +905,48 @@ Public Class MyDataConnector
                     CSVCon.Close()
                     Exit Function
                 End Try
+            Case "Elastic Search"
+                Try
+                    Dim Resp As IndexResponse = ELClient.LowLevel.Index(Of IndexResponse)(Setting.SQLTable, SQLrq)
+                    If Resp.IsValid = False Then
+                        SQLLog.Write(0, Resp.OriginalException.Message)
+                        Return False
+                    Else
+                        Return True
+                    End If
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return False
+                End Try
             Case Else
                 SQLLog.Write(0, "Execute Query - Unknown (Target) Servertype. 0 Querys were send.")
-                ExecuteQuery = Nothing
+                Return False
         End Select
-        RowsAffected = 0
+        Return False
     End Function
+
+    Public Function Elastic_IDQuery(ID As String) As DataSet
+        Try
+            Dim searchResponse = ELClient.LowLevel.Search(Of StringResponse)(Setting.SQLTable, PostData.Serializable(New With {Key .from = 0, Key .size = 10, Key .query = New With {Key .query_string = New With {Key .query = ID, Key .default_field = Setting.IDColumn}}}))
+            If searchResponse.Success = False Then
+                SQLLog.Write(0, searchResponse.OriginalException.Message)
+                Return Nothing
+            End If
+            Dim Docs As New List(Of String)
+            Dim JSONString As String = searchResponse.Body
+            Dim JSONConv As New JSON_Serialization
+            Dim DS As DataSet = JSONConv.Deserialize_EL_JSONtoDataset(JSONString)
+
+            Return DS
+
+        Catch ex As Exception
+            SQLLog.Write(0, "ElasticID_Query - Error: " & ex.Message)
+            Return Nothing
+        End Try
+
+        Return Nothing
+    End Function
+
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     '---------------------------------------------------------Masking Strings and Dates------------------------------------------------------------------------------

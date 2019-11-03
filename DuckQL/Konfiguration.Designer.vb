@@ -87,7 +87,7 @@ Partial Class Konfiguration
         Me.Label21 = New System.Windows.Forms.Label()
         Me.C_TargetTimestampfield = New System.Windows.Forms.ComboBox()
         Me.L_TargetIDColumn = New System.Windows.Forms.Label()
-        Me.Label13 = New System.Windows.Forms.Label()
+        Me.L_TagetTable = New System.Windows.Forms.Label()
         Me.C_TargetIDColumn = New System.Windows.Forms.ComboBox()
         Me.C_TargetServerType = New System.Windows.Forms.ComboBox()
         Me.L_TargetConnectionType = New System.Windows.Forms.Label()
@@ -119,8 +119,6 @@ Partial Class Konfiguration
         Me.C_Silent = New System.Windows.Forms.CheckBox()
         Me.ToolTipKonfig = New System.Windows.Forms.ToolTip(Me.components)
         Me.T_OrderID = New System.Windows.Forms.TextBox()
-        Me.C_CheckConsistency = New System.Windows.Forms.CheckBox()
-        Me.C_IDlessBatch = New System.Windows.Forms.CheckBox()
         Me.MappingGrid_Offline = New System.Windows.Forms.DataGridView()
         Me.SourceColumn_Offline = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.SourceXPath = New System.Windows.Forms.DataGridViewTextBoxColumn()
@@ -133,9 +131,20 @@ Partial Class Konfiguration
         Me.XMLAttribute = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.IsIdentity_offline = New System.Windows.Forms.DataGridViewCheckBoxColumn()
         Me.MultipleIdentifier = New System.Windows.Forms.CheckBox()
+        Me.C_CheckConsistency = New System.Windows.Forms.CheckBox()
+        Me.C_IDlessBatch = New System.Windows.Forms.CheckBox()
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.L_OrderID = New System.Windows.Forms.Label()
         Me.B_Load = New System.Windows.Forms.Button()
+        Me.C_DropIndex = New System.Windows.Forms.CheckBox()
+        Me.C_UpdateItems = New System.Windows.Forms.CheckBox()
+        Me.C_DeleteItems = New System.Windows.Forms.CheckBox()
+        Me.L_Index = New System.Windows.Forms.Label()
+        Me.T_Index = New System.Windows.Forms.TextBox()
+        Me.T_APIKey = New System.Windows.Forms.TextBox()
+        Me.L_APIKey = New System.Windows.Forms.Label()
+        Me.T_Port = New System.Windows.Forms.TextBox()
+        Me.L_Port = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -521,6 +530,15 @@ Partial Class Konfiguration
         '
         'GroupBox2
         '
+        Me.GroupBox2.Controls.Add(Me.L_Port)
+        Me.GroupBox2.Controls.Add(Me.T_Port)
+        Me.GroupBox2.Controls.Add(Me.L_APIKey)
+        Me.GroupBox2.Controls.Add(Me.T_APIKey)
+        Me.GroupBox2.Controls.Add(Me.T_Index)
+        Me.GroupBox2.Controls.Add(Me.L_Index)
+        Me.GroupBox2.Controls.Add(Me.C_DeleteItems)
+        Me.GroupBox2.Controls.Add(Me.C_UpdateItems)
+        Me.GroupBox2.Controls.Add(Me.C_DropIndex)
         Me.GroupBox2.Controls.Add(Me.C_ownTmpTable)
         Me.GroupBox2.Controls.Add(Me.l_PredefinedTmpTable)
         Me.GroupBox2.Controls.Add(Me.C_PredefinedTmpTable)
@@ -545,7 +563,7 @@ Partial Class Konfiguration
         Me.GroupBox2.Controls.Add(Me.Label21)
         Me.GroupBox2.Controls.Add(Me.C_TargetTimestampfield)
         Me.GroupBox2.Controls.Add(Me.L_TargetIDColumn)
-        Me.GroupBox2.Controls.Add(Me.Label13)
+        Me.GroupBox2.Controls.Add(Me.L_TagetTable)
         Me.GroupBox2.Controls.Add(Me.C_TargetIDColumn)
         Me.GroupBox2.Controls.Add(Me.C_TargetServerType)
         Me.GroupBox2.Controls.Add(Me.L_TargetConnectionType)
@@ -812,14 +830,14 @@ Partial Class Konfiguration
         Me.L_TargetIDColumn.TabIndex = 24
         Me.L_TargetIDColumn.Text = "ID Column:"
         '
-        'Label13
+        'L_TagetTable
         '
-        Me.Label13.AutoSize = True
-        Me.Label13.Location = New System.Drawing.Point(10, 125)
-        Me.Label13.Name = "Label13"
-        Me.Label13.Size = New System.Drawing.Size(37, 13)
-        Me.Label13.TabIndex = 36
-        Me.Label13.Text = "Table:"
+        Me.L_TagetTable.AutoSize = True
+        Me.L_TagetTable.Location = New System.Drawing.Point(10, 125)
+        Me.L_TagetTable.Name = "L_TagetTable"
+        Me.L_TagetTable.Size = New System.Drawing.Size(37, 13)
+        Me.L_TagetTable.TabIndex = 36
+        Me.L_TagetTable.Text = "Table:"
         '
         'C_TargetIDColumn
         '
@@ -833,7 +851,7 @@ Partial Class Konfiguration
         'C_TargetServerType
         '
         Me.C_TargetServerType.FormattingEnabled = True
-        Me.C_TargetServerType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access", "XML", "CSV"})
+        Me.C_TargetServerType.Items.AddRange(New Object() {"MS-SQL", "MySQL", "Access", "XML", "CSV", "Elastic Search"})
         Me.C_TargetServerType.Location = New System.Drawing.Point(81, 18)
         Me.C_TargetServerType.Name = "C_TargetServerType"
         Me.C_TargetServerType.Size = New System.Drawing.Size(191, 21)
@@ -1086,26 +1104,6 @@ Partial Class Konfiguration
         Me.ToolTipKonfig.SetToolTip(Me.T_OrderID, "Order ID: In case you want to store multiple files in one job folder, which has t" &
         "o be proccessed in a specific order." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "This has to be a numeric value.")
         '
-        'C_CheckConsistency
-        '
-        Me.C_CheckConsistency.AutoSize = True
-        Me.C_CheckConsistency.Location = New System.Drawing.Point(347, 36)
-        Me.C_CheckConsistency.Name = "C_CheckConsistency"
-        Me.C_CheckConsistency.Size = New System.Drawing.Size(121, 17)
-        Me.C_CheckConsistency.TabIndex = 2
-        Me.C_CheckConsistency.Text = "Check Consistency"
-        Me.C_CheckConsistency.UseVisualStyleBackColor = True
-        '
-        'C_IDlessBatch
-        '
-        Me.C_IDlessBatch.AutoSize = True
-        Me.C_IDlessBatch.Location = New System.Drawing.Point(253, 36)
-        Me.C_IDlessBatch.Name = "C_IDlessBatch"
-        Me.C_IDlessBatch.Size = New System.Drawing.Size(91, 17)
-        Me.C_IDlessBatch.TabIndex = 50
-        Me.C_IDlessBatch.Text = "ID-less Batch"
-        Me.C_IDlessBatch.UseVisualStyleBackColor = True
-        '
         'MappingGrid_Offline
         '
         Me.MappingGrid_Offline.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells
@@ -1205,6 +1203,26 @@ Partial Class Konfiguration
         "is. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "You'll need to define the Identifier Columns in the Mapping Grid below. ")
         Me.MultipleIdentifier.UseVisualStyleBackColor = True
         '
+        'C_CheckConsistency
+        '
+        Me.C_CheckConsistency.AutoSize = True
+        Me.C_CheckConsistency.Location = New System.Drawing.Point(347, 36)
+        Me.C_CheckConsistency.Name = "C_CheckConsistency"
+        Me.C_CheckConsistency.Size = New System.Drawing.Size(121, 17)
+        Me.C_CheckConsistency.TabIndex = 2
+        Me.C_CheckConsistency.Text = "Check Consistency"
+        Me.C_CheckConsistency.UseVisualStyleBackColor = True
+        '
+        'C_IDlessBatch
+        '
+        Me.C_IDlessBatch.AutoSize = True
+        Me.C_IDlessBatch.Location = New System.Drawing.Point(253, 36)
+        Me.C_IDlessBatch.Name = "C_IDlessBatch"
+        Me.C_IDlessBatch.Size = New System.Drawing.Size(91, 17)
+        Me.C_IDlessBatch.TabIndex = 50
+        Me.C_IDlessBatch.Text = "ID-less Batch"
+        Me.C_IDlessBatch.UseVisualStyleBackColor = True
+        '
         'L_OrderID
         '
         Me.L_OrderID.AutoSize = True
@@ -1222,6 +1240,97 @@ Partial Class Konfiguration
         Me.B_Load.TabIndex = 49
         Me.B_Load.Text = "Load Configuration..."
         Me.B_Load.UseVisualStyleBackColor = True
+        '
+        'C_DropIndex
+        '
+        Me.C_DropIndex.AutoSize = True
+        Me.C_DropIndex.Location = New System.Drawing.Point(45, 266)
+        Me.C_DropIndex.Name = "C_DropIndex"
+        Me.C_DropIndex.Size = New System.Drawing.Size(83, 17)
+        Me.C_DropIndex.TabIndex = 58
+        Me.C_DropIndex.Text = "Drop Index"
+        Me.ToolTipKonfig.SetToolTip(Me.C_DropIndex, "INSERT allowed: Check if you want new values to be added to your source.")
+        Me.C_DropIndex.UseVisualStyleBackColor = True
+        Me.C_DropIndex.Visible = False
+        '
+        'C_UpdateItems
+        '
+        Me.C_UpdateItems.AutoSize = True
+        Me.C_UpdateItems.Location = New System.Drawing.Point(230, 266)
+        Me.C_UpdateItems.Name = "C_UpdateItems"
+        Me.C_UpdateItems.Size = New System.Drawing.Size(94, 17)
+        Me.C_UpdateItems.TabIndex = 59
+        Me.C_UpdateItems.Text = "Update Items"
+        Me.ToolTipKonfig.SetToolTip(Me.C_UpdateItems, "INSERT allowed: Check if you want new values to be added to your source.")
+        Me.C_UpdateItems.UseVisualStyleBackColor = True
+        Me.C_UpdateItems.Visible = False
+        '
+        'C_DeleteItems
+        '
+        Me.C_DeleteItems.AutoSize = True
+        Me.C_DeleteItems.Location = New System.Drawing.Point(438, 266)
+        Me.C_DeleteItems.Name = "C_DeleteItems"
+        Me.C_DeleteItems.Size = New System.Drawing.Size(89, 17)
+        Me.C_DeleteItems.TabIndex = 60
+        Me.C_DeleteItems.Text = "Delete Items"
+        Me.ToolTipKonfig.SetToolTip(Me.C_DeleteItems, "INSERT allowed: Check if you want new values to be added to your source.")
+        Me.C_DeleteItems.UseVisualStyleBackColor = True
+        Me.C_DeleteItems.Visible = False
+        '
+        'L_Index
+        '
+        Me.L_Index.AutoSize = True
+        Me.L_Index.Location = New System.Drawing.Point(10, 48)
+        Me.L_Index.Name = "L_Index"
+        Me.L_Index.Size = New System.Drawing.Size(38, 13)
+        Me.L_Index.TabIndex = 61
+        Me.L_Index.Text = "Index:"
+        Me.L_Index.Visible = False
+        '
+        'T_Index
+        '
+        Me.T_Index.Location = New System.Drawing.Point(81, 44)
+        Me.T_Index.Name = "T_Index"
+        Me.T_Index.Size = New System.Drawing.Size(191, 22)
+        Me.T_Index.TabIndex = 62
+        Me.ToolTipKonfig.SetToolTip(Me.T_Index, "Database: The database you want to use.")
+        Me.T_Index.Visible = False
+        '
+        'T_APIKey
+        '
+        Me.T_APIKey.Location = New System.Drawing.Point(80, 111)
+        Me.T_APIKey.Name = "T_APIKey"
+        Me.T_APIKey.Size = New System.Drawing.Size(231, 22)
+        Me.T_APIKey.TabIndex = 63
+        Me.T_APIKey.Visible = False
+        '
+        'L_APIKey
+        '
+        Me.L_APIKey.AutoSize = True
+        Me.L_APIKey.Location = New System.Drawing.Point(10, 114)
+        Me.L_APIKey.Name = "L_APIKey"
+        Me.L_APIKey.Size = New System.Drawing.Size(46, 13)
+        Me.L_APIKey.TabIndex = 64
+        Me.L_APIKey.Text = "API Key:"
+        Me.L_APIKey.Visible = False
+        '
+        'T_Port
+        '
+        Me.T_Port.Location = New System.Drawing.Point(510, 111)
+        Me.T_Port.Name = "T_Port"
+        Me.T_Port.Size = New System.Drawing.Size(58, 22)
+        Me.T_Port.TabIndex = 65
+        Me.T_Port.Visible = False
+        '
+        'L_Port
+        '
+        Me.L_Port.AutoSize = True
+        Me.L_Port.Location = New System.Drawing.Point(458, 114)
+        Me.L_Port.Name = "L_Port"
+        Me.L_Port.Size = New System.Drawing.Size(31, 13)
+        Me.L_Port.TabIndex = 66
+        Me.L_Port.Text = "Port:"
+        Me.L_Port.Visible = False
         '
         'Konfiguration
         '
@@ -1301,7 +1410,7 @@ Partial Class Konfiguration
     Friend WithEvents Label21 As Windows.Forms.Label
     Friend WithEvents T_TargetTimestampfield As Windows.Forms.TextBox
     Friend WithEvents L_TargetIDColumn As Windows.Forms.Label
-    Friend WithEvents Label13 As Windows.Forms.Label
+    Friend WithEvents L_TagetTable As Windows.Forms.Label
     Friend WithEvents C_TargetServerType As Windows.Forms.ComboBox
     Friend WithEvents L_TargetConnectionType As Windows.Forms.Label
     Friend WithEvents T_TargetServerAdress As Windows.Forms.TextBox
@@ -1375,4 +1484,13 @@ Partial Class Konfiguration
     Friend WithEvents l_PredefinedTmpTable As Windows.Forms.Label
     Friend WithEvents C_PredefinedTmpTable As Windows.Forms.ComboBox
     Friend WithEvents C_TempTable As Windows.Forms.CheckBox
+    Friend WithEvents T_Index As Windows.Forms.TextBox
+    Friend WithEvents L_Index As Windows.Forms.Label
+    Friend WithEvents C_DeleteItems As Windows.Forms.CheckBox
+    Friend WithEvents C_UpdateItems As Windows.Forms.CheckBox
+    Friend WithEvents C_DropIndex As Windows.Forms.CheckBox
+    Friend WithEvents L_Port As Windows.Forms.Label
+    Friend WithEvents T_Port As Windows.Forms.TextBox
+    Friend WithEvents L_APIKey As Windows.Forms.Label
+    Friend WithEvents T_APIKey As Windows.Forms.TextBox
 End Class

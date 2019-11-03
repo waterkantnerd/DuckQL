@@ -194,6 +194,12 @@ Public Class DataOperations
         'ToDo: Multiple Identifier!!
         SQLrq = "SELECT " & TargetSQL.Setting.IDColumn & " FROM " & TargetSQL.Setting.SQLTable
         DS = TargetSQL.CreateDataAdapter(SQLrq)
+
+        If IsNothing(DS) Then
+            Module1.Core.NoRowsInTargetTable = True
+            Exit Sub
+        End If
+
         Module1.Core.TargetIndex = DS
         If DS.Tables(0).Rows.Count = 0 Then
             Module1.Core.NoRowsInTargetTable = True
@@ -680,10 +686,50 @@ Public Class DataOperations
                 'ToDo: implement
             Case "HTML"
                 'ToDo: implement
+            Case "JSON"
+                'ToDo: implement
+            Case "Elastic Search"
+                WriteToElastic()
             Case Else
                 WriteSQL()
         End Select
     End Sub
+
+    Private Sub WriteToElastic()
+        Dim i As Integer = 0
+        Dim JSONSer As New JSON_Serialization
+        Dim Target As MyDataConnector = Core.GetTarget
+        For i = 0 To Core.Sourcedata.Rows.Count - 1
+            Dim JSON As String = JSONSer.SerializeDataRowToJSON(Core.Sourcedata, i)
+            If EL_ItemExist(Core.Sourcedata(i)) = True Then
+            Else
+                Target.ExecuteQuery(JSON)
+            End If
+
+        Next
+    End Sub
+
+    Private Function EL_ItemExist(DRow As DataRow) As Boolean
+        Dim Target As MyDataConnector = Core.GetTarget
+        Dim SourceSetting As SQLServerSettings = GetSourceSetting()
+        Dim IDVal As String = DRow(SourceSetting.IDColumn)
+
+        Dim DS As DataSet = Target.Elastic_IDQuery(IDVal)
+        If IsNothing(DS) Then
+            Return False
+        Else
+            If DS.Tables.Count = 0 Then
+                Return False
+            Else
+                If DS.Tables(0).Rows.Count = 0 Then
+                    Return False
+                Else
+                    Return True
+                End If
+            End If
+        End If
+        Return False
+    End Function
 
     Private Sub WriteSQL()
         Dim SQLrq As String = ""

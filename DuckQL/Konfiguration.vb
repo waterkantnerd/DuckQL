@@ -184,6 +184,26 @@
                 Me.T_TargetDB.Visible = True
                 Me.T_TargetDB.Text = ""
                 Me.B_TargetSaveFile.Visible = False
+                '-----------------------Elastic Options------------------------------
+                Me.C_DropIndex.Visible = False
+                Me.C_UpdateItems.Visible = False
+                Me.C_DeleteItems.Visible = False
+                Me.L_Index.Visible = False
+                Me.T_Index.Visible = False
+                Me.T_Port.Visible = False
+                Me.L_Port.Visible = False
+                Me.T_APIKey.Visible = False
+                Me.L_APIKey.Visible = False
+                '--------------------Not relevant to Elastic-----------------------
+                Me.L_TagetTable.Visible = True
+                Me.C_TargetTable.Visible = True
+                Me.C_InsertAllowed.Visible = True
+                Me.C_UpdateAllowed.Visible = True
+                Me.C_DeleteAllowed.Visible = True
+                Me.C_TempTable.Visible = True
+                Me.C_ownTmpTable.Visible = True
+                Me.l_PredefinedTmpTable.Visible = True
+                Me.C_PredefinedTmpTable.Visible = True
             Case "MySQL"
                 Me.L_TargetServerAdress.Visible = True
                 Me.T_TargetServerAdress.Visible = True
@@ -199,6 +219,26 @@
                 Me.T_TargetDB.Visible = True
                 Me.T_TargetDB.Text = ""
                 Me.B_TargetSaveFile.Visible = False
+                '-----------------------Elastic Options------------------------------
+                Me.C_DropIndex.Visible = False
+                Me.C_UpdateItems.Visible = False
+                Me.C_DeleteItems.Visible = False
+                Me.L_Index.Visible = False
+                Me.T_Index.Visible = False
+                Me.T_Port.Visible = False
+                Me.L_Port.Visible = False
+                Me.T_APIKey.Visible = False
+                Me.L_APIKey.Visible = False
+                '--------------------Not relevant to Elastic-----------------------
+                Me.L_TagetTable.Visible = True
+                Me.C_TargetTable.Visible = True
+                Me.C_InsertAllowed.Visible = True
+                Me.C_UpdateAllowed.Visible = True
+                Me.C_DeleteAllowed.Visible = True
+                Me.C_TempTable.Visible = True
+                Me.C_ownTmpTable.Visible = True
+                Me.l_PredefinedTmpTable.Visible = True
+                Me.C_PredefinedTmpTable.Visible = True
             Case "Access"
                 Me.L_TargetServerAdress.Visible = False
                 Me.T_TargetServerAdress.Visible = False
@@ -216,6 +256,26 @@
                 Me.T_TargetPassword.Text = "  "
                 Me.B_TargetPath.Visible = True
                 Me.B_TargetSaveFile.Visible = False
+                '-----------------------Elastic Options------------------------------
+                Me.C_DropIndex.Visible = False
+                Me.C_UpdateItems.Visible = False
+                Me.C_DeleteItems.Visible = False
+                Me.L_Index.Visible = False
+                Me.T_Index.Visible = False
+                Me.T_Port.Visible = False
+                Me.L_Port.Visible = False
+                Me.T_APIKey.Visible = False
+                Me.L_APIKey.Visible = False
+                '--------------------Not relevant to Elastic-----------------------
+                Me.L_TagetTable.Visible = True
+                Me.C_TargetTable.Visible = True
+                Me.C_InsertAllowed.Visible = True
+                Me.C_UpdateAllowed.Visible = True
+                Me.C_DeleteAllowed.Visible = True
+                Me.C_TempTable.Visible = True
+                Me.C_ownTmpTable.Visible = True
+                Me.l_PredefinedTmpTable.Visible = True
+                Me.C_PredefinedTmpTable.Visible = True
             Case "XML"
                 Me.L_TargetServerAdress.Visible = False
                 Me.T_TargetServerAdress.Visible = False
@@ -237,6 +297,26 @@
                 Me.T_TargetDB.Visible = False
                 Me.T_TargetDB.Text = "XML"
                 Me.B_TargetSaveFile.Visible = True
+                '-----------------------Elastic Options------------------------------
+                Me.C_DropIndex.Visible = False
+                Me.C_UpdateItems.Visible = False
+                Me.C_DeleteItems.Visible = False
+                Me.L_Index.Visible = False
+                Me.T_Index.Visible = False
+                Me.T_Port.Visible = False
+                Me.L_Port.Visible = False
+                Me.T_APIKey.Visible = False
+                Me.L_APIKey.Visible = False
+                '--------------------Not relevant to Elastic-----------------------
+                Me.L_TagetTable.Visible = True
+                Me.C_TargetTable.Visible = True
+                Me.C_InsertAllowed.Visible = True
+                Me.C_UpdateAllowed.Visible = True
+                Me.C_DeleteAllowed.Visible = True
+                Me.C_TempTable.Visible = True
+                Me.C_ownTmpTable.Visible = True
+                Me.l_PredefinedTmpTable.Visible = True
+                Me.C_PredefinedTmpTable.Visible = True
             Case "CSV"
                 Me.L_TargetServerAdress.Visible = False
                 Me.T_TargetServerAdress.Visible = False
@@ -258,6 +338,66 @@
                 Me.T_TargetDB.Visible = False
                 Me.T_TargetDB.Text = "CSV"
                 Me.B_TargetSaveFile.Visible = True
+                '-----------------------Elastic Options------------------------------
+                Me.C_DropIndex.Visible = False
+                Me.C_UpdateItems.Visible = False
+                Me.C_DeleteItems.Visible = False
+                Me.L_Index.Visible = False
+                Me.T_Index.Visible = False
+                Me.T_Port.Visible = False
+                Me.L_Port.Visible = False
+                Me.T_APIKey.Visible = False
+                Me.L_APIKey.Visible = False
+                '--------------------Not relevant to Elastic-----------------------
+                Me.L_TagetTable.Visible = True
+                Me.C_TargetTable.Visible = True
+                Me.C_InsertAllowed.Visible = True
+                Me.C_UpdateAllowed.Visible = True
+                Me.C_DeleteAllowed.Visible = True
+                Me.C_TempTable.Visible = True
+                Me.C_ownTmpTable.Visible = True
+                Me.l_PredefinedTmpTable.Visible = True
+                Me.C_PredefinedTmpTable.Visible = True
+
+            Case "Elastic Search"
+                Me.L_TargetServerAdress.Visible = True
+                Me.T_TargetServerAdress.Visible = True
+                Me.C_TargetConnectionType.Visible = True
+                Me.L_TargetConnectionType.Visible = True
+                Me.C_TargetConnectionType.Items.Clear()
+                Me.C_TargetConnectionType.Items.Add("Normal")
+                Me.C_TargetConnectionType.Items.Add("No PW")
+                Me.C_TargetConnectionType.Items.Add("API Key")
+                Me.C_TargetConnectionType.Text = "Normal"
+                Me.T_TargetUsername.Visible = True
+                Me.T_TargetPassword.Visible = True
+                Me.T_TargetPassword.Text = ""
+                Me.T_TargetUsername.Text = ""
+                Me.L_TargetUsername.Visible = True
+                Me.L_TargetPassword.Visible = True
+                '-----------------------Elastic Options------------------------------
+                Me.C_DropIndex.Visible = True
+                Me.C_UpdateItems.Visible = True
+                Me.C_DeleteItems.Visible = True
+                Me.L_Index.Visible = True
+                Me.T_Index.Visible = True
+                Me.T_Port.Visible = True
+                Me.L_Port.Visible = True
+                Me.T_APIKey.Visible = True
+                Me.L_APIKey.Visible = True
+                '--------------------Not relevant to Elastic-----------------------
+                Me.L_TagetTable.Visible = False
+                Me.C_TargetTable.Visible = False
+                Me.C_InsertAllowed.Visible = False
+                Me.C_UpdateAllowed.Visible = False
+                Me.C_DeleteAllowed.Visible = False
+                Me.C_TempTable.Visible = False
+                Me.C_ownTmpTable.Visible = False
+                Me.l_PredefinedTmpTable.Visible = False
+                Me.C_PredefinedTmpTable.Visible = False
+                Me.T_TargetPath.Visible = False
+                Me.L_TargetPath.Visible = False
+                Me.B_TargetPath.Visible = False
             Case Else
                 Me.L_TargetServerAdress.Visible = True
                 Me.T_TargetServerAdress.Visible = True
@@ -266,6 +406,26 @@
                 Me.T_TargetPath.Visible = False
                 Me.L_TargetPath.Visible = False
                 Me.B_TargetPath.Visible = False
+                '-----------------------Elastic Options------------------------------
+                Me.C_DropIndex.Visible = False
+                Me.C_UpdateItems.Visible = False
+                Me.C_DeleteItems.Visible = False
+                Me.L_Index.Visible = False
+                Me.T_Index.Visible = False
+                Me.T_Port.Visible = False
+                Me.L_Port.Visible = False
+                Me.T_APIKey.Visible = False
+                Me.L_APIKey.Visible = False
+                '--------------------Not relevant to Elastic-----------------------
+                Me.L_TagetTable.Visible = True
+                Me.C_TargetTable.Visible = True
+                Me.C_InsertAllowed.Visible = True
+                Me.C_UpdateAllowed.Visible = True
+                Me.C_DeleteAllowed.Visible = True
+                Me.C_TempTable.Visible = True
+                Me.C_ownTmpTable.Visible = True
+                Me.l_PredefinedTmpTable.Visible = True
+                Me.C_PredefinedTmpTable.Visible = True
         End Select
     End Sub
 
@@ -329,16 +489,29 @@
                 Me.T_TargetPassword.Visible = True
                 Me.L_TargetUsername.Visible = True
                 Me.L_TargetPassword.Visible = True
+                Me.L_APIKey.Visible = False
+                Me.T_APIKey.Visible = False
             Case "Trusted"
                 Me.T_TargetUsername.Visible = False
                 Me.T_TargetPassword.Visible = False
                 Me.L_TargetUsername.Visible = False
                 Me.L_TargetPassword.Visible = False
+                Me.L_APIKey.Visible = False
+                Me.T_APIKey.Visible = False
+            Case "APIKey"
+                Me.T_TargetUsername.Visible = True
+                Me.T_TargetPassword.Visible = True
+                Me.L_TargetUsername.Visible = True
+                Me.L_TargetPassword.Visible = True
+                Me.L_APIKey.Visible = True
+                Me.T_APIKey.Visible = True
             Case "Else"
                 Me.T_TargetUsername.Visible = False
                 Me.T_TargetPassword.Visible = False
                 Me.L_TargetUsername.Visible = False
                 Me.L_TargetPassword.Visible = False
+                Me.L_APIKey.Visible = False
+                Me.T_APIKey.Visible = False
         End Select
     End Sub
 
@@ -751,6 +924,14 @@
                     Exit Function
                 End If
 
+            Case "Elastic Search"
+                If IsNothing(Me.T_TargetServerAdress.Text) Or Me.T_TargetServerAdress.Text = "" Then
+                    Me.T_TargetServerAdress.BackColor = Drawing.Color.Red
+                    MsgBox("Please enter the adress to your Elastic Search Instance!")
+                    ValidateUserInput = False
+                    Exit Function
+                End If
+
             Case Else
                 If IsNothing(Me.T_TargetServerAdress.Text) Or Me.T_TargetServerAdress.Text = "" Then
                     Me.T_TargetServerAdress.BackColor = Drawing.Color.Red
@@ -760,12 +941,20 @@
                 End If
         End Select
 
-
-        If IsNothing(Me.T_TargetDB.Text) Or Me.T_TargetDB.Text = "" Then
-            Me.T_TargetDB.BackColor = Drawing.Color.Red
-            MsgBox("Please enter the database you want to connect to!")
-            ValidateUserInput = False
-            Exit Function
+        If Me.C_TargetServerType.Text = "Elastic Search" Then
+            If IsNothing(Me.T_Index.Text) Or Me.T_Index.Text = "" Then
+                Me.T_Index.BackColor = Drawing.Color.Red
+                MsgBox("Please enter the index you want to connect to!")
+                ValidateUserInput = False
+                Exit Function
+            End If
+        Else
+            If IsNothing(Me.T_TargetDB.Text) Or Me.T_TargetDB.Text = "" Then
+                Me.T_TargetDB.BackColor = Drawing.Color.Red
+                MsgBox("Please enter the database you want to connect to!")
+                ValidateUserInput = False
+                Exit Function
+            End If
         End If
 
         If IsNothing(Me.C_TargetConnectionType.Text) Or Me.C_TargetConnectionType.Text = "" Then
