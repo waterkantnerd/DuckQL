@@ -14,7 +14,7 @@ Public Class DataOperations
     Private INSERTBlock As SQLQueryBlock
     Private UPDATEBlock As SQLQueryBlock
     Private UsingQueryBlocks As Boolean = False
-
+    Private Core As Core = Module1.Core
 
 
     Public Sub Setup(SQLEnvoirenment As MyDataConnector) 'Change this to real constructor method in the near future
@@ -53,7 +53,7 @@ Public Class DataOperations
         Dim SQLrq As String
         Dim DS As New DataSet
 
-        Dim i As Long = 0
+        'Dim i As Long = 0
         Dim TargetSQL As MyDataConnector
         Dim Target As SQLServerSettings
         Target = GetTargetSetting()
@@ -71,41 +71,116 @@ Public Class DataOperations
         '--------------------------------------------------------------Getting the rows from the result-----------------------------------------------------------------------------------------
         DS = SQL.CreateDataAdapter(SQLrq)
 
+
         If IsNothing(DS) = True Then
             Log.Write(0, "No results found. Is the filter correct?")
             Exit Sub
         End If
-        Module1.Core.SourceIndex = DS
-        Dim Max As Long = DS.Tables(0).Rows.Count - 1
-        Log.Write(1, Max & " rows found")
-        Try
-            For Each Row In DS.Tables(0).Rows
-                Dim ResultRow As DataRow = Row
-                If IsDBNull(ResultRow(Setting.IDColumn)) = True Then
-                    Log.Write(1, "Filtering empty row.")
-                Else
-                    Dim Reihe As New Reihe
-                    Reihe.SetUp(SQL, TargetSQL)
-                    'ToDo: Multiple Identifier!!!
-                    If Target.MapTargetIDColumnValue = True Then ' If the Identifier has to be modified before matching with the target 
-                        Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
-                        Reihe.MapIdentifier()
-                    Else
-                        Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
-                    End If
-                    Reihe.IDValueDataType = Setting.IDColumnDataType
-                    Dim RowObj As New RowObj
-                    RowObj.SetUp(Reihe, DS.Tables(0).Columns, ResultRow, Max, i)
-                    Log.Write(1, "Row " & i & " has ID value " & Reihe.IDValue)
-                    Dim t As New Threading.Thread(AddressOf SetUpSQLRow)
-                    t.Start(RowObj)
+        'Core.Sourcedata = DS.Tables(0)
+        Dim i As Integer = 0
+        For i = 0 To DS.Tables(0).Columns.Count - 1
+            For Each Mapping In Module1.Core.Mappings
+                If Mapping.Sourcename = DS.Tables(0).Columns(i).ColumnName Then
+                    Dim DC As New DataColumn
+                    DC.ColumnName = Mapping.Targetname
+                    DC.DataType = System.Type.GetType("System." & Mapping.Targettype)
+                    Core.Sourcedata.Columns.Add(DC)
+
                 End If
-                i = i + 1
             Next
-            '------------------------------------------------------------------------------------------------------------------------------------------------
-        Catch ex As Exception
-            Log.Write(0, "Error while searching for ID: " & ex.Message)
-        End Try
+        Next
+        Dim MyRows() As DataRow = DS.Tables(0).Select
+        For Each Row In MyRows
+            Core.Sourcedata.ImportRow(Row)
+        Next
+
+
+        SQLrq = CreateSelectStatement("target")
+        DS = TargetSQL.CreateDataAdapter(SQLrq)
+        If IsNothing(DS) = True Then
+            Log.Write(0, "No results found. Is the filter correct?")
+            Exit Sub
+        End If
+
+
+
+        Core.Targetdata = DS.Tables(0)
+        'Core.Targetdata.Merge(Core.Sourcedata)
+
+        MyRows = Core.Sourcedata.Select()
+        For Each Row In MyRows
+            Dim TRows() As DataRow = Core.Targetdata.Select(Target.IDColumn & "=" & Row(Target.IDColumn))
+            If TRows.Count = 0 Then
+                Row.SetAdded()
+                Core.Targetdata.ImportRow(Row)
+            Else
+                Row.SetModified()
+                Core.Targetdata.ImportRow(Row)
+            End If
+        Next
+
+
+        DS.Tables(0).Merge(Core.Targetdata)
+
+        Dim Column As DataColumn
+        Dim Columns(0) As DataColumn
+        For Each Column In DS.Tables(0).Columns
+            If Core.CurrentENV.HasMultipleIdentifiers = False Then
+                If Column.ColumnName = Target.IDColumn Then
+                    'Column.Unique = True
+                    'Columns(0) = Column
+                    'DS.Tables(0).PrimaryKey = Columns
+                End If
+            Else
+                For Each Mapping In Core.Mappings
+                    If Column.ColumnName.ToLower = Mapping.Targetname.ToLower Then
+
+                    End If
+                Next
+            End If
+        Next
+
+        MyRows = Core.Targetdata.Select()
+
+        For Each Row In MyRows
+            Log.Write(1, Row.RowState)
+        Next
+        Dim ChangedRows As Integer = TargetSQL.WriteDataset(DS)
+        Core.LoadProccessHasFinished = True
+        'Module1.Core.SourceIndex = DS
+        'Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Module1.Core.LoadChecker))
+        'Dim Max As Long = DS.Tables(0).Rows.Count - 1
+        'Log.Write(1, Max & " rows found")
+        'Try
+        'For Each Row In DS.Tables(0).Rows
+        'Dim ResultRow As DataRow = Row
+        'If IsDBNull(ResultRow(Setting.IDColumn)) = True Then
+        'Log.Write(1, "Filtering empty row.")
+        'Else
+        'Dim Reihe As New Reihe
+        'Reihe.SetUp(SQL, TargetSQL)
+        'ToDo: Multiple Identifier!!!
+        'If Target.MapTargetIDColumnValue = True Then ' If the Identifier has to be modified before matching with the target 
+        'Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
+        'Reihe.MapIdentifier()
+        'Else
+        'Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
+        'End If
+        'Reihe.IDValueDataType = Setting.IDColumnDataType
+        'Dim RowObj As New RowObj
+        'RowObj.SetUp(Reihe, DS.Tables(0).Columns, ResultRow, Max, i)
+        'Log.Write(1, "Row " & i & " has ID value " & Reihe.IDValue)
+        'Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf SetUpSQLRow), RowObj)
+
+        'Dim t As New Threading.Thread(AddressOf SetUpSQLRow)
+        't.Start(RowObj)
+        'End If
+        'i = i + 1
+        'Next
+        '------------------------------------------------------------------------------------------------------------------------------------------------
+        'Catch ex As Exception
+        'Log.Write(0, "Error while searching for ID: " & ex.Message)
+        'End Try
     End Sub
 
     Private Sub GetTargetIDList()
@@ -119,6 +194,12 @@ Public Class DataOperations
         'ToDo: Multiple Identifier!!
         SQLrq = "SELECT " & TargetSQL.Setting.IDColumn & " FROM " & TargetSQL.Setting.SQLTable
         DS = TargetSQL.CreateDataAdapter(SQLrq)
+
+        If IsNothing(DS) Then
+            Module1.Core.NoRowsInTargetTable = True
+            Exit Sub
+        End If
+
         Module1.Core.TargetIndex = DS
         If DS.Tables(0).Rows.Count = 0 Then
             Module1.Core.NoRowsInTargetTable = True
@@ -202,20 +283,7 @@ Public Class DataOperations
                     .Wert = ResultRow(Columns(i)).ToString
                 End If
 
-                Daten.Mapping = Module1.Core.Mappings(i)
-                If IsNothing(Daten.Mapping) Then
-                    If IsNothing(Module1.Core.Mappings(i)) Then
-                        Log.Write(0, "AAAHHHHHHHH!")
-                    End If
-                End If
-
-                If IsNothing(Daten.Mapping.StaticValue) = True Then
-                Else
-                    If .Mapping.StaticValue = "" Then
-                    Else
-                        .Wert = .Mapping.StaticValue
-                    End If
-                End If
+                .Mapping = Module1.Core.Mappings(i)
                 .MapDaten()
                 If Module1.Core.CurrentENV.HasMultipleIdentifiers = True Then
                     If Module1.Core.Mappings(i).UseAsIdentifier = True Then
@@ -237,8 +305,10 @@ Public Class DataOperations
         If Module1.Core.NoRowsInTargetTable = True Then
             Reihe.LookedUp = True
         Else
-            Dim t As New System.Threading.Thread(AddressOf Reihe.FindInTarget)
-            t.Start()
+            Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.FindInTarget))
+
+            'Dim t As New System.Threading.Thread(AddressOf Reihe.FindInTarget)
+            't.Start()
         End If
 
 
@@ -283,52 +353,69 @@ Public Class DataOperations
             End If
         End If
 
+        'Wait for Lookup on Target to finish
+        While Reihe.LookedUp = False
+            System.Threading.Thread.Sleep(100)
+        End While
+
         Select Case Target.Servertype
             Case "MSSQL"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
             Case "MS-SQL"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
             Case "MySQL"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
 
             Case "Access"
                 If Reihe.Found = False Then
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
+                    't.Start()
                 Else
-                    Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    t.Start()
+                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
+                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
+                    't.Start()
                 End If
             Case Else
 
         End Select
 
-        '-> Todo: Racecondition!!!
+        'Wait for Reihe to finish it Insert/Update Strings
+        While Reihe.StringsDone = False
+            System.Threading.Thread.Sleep(100)
+        End While
+
+        'Setting Proccessed bit to Signal that this row is complete
+        Reihe.Proccessed = True
         Log.Write(1, "Row " & CurrentRow & " from " & MaxRows & " has beend added to data core")
         If IsNothing(Reihe) Then
             Log.Write(0, "WARNING empty row detected on " & CurrentRow & " !!")
         Else
-            SyncLock Module1.Core.ReihenQueueHandle
-                Module1.Core.Reihen.Enqueue(Reihe)
-            End SyncLock
+            Module1.Core.Reihen.Enqueue(Reihe)
         End If
 
 
@@ -396,10 +483,7 @@ Public Class DataOperations
                         End If
                         If Reihe.IsComplete Then
                             'If a row is complete, it should be written into core
-                            SyncLock Module1.Core.ReihenQueueHandle
-                                Module1.Core.Reihen.Enqueue(Reihe)
-                            End SyncLock
-
+                            Module1.Core.Reihen.Enqueue(Reihe)
                             Reihe = New Reihe
                             Reihe.SetUp(SQL, TargetSQL)
                         End If
@@ -478,7 +562,7 @@ Public Class DataOperations
         CheckInnerXML4XML = XMLString
     End Function
 
-    Private Function CreateSelectStatement() As String
+    Private Function CreateSelectStatement(Optional Direction As String = "source") As String
         Dim SQLrq As String = ""
 
         '--------------------------------------------------------------Defining the SQL-query----------------------------------------------------------
@@ -486,32 +570,46 @@ Public Class DataOperations
         Dim SelectStatement As String = "SELECT "
         Dim SB As New System.Text.StringBuilder
 
-        For Each Map In Module1.Core.Mappings
-            SB.Append(Map.Sourcename & ",")
-        Next
-        SelectStatement = SelectStatement & SB.ToString
-        SelectStatement = SelectStatement.Remove(SelectStatement.Length - 1)
+        Select Case Direction.ToLower
+            Case "source"
+                For Each Map In Module1.Core.Mappings
+                    SB.Append(Map.Sourcename & ",")
+                Next
+                SelectStatement = SelectStatement & SB.ToString
+                SelectStatement = SelectStatement.Remove(SelectStatement.Length - 1)
 
 
-        'For compatibility reasons there are serveral cases that are doing the same. Sorry for the mess :P
-        Select Case Setting.Filtertype.ToUpper
-            Case ""
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable
-            Case "NONE" ' No filter criteria is set in the xml file
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable
-            Case "DEFAULT" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
-            Case "STANDARD" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
-            Case "SIMPLE" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
-            Case "ONE COLUMN MATCH"
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
-            Case "SQL FILTER" ' For more complex statements you can set up a sql filter setting on your own.
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.SQLFilter
-            Case Else ' If nothing has been defined, the program just loads the whole table.
-                SQLrq = SelectStatement & " FROM " & Setting.SQLTable
+                'For compatibility reasons there are serveral cases that are doing the same. Sorry for the mess :P
+                Select Case Setting.Filtertype.ToUpper
+                    Case ""
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable
+                    Case "NONE" ' No filter criteria is set in the xml file
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable
+                    Case "DEFAULT" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
+                    Case "STANDARD" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
+                    Case "SIMPLE" ' Per default the sql filter is just a simple statement e.g. columnvalue = 5 
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
+                    Case "ONE COLUMN MATCH"
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.FilterColumn & "=" & SQL.CSQL(Setting.FilterValue)
+                    Case "SQL FILTER" ' For more complex statements you can set up a sql filter setting on your own.
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable & " WHERE " & Setting.SQLFilter
+                    Case Else ' If nothing has been defined, the program just loads the whole table.
+                        SQLrq = SelectStatement & " FROM " & Setting.SQLTable
+                End Select
+            Case "target"
+                For Each Map In Module1.Core.Mappings
+                    SB.Append(Map.Targetname & ",")
+                Next
+                SelectStatement = SelectStatement & SB.ToString
+                SelectStatement = SelectStatement.Remove(SelectStatement.Length - 1)
+
+                SQLrq = SelectStatement & " From " & GetTargetSetting.SQLTable
+
         End Select
+
+
 
         Log.Write(1, "Current query is: " & SQLrq)
         '------------------------------------------------------------------------------------------------------------------------------------------------
@@ -588,15 +686,59 @@ Public Class DataOperations
                 'ToDo: implement
             Case "HTML"
                 'ToDo: implement
+            Case "JSON"
+                'ToDo: implement
+            Case "Elastic Search"
+                WriteToElastic()
             Case Else
                 WriteSQL()
         End Select
     End Sub
 
+    Private Sub WriteToElastic()
+        Dim i As Integer = 0
+        Dim JSONSer As New JSON_Serialization
+        Dim Target As MyDataConnector = Core.GetTarget
+        For i = 0 To Core.Sourcedata.Rows.Count - 1
+            Dim JSON As String = JSONSer.SerializeDataRowToJSON(Core.Sourcedata, i)
+            If EL_ItemExist(Core.Sourcedata(i)) = True Then
+            Else
+                Target.ExecuteQuery(JSON)
+            End If
+
+        Next
+    End Sub
+
+    Private Function EL_ItemExist(DRow As DataRow) As Boolean
+        Dim Target As MyDataConnector = Core.GetTarget
+        Dim SourceSetting As SQLServerSettings = GetSourceSetting()
+        Dim IDVal As String = DRow(SourceSetting.IDColumn)
+
+        Dim DS As DataSet = Target.Elastic_IDQuery(IDVal)
+        If IsNothing(DS) Then
+            Return False
+        Else
+            If DS.Tables.Count = 0 Then
+                Return False
+            Else
+                If DS.Tables(0).Rows.Count = 0 Then
+                    Return False
+                Else
+                    Return True
+                End If
+            End If
+        End If
+        Return False
+    End Function
+
     Private Sub WriteSQL()
         Dim SQLrq As String = ""
 
         'ToDo: UPDATE Handling of Query Blocks for MySQL + INSERT & UPDATE Handling for MS-SQL
+        While Module1.Core.LoadProccessHasFinished = False
+            Log.Write(1, "Waiting 5 Seconds to finish loading process")
+            System.Threading.Thread.Sleep(5000)
+        End While
 
         Log.Write(1, "Writing to Target...")
         If ENV.IDLessBatch = True Then
@@ -606,72 +748,50 @@ Public Class DataOperations
         End If
 
         If SQL.Setting.BatchQueryAllowed = True Then
-            Dim k As New System.Threading.Thread(AddressOf Module1.Core.QueryBlockHandler)
-            k.Start()
+            Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Module1.Core.QueryBlockHandler))
+            'Dim k As New System.Threading.Thread(AddressOf Module1.Core.QueryBlockHandler)
+            'k.Start()
         End If
 
         If Module1.Core.NoRowsInTargetTable = True Then
             Log.Write(1, "NOTE: Target Table is empty --> Only INSERT Statements will be used")
         End If
 
-        If Module1.Core.TargetDataTable.Rows.Count > 0 Then
-            While CheckRowCompletion() = False
-                Log.Write(1, "Waiting 5 Seconds for Row to fill...")
-                System.Threading.Thread.Sleep(5000)
-            End While
-            SQL.CopyDataToMSSQL()
-        Else
-            Dim i As Long = 0
-            While Module1.Core.Reihen.Count > 0
-                Dim y As Integer = 0
-                While IsNothing(Module1.Core.Reihen.Peek) = True
-                    If y = 3 Then
-                        Log.Write(1, "Putting Row back on queue...")
-                        Dim TmpReihe As Reihe = Module1.Core.Reihen.Dequeue
-                        SyncLock Module1.Core.ReihenQueueHandle
-                            Module1.Core.Reihen.Enqueue(TmpReihe)
-
-                        End SyncLock
-                    Else
-                        Log.Write(1, "I have " & Module1.Core.Reihen.Count & " Rows left")
-                        Log.Write(1, "Waiting 5 Seconds for Row to fill...")
-                        System.Threading.Thread.Sleep(5000)
-                    End If
-                    y = y + 1
-                End While
-
-                Dim Reihe As Reihe = Module1.Core.Reihen.Dequeue
-
-
-                While Reihe.IsComplete = False Or Reihe.LookedUp = False
-                    Log.Write(1, "Waiting for Row to finish...")
+        If SQL.Setting.Servertype = "MS-SQL" Or SQL.Setting.Servertype = "MSSQL" Then
+            If Module1.Core.TargetDataTable.Rows.Count > 0 Then
+                While CheckRowCompletion() = False
+                    Log.Write(1, "Waiting 5 Seconds for Row to fill...")
                     System.Threading.Thread.Sleep(5000)
                 End While
-                'The Program checks only for an existing ID if IDless Batch Mode is deactivated
-
-                'If it can't find Records with the corresponding ID OR IDless Batch Mode is activated, the programs creates an insert string (if allowed)
-                If ENV.IDLessBatch = True Or Module1.Core.NoRowsInTargetTable = True Then
-                    If Setting.InsertAllowed = True Then
-                        Log.Write(1, "So far the Identifier didn't exist --> INSERT")
-                        If SQL.Setting.Servertype = "Access" Or SQL.Setting.BatchQueryAllowed = False Then
-                            SQL.ExecuteQuery(Reihe.InsertString)
+                SQL.CopyDataToMSSQL()
+            Else
+                Dim i As Long = 0
+                While Module1.Core.Reihen.Count > 0
+                    Dim y As Integer = 0
+                    While IsNothing(Module1.Core.Reihen.Peek) = True
+                        If y = 3 Then
+                            Log.Write(1, "Putting Row back on queue...")
+                            Dim TmpReihe As Reihe = Module1.Core.Reihen.Dequeue
+                            Module1.Core.Reihen.Enqueue(TmpReihe)
                         Else
-                            Select Case SQL.Setting.Servertype
-                                Case "MySQL"
-                                    Me.AddQueryToINSERTBlock(Reihe)
-                                Case "MSSQL"
-                                        'This is already handled while creating the INSERT String --> Data Table in Core
-                                Case "MS-SQL"
-                                    'This is already handled while creating the INSERT String --> Data Table in Core
-                                Case Else
-                                    Me.AddQueryToINSERTBlock(Reihe)
-                            End Select
+                            Log.Write(1, "I have " & Module1.Core.Reihen.Count & " Rows left")
+                            Log.Write(1, "Waiting 5 Seconds for Row to fill...")
+                            System.Threading.Thread.Sleep(5000)
                         End If
-                    Else
-                        Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
-                    End If
-                Else
-                    If Reihe.Found = False Then
+                        y = y + 1
+                    End While
+
+                    Dim Reihe As Reihe = Module1.Core.Reihen.Dequeue
+
+
+                    While Reihe.IsComplete = False Or Reihe.LookedUp = False
+                        Log.Write(1, "Waiting for Row to finish...")
+                        System.Threading.Thread.Sleep(5000)
+                    End While
+                    'The Program checks only for an existing ID if IDless Batch Mode is deactivated
+
+                    'If it can't find Records with the corresponding ID OR IDless Batch Mode is activated, the programs creates an insert string (if allowed)
+                    If ENV.IDLessBatch = True Or Module1.Core.NoRowsInTargetTable = True Then
                         If Setting.InsertAllowed = True Then
                             Log.Write(1, "So far the Identifier didn't exist --> INSERT")
                             If SQL.Setting.Servertype = "Access" Or SQL.Setting.BatchQueryAllowed = False Then
@@ -681,7 +801,7 @@ Public Class DataOperations
                                     Case "MySQL"
                                         Me.AddQueryToINSERTBlock(Reihe)
                                     Case "MSSQL"
-                                'This is already handled while creating the INSERT String --> Data Table in Core
+                                        'This is already handled while creating the INSERT String --> Data Table in Core
                                     Case "MS-SQL"
                                         'This is already handled while creating the INSERT String --> Data Table in Core
                                     Case Else
@@ -692,21 +812,43 @@ Public Class DataOperations
                             Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
                         End If
                     Else
-                        If Setting.UpdateAllowed = True Then
-                            Log.Write(1, "Identifier already exists --> UPDATE")
-                            Reihe.MakeUpdateString()
-                            If SQL.Setting.Servertype = "Access" Then
-                                SQL.ExecuteQuery(Reihe.UpdateString)
+                        If Reihe.Found = False Then
+                            If Setting.InsertAllowed = True Then
+                                Log.Write(1, "So far the Identifier didn't exist --> INSERT")
+                                If SQL.Setting.Servertype = "Access" Or SQL.Setting.BatchQueryAllowed = False Then
+                                    SQL.ExecuteQuery(Reihe.InsertString)
+                                Else
+                                    Select Case SQL.Setting.Servertype
+                                        Case "MySQL"
+                                            Me.AddQueryToINSERTBlock(Reihe)
+                                        Case "MSSQL"
+                                'This is already handled while creating the INSERT String --> Data Table in Core
+                                        Case "MS-SQL"
+                                            'This is already handled while creating the INSERT String --> Data Table in Core
+                                        Case Else
+                                            Me.AddQueryToINSERTBlock(Reihe)
+                                    End Select
+                                End If
                             Else
-                                Me.AddQueryToUPDATEBlock(Reihe)
+                                Log.Write(1, "So far the Identifier didn't exist --> INSERT not allowed!")
                             End If
                         Else
-                            Log.Write(1, "Identifier already exists --> UPDATE not allowed!")
+                            If Setting.UpdateAllowed = True Then
+                                Log.Write(1, "Identifier already exists --> UPDATE")
+                                Reihe.MakeUpdateString()
+                                If SQL.Setting.Servertype = "Access" Then
+                                    SQL.ExecuteQuery(Reihe.UpdateString)
+                                Else
+                                    Me.AddQueryToUPDATEBlock(Reihe)
+                                End If
+                            Else
+                                Log.Write(1, "Identifier already exists --> UPDATE not allowed!")
+                            End If
                         End If
                     End If
-                End If
-                i = i + 1
-            End While
+                    i = i + 1
+                End While
+            End If
         End If
 
         SyncLock Module1.Core.QueryBlock
@@ -744,14 +886,15 @@ Public Class DataOperations
         If Module1.Core.Reihen.Count = RowCount Then
             For Each Row In Module1.Core.Reihen
                 If IsNothing(Row) Then
-                    Log.Write(1, "Row " & i & " hasn't been proccessed yet...")
-                    Return False
-                End If
-                If Row.IsComplete = True Then
-                    Log.Write(1, "Row " & i & " looks fine...")
+                    Log.Write(1, "WARNING! Row " & i & " IS NULL")
+                    'Return False
                 Else
-                    Log.Write(1, "Row " & i & " has not been finished by now...")
-                    Return False
+                    If Row.IsComplete = True Then
+                        Log.Write(1, "Row " & i & " looks fine...")
+                    Else
+                        Log.Write(1, "Row " & i & " has not been finished by now...")
+                        Return False
+                    End If
                 End If
                 i = i + 1
             Next

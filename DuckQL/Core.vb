@@ -26,8 +26,9 @@ Public Class Core : Implements IDisposable
     Public AllQueryBlocksFinished As Boolean = False
     Public DataTransferFinished As Boolean = False
     Public RowHandle As New System.Threading.EventWaitHandle(True, Threading.EventResetMode.ManualReset)
-    Public ReihenQueueHandle As New System.Threading.EventWaitHandle(True, Threading.EventResetMode.ManualReset)
-
+    Public LoadProccessHasFinished As Boolean = False
+    Public Sourcedata As New DataTable
+    Public Targetdata As DataTable
 
     Public Async Sub QueryBlockHandler()
         While DataTransferFinished = False
@@ -46,6 +47,29 @@ Public Class Core : Implements IDisposable
                         End If
                     End If
                 Next
+            End If
+        End While
+    End Sub
+
+    Public Sub LoadChecker()
+        While LoadProccessHasFinished = False
+            If SourceIndex.Tables(0).Rows.Count = Reihen.Count Then
+                Dim UnFinishedRowFound As Boolean = False
+                For Each Reihe In Reihen
+                    If IsNothing(Reihe) Then
+                    Else
+                        If Reihe.Proccessed = True Then
+                        Else
+                            UnFinishedRowFound = True
+                        End If
+                    End If
+                Next
+                If UnFinishedRowFound = True Then
+                Else
+                    LoadProccessHasFinished = True
+                    CurrentLog.Write(1, "Load Process has finished!")
+                    Exit Sub
+                End If
             End If
         End While
     End Sub
@@ -99,7 +123,7 @@ Public Class Core : Implements IDisposable
         ReDim Mappings(256)
         ReDim NoSourceMappings(256)
         ReDim SourceMappings(256)
-        TargetIndex.Dispose()
+        'TargetIndex.Dispose()
         TargetDataTable.Dispose()
         NoRowsInTargetTable = False
         AllQueryBlocksFinished = False

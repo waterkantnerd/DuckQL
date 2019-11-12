@@ -18,6 +18,8 @@ Public Class Reihe
     Public Found As Boolean = False
     Public LookedUp As Boolean = False
     Private Log As LOG = Module1.Core.CurrentLog
+    Public Proccessed As Boolean = False
+    Public StringsDone As Boolean = False
 
 
     Public Sub FindInTarget()
@@ -51,15 +53,15 @@ Public Class Reihe
             For Each Column In Me.IDSpalten
                 If Column.Mapping.UseAsIdentifier = True Then
                     If SB.ToString = "" Then
-                        SB.Append(Column.Mapping.Targetname & "=" & Me.Target.CSQL(Column.Wert, Column.Mapping.Targettype))
+                        SB.Append(Column.Mapping.Targetname & "=" & Target.CSQL(Column.Wert, Column.Mapping.Targettype))
                     Else
                         SB.Append(" AND ")
-                        SB.Append(Column.Mapping.Targetname & "=" & Me.Target.CSQL(Column.Wert, Column.Mapping.Targettype))
+                        SB.Append(Column.Mapping.Targetname & "=" & Target.CSQL(Column.Wert, Column.Mapping.Targettype))
                     End If
                 End If
             Next
         Else
-            SB.Append(Me.Target.Setting.IDColumn & "=" & Me.Target.CSQL(Me.IDValue, Me.IDValueDataType))
+            SB.Append(Me.Target.Setting.IDColumn & "=" & Target.CSQL(Me.IDValue, Me.IDValueDataType))
         End If
 
         Return SB.ToString
@@ -160,7 +162,7 @@ Public Class Reihe
         Else
             MakeDefaultUpdateString()
         End If
-
+        Me.StringsDone = True
     End Sub
 
     Private Sub MakeDefaultUpdateString()
@@ -196,6 +198,7 @@ Public Class Reihe
             Case Else
                 MakeSQLInsertString()
         End Select
+        Me.StringsDone = True
     End Sub
 
     Private Sub MakeCSVInsertString()

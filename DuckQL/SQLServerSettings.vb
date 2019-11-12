@@ -4,7 +4,10 @@
     Public ConnMode As String
     Public User As String
     Public Password As String
+    Public APIKey As String
+    Public Port As String
     Public SQLDB As String
+    Public Index As String
     Public Servertype As String
     Public FilePath As String
     Public BatchQueryAllowed As Boolean = True
@@ -28,6 +31,9 @@
     Public InsertAllowed As Boolean = False
     Public UpdateAllowed As Boolean = False
     Public DeleteAllowed As Boolean = False         ' ToDo: Implement Delete Options
+    Public DropIndex As Boolean = False             ' EL Option
+    Public UpdateItems As Boolean = False           ' EL Option
+    Public DeleteItems As Boolean = False           ' EL Option
     Public Direction As String                      ' This Parameter defines if it is a target or source setting
     Public TargetID As String                       ' ToDo: Enable more than one target table
     Public SessionTimestampField As String

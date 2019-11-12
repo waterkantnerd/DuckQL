@@ -9,35 +9,44 @@ Imports System.IO
 Imports MySql
 Imports MySql.Data
 Imports MySql.Data.MySqlClient
+Imports Nest
+Imports Elasticsearch.Net
 
 Public Class MyDataConnector
     'Private myConn As SqlConnection
     Private myCmd As SqlCommand
     Private myReader As SqlDataReader
     Public SQLCon As SqlConnection
+    Private CurrentSQLDataadapter As SqlDataAdapter
     Public ENV As ENV
     Public SQLLog As LOG
 
     Public MySQLCon As MySqlConnection
     Private MySQLcmd As New MySqlCommand
     Private mySQLReader As MySqlDataReader
+    Private CurrentMySQLDataadapter As MySqlDataAdapter
 
     Public AccessCon As OleDb.OleDbConnection
     Private AccessCmd As OleDb.OleDbCommand
     Private AccessReader As OleDb.OleDbDataReader
+    Private CurrentAccessDataadapter As OleDb.OleDbDataAdapter
 
     'CSV could work with Access Object as well, but I implemented a more strict sepearation, in order to have a better overview and handling of the code
     Public CSVCon As OleDb.OleDbConnection
     Private CSVCmd As OleDb.OleDbCommand
     Private CSVReader As OleDb.OleDbDataReader
+    Private CurrentCSVDataadapter As OleDb.OleDbDataAdapter
+
+    Private ELClient As ElasticClient
+    Private ELNode As Uri
+    Private ELConfig As ConnectionSettings
+
 
     Public Setting As SQLServerSettings
     Public Testmode As Boolean = False
 
     Public TableSchema As New TableSchema
     Public Tables As New LinkedList(Of TableSchema)
-
-    Public ConnectionTestSuccessful As Boolean = False
 
     '--------------------------------------------------Initializing the class-------------------------------------------------
     Public Sub SetENV(ENV)
@@ -66,7 +75,6 @@ Public Class MyDataConnector
             SQLLog.Write(1, "Connected with " & sServer & "\" & sDB)
             MySQLCon.Close()
             ConnectMySQL = MySQLCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, ex.Message)
             ConnectMySQL = Nothing
@@ -89,7 +97,6 @@ Public Class MyDataConnector
             SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
             ConnectDBByUser = SQLCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & Err.Description)
             ConnectDBByUser = Nothing
@@ -114,7 +121,6 @@ Public Class MyDataConnector
             SQLCon.Open()
             SQLLog.Write(1, "Established connection to:" & sServer & "." & sDB)
             ConnectDBTrusted = SQLCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBTrusted = Nothing
@@ -141,7 +147,6 @@ Public Class MyDataConnector
             Me.AccessCon.Open()
             SQLLog.Write(1, "Established connection to:" & Path)
             ConnectDBAccess = Me.AccessCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBAccess = Nothing
@@ -195,7 +200,6 @@ Public Class MyDataConnector
             Me.CSVCon.Open()
             SQLLog.Write(1, "Established connection to:" & Path)
             ConnectDBCSV = Me.CSVCon
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR!: " & ex.Message)
             ConnectDBCSV = Nothing
@@ -241,7 +245,6 @@ Public Class MyDataConnector
             headerString = headerString & "," & vbCrLf
             myWriter.WriteLine(headerString)
             myWriter.Close()
-            Me.ConnectionTestSuccessful = True
         Catch ex As Exception
             SQLLog.Write(0, "ERROR while rewriting csv file: " & ex.Message)
             Exit Sub
@@ -305,10 +308,37 @@ Public Class MyDataConnector
                     Case Else
                         Me.CSVCon = ConnectDBCSV(Setting.FilePath, Setting.SQLDB)
                 End Select
+            Case "Elastic Search"
+                ConnectToElasticSearch()
             Case Else
                 SQLLog.Write(1, Setting.Servertype & " choosen no Dataconnection neccessary.")
         End Select
     End Sub
+
+    Private Function ConnectToElasticSearch() As Boolean
+
+        Dim TMPNode As New Uri(Setting.Servername)
+        Dim TMPConfig As New ConnectionSettings(TMPNode)
+        TMPConfig.DefaultIndex(Setting.SQLTable)
+        Dim Client As New ElasticClient(TMPConfig)
+
+        Dim response As PingResponse = Client.Ping
+
+        If response.IsValid = True Then
+            Me.ELClient = Client
+            Me.ELConfig = TMPConfig
+            Me.ELNode = TMPNode
+
+            SQLLog.Write(1, "Connected to " & Setting.Servername)
+            Return True
+        Else
+            SQLLog.Write(0, response.OriginalException.Message)
+        End If
+
+
+        Return False
+    End Function
+
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     '--------------------------------------------------Query and Data Handling---------------------------------------------------------------------------------------
@@ -333,6 +363,7 @@ Public Class MyDataConnector
                 Try
                     dataadapter.Fill(ds, Module1.Core.CurrentENV.GetName())
                     SQLCon.Close()
+                    Me.CurrentSQLDataadapter = dataadapter
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                     CreateDataAdapter = Nothing
@@ -354,6 +385,7 @@ Public Class MyDataConnector
                 Try
                     dataadapter.Fill(ds, Module1.Core.CurrentENV.GetName())
                     SQLCon.Close()
+                    Me.CurrentSQLDataadapter = dataadapter
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                     CreateDataAdapter = Nothing
@@ -378,6 +410,7 @@ Public Class MyDataConnector
                         Dim ds As New DataSet
                         dataadapter.Fill(ds)
                         CreateDataAdapter = ds
+                        Me.CurrentMySQLDataadapter = dataadapter
                     Else
                         If MySQLCon.State = ConnectionState.Open Then
                             MySQLCon.Close()
@@ -386,6 +419,7 @@ Public Class MyDataConnector
                         Dim ds As New DataSet
                         dataadapter.Fill(ds)
                         CreateDataAdapter = ds
+                        Me.CurrentMySQLDataadapter = dataadapter
                     End If
                     Exit Function
                 Catch ex As Exception
@@ -400,6 +434,7 @@ Public Class MyDataConnector
                     Dim ds As New DataSet
                     dataadapter.Fill(ds)
                     CreateDataAdapter = ds
+                    Me.CurrentAccessDataadapter = dataadapter
                     Exit Function
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
@@ -413,12 +448,95 @@ Public Class MyDataConnector
                     Dim ds As New DataSet
                     dataadapter.Fill(ds)
                     CreateDataAdapter = ds
+                    Me.CurrentCSVDataadapter = dataadapter
                     Exit Function
                 Catch ex As Exception
                     SQLLog.Write(0, ex.Message)
                 End Try
+
+            Case "Elastic Search"
+                Try
+
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                End Try
+
         End Select
         CreateDataAdapter = Nothing
+    End Function
+
+    Public Function WriteDataset(DS As DataSet) As Integer
+        Dim RowsChanged As Integer = 0
+        Select Case Setting.Servertype
+            Case "MSSQL"
+                Try
+                    SQLCon.Open()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+                Try
+                    CurrentSQLDataadapter.TableMappings.Add(Setting.SQLTable, DS.Tables(0).TableName)
+                    RowsChanged = CurrentSQLDataadapter.Update(DS, Setting.SQLTable)
+                    SQLCon.Close()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "MS-SQL"
+                Try
+                    SQLCon.Open()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+                Try
+                    Dim builder As SqlCommandBuilder = New SqlCommandBuilder(CurrentSQLDataadapter)
+                    builder.QuotePrefix = "["
+                    builder.QuoteSuffix = "]"
+                    builder.SetAllValues = True
+                    SQLLog.Write(1, builder.GetInsertCommand().CommandText)
+                    CurrentSQLDataadapter.TableMappings.Add(Setting.SQLTable, DS.Tables(0).TableName)
+                    RowsChanged = CurrentSQLDataadapter.Update(DS, Setting.SQLTable)
+                    SQLCon.Close()
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "MySQL"
+                Try
+                    If MySQLCon.State = ConnectionState.Open Then
+                        MySQLCon.Close()
+                    End If
+                    RowsChanged = CurrentMySQLDataadapter.Update(DS, Setting.SQLTable)
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "Access"
+                Try
+                    If AccessCon.State = ConnectionState.Open Then
+                        AccessCon.Close()
+                    End If
+                    RowsChanged = CurrentAccessDataadapter.Update(DS, Setting.SQLTable)
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "CSV"
+                Try
+                    If CSVCon.State = ConnectionState.Open Then
+                        CSVCon.Close()
+                    End If
+                    RowsChanged = CurrentCSVDataadapter.Update(DS, Setting.SQLTable)
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return Nothing
+                End Try
+            Case "Elastic Search"
+
+        End Select
+        Return RowsChanged
     End Function
 
     Public Sub CopyDataToMSSQL()
@@ -434,7 +552,7 @@ Public Class MyDataConnector
 
             If Me.Setting.UpdateAllowed = True Then
                 If Me.Setting.TmpTableAllowed = True Then
-                    BulkCopy.DestinationTableName = Me.Setting.TmpSQLTable
+                    BulkCopy.DestinationTableName = "[" & Me.Setting.TmpSQLTable & "]"
                 Else
                     SQLLog.Write(0, "Config ERROR: No TmpTables allowed for BULK Update")
                 End If
@@ -477,50 +595,63 @@ Public Class MyDataConnector
     Private Sub MergeMSSQLTables()
         Dim SB As New System.Text.StringBuilder
 
-        SB.Append("MERGE " & Me.Setting.SQLTable & " AS TARGET")
-        SB.Append("USING " & Me.Setting.TmpSQLTable & " As SOURCE")
-        For Each Column In Me.TableSchema.Columns
-            If Column.IsKey Then
-                SB.Append("On (TARGET." & Column.Name & " = SOURCE." & Column.Name)
-            End If
-        Next
+        SB.Append("MERGE [" & Me.Setting.SQLTable & "] AS TARGET ")
+        SB.Append("USING [" & Me.Setting.TmpSQLTable & "] As SOURCE ")
+        If Me.TableSchema.HasDBKeyColumns = True Then                                               'By default the predefined Key Columns of the Tableschema will be used
+            For Each Column In Me.TableSchema.Columns                                               'If these Keys are not available, the program uses the Columns that have been
+                If Column.IsKey Then                                                                'defined as Identifier by the user    
+                    SB.Append("On (TARGET.[" & Column.Name & "] = SOURCE.[" & Column.Name & "]")
+                End If
+            Next
+        Else
+            For Each Column In Me.TableSchema.Columns
+                If Column.IsUserDefinedIdentifier Then
+                    SB.Append("On (TARGET.[" & Column.Name & "] = SOURCE.[" & Column.Name & "]")
+                End If
+            Next
+        End If
+
         SB.Append(")")
         SB.Append(" WHEN MATCHED AND ")
         Dim i As Integer = 0
         For Each Column In ENV.Mappings
             If i + 1 = ENV.Mappings.Count Then
-                SB.Append("Target." & Column.Targetname & "<>" & "SOURCE." & Column.Targetname)
+                SB.Append("Target.[" & Column.Targetname & "] <> " & "SOURCE.[" & Column.Targetname & "]")
             Else
-                SB.Append("Target." & Column.Targetname & "<>" & "SOURCE." & Column.Targetname & " OR ")
+                SB.Append("Target.[" & Column.Targetname & "] <>" & "SOURCE.[" & Column.Targetname & "] OR ")
             End If
+            i = i + 1
         Next
         i = 0
         SB.Append(" THEN UPDATE SET ")
         For Each Column In ENV.Mappings
             If i + 1 = ENV.Mappings.Count Then
-                SB.Append("Target." & Column.Targetname & "=" & "SOURCE." & Column.Targetname)
+                SB.Append("Target.[" & Column.Targetname & "] = " & "SOURCE.[" & Column.Targetname & "]")
             Else
-                SB.Append("Target." & Column.Targetname & "=" & "SOURCE." & Column.Targetname & ",")
+                SB.Append("Target.[" & Column.Targetname & "] = " & "SOURCE.[" & Column.Targetname & "],")
             End If
+            i = i + 1
         Next
         i = 0
         If Me.Setting.InsertAllowed = True Then
             SB.Append(" WHEN Not MATCHED BY TARGET THEN INSERT (")
             For Each Column In ENV.Mappings
                 If i + 1 = ENV.Mappings.Count Then
-                    SB.Append(Column.Targetname)
+                    SB.Append("[" & Column.Targetname & "]")
                 Else
-                    SB.Append(Column.Targetname & ",")
+                    SB.Append("[" & Column.Targetname & "], ")
                 End If
+                i = i + 1
             Next
             i = 0
             SB.Append(") VALUES (")
             For Each Column In ENV.Mappings
                 If i + 1 = ENV.Mappings.Count Then
-                    SB.Append("SOURCE." & Column.Targetname)
+                    SB.Append("SOURCE.[" & Column.Targetname & "]")
                 Else
-                    SB.Append("SOURCE." & Column.Targetname & ",")
+                    SB.Append("SOURCE.[" & Column.Targetname & "], ")
                 End If
+                i = i + 1
             Next
             SB.Append(")")
         End If
@@ -528,6 +659,7 @@ Public Class MyDataConnector
             SB.Append(" WHEN NOT MATCHED BY SOURCE ")
             SB.Append(" THEN DELETE ")
         End If
+        SB.Append(";")
         ExecuteQuery(SB.ToString)
     End Sub
 
@@ -660,11 +792,19 @@ Public Class MyDataConnector
                     Return False
                     Exit Function
                 End Try
+            Case "Elastic Search"
+                Try
+
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return False
+                End Try
             Case Else
                 SQLLog.Write(0, "Execute Query - Unknown (Target) Servertype. 0 Querys were send.")
                 Return Nothing
         End Select
         RowsAffected = 0
+        Return RowsAffected
     End Function
 
     Public Function ExecuteQuery(SQLrq As String) As Boolean
@@ -765,12 +905,48 @@ Public Class MyDataConnector
                     CSVCon.Close()
                     Exit Function
                 End Try
+            Case "Elastic Search"
+                Try
+                    Dim Resp As IndexResponse = ELClient.LowLevel.Index(Of IndexResponse)(Setting.SQLTable, SQLrq)
+                    If Resp.IsValid = False Then
+                        SQLLog.Write(0, Resp.OriginalException.Message)
+                        Return False
+                    Else
+                        Return True
+                    End If
+                Catch ex As Exception
+                    SQLLog.Write(0, ex.Message)
+                    Return False
+                End Try
             Case Else
                 SQLLog.Write(0, "Execute Query - Unknown (Target) Servertype. 0 Querys were send.")
-                ExecuteQuery = Nothing
+                Return False
         End Select
-        RowsAffected = 0
+        Return False
     End Function
+
+    Public Function Elastic_IDQuery(ID As String) As DataSet
+        Try
+            Dim searchResponse = ELClient.LowLevel.Search(Of StringResponse)(Setting.SQLTable, PostData.Serializable(New With {Key .from = 0, Key .size = 10, Key .query = New With {Key .query_string = New With {Key .query = ID, Key .default_field = Setting.IDColumn}}}))
+            If searchResponse.Success = False Then
+                SQLLog.Write(0, searchResponse.OriginalException.Message)
+                Return Nothing
+            End If
+            Dim Docs As New List(Of String)
+            Dim JSONString As String = searchResponse.Body
+            Dim JSONConv As New JSON_Serialization
+            Dim DS As DataSet = JSONConv.Deserialize_EL_JSONtoDataset(JSONString)
+
+            Return DS
+
+        Catch ex As Exception
+            SQLLog.Write(0, "ElasticID_Query - Error: " & ex.Message)
+            Return Nothing
+        End Try
+
+        Return Nothing
+    End Function
+
     '----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     '---------------------------------------------------------Masking Strings and Dates------------------------------------------------------------------------------
