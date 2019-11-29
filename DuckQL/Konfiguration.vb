@@ -194,6 +194,8 @@
                 Me.L_Port.Visible = False
                 Me.T_APIKey.Visible = False
                 Me.L_APIKey.Visible = False
+                Me.T_TargetDB.Visible = True
+                Me.L_TargetDB.Visible = True
                 '--------------------Not relevant to Elastic-----------------------
                 Me.L_TagetTable.Visible = True
                 Me.C_TargetTable.Visible = True
@@ -229,6 +231,8 @@
                 Me.L_Port.Visible = False
                 Me.T_APIKey.Visible = False
                 Me.L_APIKey.Visible = False
+                Me.T_TargetDB.Visible = True
+                Me.L_TargetDB.Visible = True
                 '--------------------Not relevant to Elastic-----------------------
                 Me.L_TagetTable.Visible = True
                 Me.C_TargetTable.Visible = True
@@ -266,6 +270,8 @@
                 Me.L_Port.Visible = False
                 Me.T_APIKey.Visible = False
                 Me.L_APIKey.Visible = False
+                Me.T_TargetDB.Visible = True
+                Me.L_TargetDB.Visible = True
                 '--------------------Not relevant to Elastic-----------------------
                 Me.L_TagetTable.Visible = True
                 Me.C_TargetTable.Visible = True
@@ -348,6 +354,8 @@
                 Me.L_Port.Visible = False
                 Me.T_APIKey.Visible = False
                 Me.L_APIKey.Visible = False
+                Me.T_TargetDB.Visible = True
+                Me.L_TargetDB.Visible = True
                 '--------------------Not relevant to Elastic-----------------------
                 Me.L_TagetTable.Visible = True
                 Me.C_TargetTable.Visible = True
@@ -385,6 +393,8 @@
                 Me.L_Port.Visible = True
                 Me.T_APIKey.Visible = True
                 Me.L_APIKey.Visible = True
+                Me.T_TargetDB.Visible = False
+                Me.L_TargetDB.Visible = False
                 '--------------------Not relevant to Elastic-----------------------
                 Me.L_TagetTable.Visible = False
                 Me.C_TargetTable.Visible = False
@@ -416,6 +426,8 @@
                 Me.L_Port.Visible = False
                 Me.T_APIKey.Visible = False
                 Me.L_APIKey.Visible = False
+                Me.T_TargetDB.Visible = True
+                Me.L_TargetDB.Visible = True
                 '--------------------Not relevant to Elastic-----------------------
                 Me.L_TagetTable.Visible = True
                 Me.C_TargetTable.Visible = True
@@ -582,7 +594,8 @@
             .Password = Me.T_TargetPassword.Text,
             .SQLTable = Me.C_TargetTable.Text,
             .IDColumn = Me.C_TargetIDColumn.Text,
-            .IDColumnDataType = Me.C_TargetIDDatatype.Text
+            .IDColumnDataType = Me.C_TargetIDDatatype.Text,
+            .Index = Me.T_Index.Text
         }
 
         If Me.C_MapIDValue.Checked = True Then
@@ -611,6 +624,24 @@
             TargetSettings.DeleteAllowed = True
         Else
             TargetSettings.DeleteAllowed = False
+        End If
+
+        If Me.C_DropIndex.Checked = True Then
+            TargetSettings.DropIndex = True
+        Else
+            TargetSettings.DropIndex = False
+        End If
+
+        If Me.C_UpdateItems.Checked = True Then
+            TargetSettings.UpdateItems = True
+        Else
+            TargetSettings.UpdateItems = False
+        End If
+
+        If Me.C_DeleteItems.Checked = True Then
+            TargetSettings.DeleteItems = True
+        Else
+            TargetSettings.DeleteItems = False
         End If
 
         If Me.C_TempTable.Checked = True Then
@@ -1798,6 +1829,7 @@
                         Me.T_TargetServerAdress.Text = Setting.Servername
                         Me.T_TargetPath.Text = Setting.FilePath
                         Me.T_TargetDB.Text = Setting.SQLDB
+                        Me.T_Index.Text = Setting.Index
                         Me.C_TargetConnectionType.Text = Setting.ConnMode
                         Me.T_TargetUsername.Text = Setting.User
                         Me.T_TargetPassword.Text = Setting.Password
@@ -1811,6 +1843,9 @@
                         Me.C_InsertAllowed.Checked = Setting.InsertAllowed
                         Me.C_UpdateAllowed.Checked = Setting.UpdateAllowed
                         Me.C_DeleteAllowed.Checked = Setting.DeleteAllowed
+                        Me.C_DropIndex.Checked = Setting.DropIndex
+                        Me.C_UpdateItems.Checked = Setting.UpdateItems
+                        Me.C_DeleteItems.Checked = Setting.DeleteItems
                         Me.C_TempTable.Checked = Setting.TmpTableAllowed
                         Me.C_ownTmpTable.Checked = Setting.UseOwnTmpTable
                         Me.C_PredefinedTmpTable.Text = Setting.PredefinedTmpTable

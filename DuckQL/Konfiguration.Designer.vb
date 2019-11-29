@@ -63,6 +63,15 @@ Partial Class Konfiguration
         Me.T_SourceAdress = New System.Windows.Forms.TextBox()
         Me.T_SourceFilterColumn = New System.Windows.Forms.TextBox()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.L_Port = New System.Windows.Forms.Label()
+        Me.T_Port = New System.Windows.Forms.TextBox()
+        Me.L_APIKey = New System.Windows.Forms.Label()
+        Me.T_APIKey = New System.Windows.Forms.TextBox()
+        Me.T_Index = New System.Windows.Forms.TextBox()
+        Me.L_Index = New System.Windows.Forms.Label()
+        Me.C_DeleteItems = New System.Windows.Forms.CheckBox()
+        Me.C_UpdateItems = New System.Windows.Forms.CheckBox()
+        Me.C_DropIndex = New System.Windows.Forms.CheckBox()
         Me.C_ownTmpTable = New System.Windows.Forms.CheckBox()
         Me.l_PredefinedTmpTable = New System.Windows.Forms.Label()
         Me.C_PredefinedTmpTable = New System.Windows.Forms.ComboBox()
@@ -136,15 +145,6 @@ Partial Class Konfiguration
         Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
         Me.L_OrderID = New System.Windows.Forms.Label()
         Me.B_Load = New System.Windows.Forms.Button()
-        Me.C_DropIndex = New System.Windows.Forms.CheckBox()
-        Me.C_UpdateItems = New System.Windows.Forms.CheckBox()
-        Me.C_DeleteItems = New System.Windows.Forms.CheckBox()
-        Me.L_Index = New System.Windows.Forms.Label()
-        Me.T_Index = New System.Windows.Forms.TextBox()
-        Me.T_APIKey = New System.Windows.Forms.TextBox()
-        Me.L_APIKey = New System.Windows.Forms.Label()
-        Me.T_Port = New System.Windows.Forms.TextBox()
-        Me.L_Port = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         CType(Me.PB_Source, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox2.SuspendLayout()
@@ -584,6 +584,97 @@ Partial Class Konfiguration
         Me.GroupBox2.TabIndex = 6
         Me.GroupBox2.TabStop = False
         Me.GroupBox2.Text = "Target"
+        '
+        'L_Port
+        '
+        Me.L_Port.AutoSize = True
+        Me.L_Port.Location = New System.Drawing.Point(458, 114)
+        Me.L_Port.Name = "L_Port"
+        Me.L_Port.Size = New System.Drawing.Size(31, 13)
+        Me.L_Port.TabIndex = 66
+        Me.L_Port.Text = "Port:"
+        Me.L_Port.Visible = False
+        '
+        'T_Port
+        '
+        Me.T_Port.Location = New System.Drawing.Point(510, 111)
+        Me.T_Port.Name = "T_Port"
+        Me.T_Port.Size = New System.Drawing.Size(58, 22)
+        Me.T_Port.TabIndex = 65
+        Me.T_Port.Visible = False
+        '
+        'L_APIKey
+        '
+        Me.L_APIKey.AutoSize = True
+        Me.L_APIKey.Location = New System.Drawing.Point(10, 114)
+        Me.L_APIKey.Name = "L_APIKey"
+        Me.L_APIKey.Size = New System.Drawing.Size(46, 13)
+        Me.L_APIKey.TabIndex = 64
+        Me.L_APIKey.Text = "API Key:"
+        Me.L_APIKey.Visible = False
+        '
+        'T_APIKey
+        '
+        Me.T_APIKey.Location = New System.Drawing.Point(80, 111)
+        Me.T_APIKey.Name = "T_APIKey"
+        Me.T_APIKey.Size = New System.Drawing.Size(231, 22)
+        Me.T_APIKey.TabIndex = 63
+        Me.T_APIKey.Visible = False
+        '
+        'T_Index
+        '
+        Me.T_Index.Location = New System.Drawing.Point(81, 44)
+        Me.T_Index.Name = "T_Index"
+        Me.T_Index.Size = New System.Drawing.Size(191, 22)
+        Me.T_Index.TabIndex = 62
+        Me.ToolTipKonfig.SetToolTip(Me.T_Index, "Database: The database you want to use.")
+        Me.T_Index.Visible = False
+        '
+        'L_Index
+        '
+        Me.L_Index.AutoSize = True
+        Me.L_Index.Location = New System.Drawing.Point(10, 48)
+        Me.L_Index.Name = "L_Index"
+        Me.L_Index.Size = New System.Drawing.Size(38, 13)
+        Me.L_Index.TabIndex = 61
+        Me.L_Index.Text = "Index:"
+        Me.L_Index.Visible = False
+        '
+        'C_DeleteItems
+        '
+        Me.C_DeleteItems.AutoSize = True
+        Me.C_DeleteItems.Location = New System.Drawing.Point(438, 266)
+        Me.C_DeleteItems.Name = "C_DeleteItems"
+        Me.C_DeleteItems.Size = New System.Drawing.Size(89, 17)
+        Me.C_DeleteItems.TabIndex = 60
+        Me.C_DeleteItems.Text = "Delete Items"
+        Me.ToolTipKonfig.SetToolTip(Me.C_DeleteItems, "INSERT allowed: Check if you want new values to be added to your source.")
+        Me.C_DeleteItems.UseVisualStyleBackColor = True
+        Me.C_DeleteItems.Visible = False
+        '
+        'C_UpdateItems
+        '
+        Me.C_UpdateItems.AutoSize = True
+        Me.C_UpdateItems.Location = New System.Drawing.Point(230, 266)
+        Me.C_UpdateItems.Name = "C_UpdateItems"
+        Me.C_UpdateItems.Size = New System.Drawing.Size(94, 17)
+        Me.C_UpdateItems.TabIndex = 59
+        Me.C_UpdateItems.Text = "Update Items"
+        Me.ToolTipKonfig.SetToolTip(Me.C_UpdateItems, "INSERT allowed: Check if you want new values to be added to your source.")
+        Me.C_UpdateItems.UseVisualStyleBackColor = True
+        Me.C_UpdateItems.Visible = False
+        '
+        'C_DropIndex
+        '
+        Me.C_DropIndex.AutoSize = True
+        Me.C_DropIndex.Location = New System.Drawing.Point(45, 266)
+        Me.C_DropIndex.Name = "C_DropIndex"
+        Me.C_DropIndex.Size = New System.Drawing.Size(83, 17)
+        Me.C_DropIndex.TabIndex = 58
+        Me.C_DropIndex.Text = "Drop Index"
+        Me.ToolTipKonfig.SetToolTip(Me.C_DropIndex, "INSERT allowed: Check if you want new values to be added to your source.")
+        Me.C_DropIndex.UseVisualStyleBackColor = True
+        Me.C_DropIndex.Visible = False
         '
         'C_ownTmpTable
         '
@@ -1240,97 +1331,6 @@ Partial Class Konfiguration
         Me.B_Load.TabIndex = 49
         Me.B_Load.Text = "Load Configuration..."
         Me.B_Load.UseVisualStyleBackColor = True
-        '
-        'C_DropIndex
-        '
-        Me.C_DropIndex.AutoSize = True
-        Me.C_DropIndex.Location = New System.Drawing.Point(45, 266)
-        Me.C_DropIndex.Name = "C_DropIndex"
-        Me.C_DropIndex.Size = New System.Drawing.Size(83, 17)
-        Me.C_DropIndex.TabIndex = 58
-        Me.C_DropIndex.Text = "Drop Index"
-        Me.ToolTipKonfig.SetToolTip(Me.C_DropIndex, "INSERT allowed: Check if you want new values to be added to your source.")
-        Me.C_DropIndex.UseVisualStyleBackColor = True
-        Me.C_DropIndex.Visible = False
-        '
-        'C_UpdateItems
-        '
-        Me.C_UpdateItems.AutoSize = True
-        Me.C_UpdateItems.Location = New System.Drawing.Point(230, 266)
-        Me.C_UpdateItems.Name = "C_UpdateItems"
-        Me.C_UpdateItems.Size = New System.Drawing.Size(94, 17)
-        Me.C_UpdateItems.TabIndex = 59
-        Me.C_UpdateItems.Text = "Update Items"
-        Me.ToolTipKonfig.SetToolTip(Me.C_UpdateItems, "INSERT allowed: Check if you want new values to be added to your source.")
-        Me.C_UpdateItems.UseVisualStyleBackColor = True
-        Me.C_UpdateItems.Visible = False
-        '
-        'C_DeleteItems
-        '
-        Me.C_DeleteItems.AutoSize = True
-        Me.C_DeleteItems.Location = New System.Drawing.Point(438, 266)
-        Me.C_DeleteItems.Name = "C_DeleteItems"
-        Me.C_DeleteItems.Size = New System.Drawing.Size(89, 17)
-        Me.C_DeleteItems.TabIndex = 60
-        Me.C_DeleteItems.Text = "Delete Items"
-        Me.ToolTipKonfig.SetToolTip(Me.C_DeleteItems, "INSERT allowed: Check if you want new values to be added to your source.")
-        Me.C_DeleteItems.UseVisualStyleBackColor = True
-        Me.C_DeleteItems.Visible = False
-        '
-        'L_Index
-        '
-        Me.L_Index.AutoSize = True
-        Me.L_Index.Location = New System.Drawing.Point(10, 48)
-        Me.L_Index.Name = "L_Index"
-        Me.L_Index.Size = New System.Drawing.Size(38, 13)
-        Me.L_Index.TabIndex = 61
-        Me.L_Index.Text = "Index:"
-        Me.L_Index.Visible = False
-        '
-        'T_Index
-        '
-        Me.T_Index.Location = New System.Drawing.Point(81, 44)
-        Me.T_Index.Name = "T_Index"
-        Me.T_Index.Size = New System.Drawing.Size(191, 22)
-        Me.T_Index.TabIndex = 62
-        Me.ToolTipKonfig.SetToolTip(Me.T_Index, "Database: The database you want to use.")
-        Me.T_Index.Visible = False
-        '
-        'T_APIKey
-        '
-        Me.T_APIKey.Location = New System.Drawing.Point(80, 111)
-        Me.T_APIKey.Name = "T_APIKey"
-        Me.T_APIKey.Size = New System.Drawing.Size(231, 22)
-        Me.T_APIKey.TabIndex = 63
-        Me.T_APIKey.Visible = False
-        '
-        'L_APIKey
-        '
-        Me.L_APIKey.AutoSize = True
-        Me.L_APIKey.Location = New System.Drawing.Point(10, 114)
-        Me.L_APIKey.Name = "L_APIKey"
-        Me.L_APIKey.Size = New System.Drawing.Size(46, 13)
-        Me.L_APIKey.TabIndex = 64
-        Me.L_APIKey.Text = "API Key:"
-        Me.L_APIKey.Visible = False
-        '
-        'T_Port
-        '
-        Me.T_Port.Location = New System.Drawing.Point(510, 111)
-        Me.T_Port.Name = "T_Port"
-        Me.T_Port.Size = New System.Drawing.Size(58, 22)
-        Me.T_Port.TabIndex = 65
-        Me.T_Port.Visible = False
-        '
-        'L_Port
-        '
-        Me.L_Port.AutoSize = True
-        Me.L_Port.Location = New System.Drawing.Point(458, 114)
-        Me.L_Port.Name = "L_Port"
-        Me.L_Port.Size = New System.Drawing.Size(31, 13)
-        Me.L_Port.TabIndex = 66
-        Me.L_Port.Text = "Port:"
-        Me.L_Port.Visible = False
         '
         'Konfiguration
         '

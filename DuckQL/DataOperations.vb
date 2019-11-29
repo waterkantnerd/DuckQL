@@ -77,6 +77,7 @@ Public Class DataOperations
             Exit Sub
         End If
         'Core.Sourcedata = DS.Tables(0)
+        '-------------------------------------------------------------Creating a virtual Table for adding static columns and stuff---------------------------------------------------------------
         Dim i As Integer = 0
         For i = 0 To DS.Tables(0).Columns.Count - 1
             For Each Mapping In Module1.Core.Mappings
@@ -85,40 +86,39 @@ Public Class DataOperations
                     DC.ColumnName = Mapping.Targetname
                     DC.DataType = System.Type.GetType("System." & Mapping.Targettype)
                     Core.Sourcedata.Columns.Add(DC)
-
                 End If
             Next
         Next
+        '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        '----------------------------------------------------------------Import Source Data into virtual table-----------------------------------------------------------------------------------
         Dim MyRows() As DataRow = DS.Tables(0).Select
         For Each Row In MyRows
             Core.Sourcedata.ImportRow(Row)
         Next
+        '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
+        '----------------------------------------------------------------Get target Data for matching--------------------------------------------------------------------------------------------
         SQLrq = CreateSelectStatement("target")
         DS = TargetSQL.CreateDataAdapter(SQLrq)
         If IsNothing(DS) = True Then
             Log.Write(0, "No results found. Is the filter correct?")
             Exit Sub
         End If
-
-
-
         Core.Targetdata = DS.Tables(0)
-        'Core.Targetdata.Merge(Core.Sourcedata)
+        '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+        '--------------------------------------------------------------------Setting Row State depending if data had been found------------------------------------------------------------------ 
         MyRows = Core.Sourcedata.Select()
         For Each Row In MyRows
             Dim TRows() As DataRow = Core.Targetdata.Select(Target.IDColumn & "=" & Row(Target.IDColumn))
             If TRows.Count = 0 Then
                 Row.SetAdded()
-                Core.Targetdata.ImportRow(Row)
             Else
                 Row.SetModified()
-                Core.Targetdata.ImportRow(Row)
             End If
+            Core.Targetdata.ImportRow(Row)
         Next
-
+        '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         DS.Tables(0).Merge(Core.Targetdata)
 
