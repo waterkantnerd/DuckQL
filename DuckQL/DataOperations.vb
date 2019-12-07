@@ -109,14 +109,31 @@ Public Class DataOperations
 
         '--------------------------------------------------------------------Setting Row State depending if data had been found------------------------------------------------------------------ 
         MyRows = Core.Sourcedata.Select()
+        Log.Write(1, "Matching Source- and Targetdata started...")
+        If Target.Servertype = "MSSQL" Or Target.Servertype = "MS-SQL" Then
+            If Target.BatchQueryAllowed = True Then
+                Module1.Core.TargetDataTable = Core.Sourcedata
+                Module1.Core.LoadProccessHasFinished = True
+                Exit Sub
+            End If
+        Else
+
+        End If
+
         For Each Row In MyRows
-            Dim TRows() As DataRow = Core.Targetdata.Select(Target.IDColumn & "=" & Row(Target.IDColumn))
-            If TRows.Count = 0 Then
+            If Core.Targetdata.Rows.Count = 0 Then
+                'If the target table is empty no checkup needed
                 Row.SetAdded()
             Else
-                Row.SetModified()
+                Dim TRows() As DataRow = Core.Targetdata.Select(Target.IDColumn & "=" & Row(Target.IDColumn))
+                If TRows.Count = 0 Then
+                    Row.SetAdded()
+                Else
+                    Row.SetModified()
+                End If
             End If
             Core.Targetdata.ImportRow(Row)
+            Log.Write(1, Row.RowState)
         Next
         '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -145,6 +162,7 @@ Public Class DataOperations
         For Each Row In MyRows
             Log.Write(1, Row.RowState)
         Next
+        '----> Muss das nicht zum Fire????
         Dim ChangedRows As Integer = TargetSQL.WriteDataset(DS)
         Core.LoadProccessHasFinished = True
         'Module1.Core.SourceIndex = DS
@@ -758,11 +776,9 @@ Public Class DataOperations
         End If
 
         If SQL.Setting.Servertype = "MS-SQL" Or SQL.Setting.Servertype = "MSSQL" Then
-            If Module1.Core.TargetDataTable.Rows.Count > 0 Then
-                While CheckRowCompletion() = False
-                    Log.Write(1, "Waiting 5 Seconds for Row to fill...")
-                    System.Threading.Thread.Sleep(5000)
-                End While
+            If Module1.Core.Sourcedata.Rows.Count > 0 Then
+                'Just use the virtual data table and send it directly to the SQL Server. 
+                'MS-SQL ist Using Upsert Methods to Merge Data into Targettable
                 SQL.CopyDataToMSSQL()
             Else
                 Dim i As Long = 0

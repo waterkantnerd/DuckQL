@@ -119,12 +119,37 @@ Public Class Core : Implements IDisposable
         Me.QueryBlockID = 0
         Me.Files.Clear()
         Me.QueryBlockID = 0
-        Me.QueryBlock.Dispose()
+        If IsNothing(Me.QueryBlock) Then
+        Else
+            Me.QueryBlock.Dispose()
+        End If
+
+
+
         ReDim Mappings(256)
         ReDim NoSourceMappings(256)
         ReDim SourceMappings(256)
-        'TargetIndex.Dispose()
-        TargetDataTable.Dispose()
+
+        If IsNothing(Me.Targetdata) Then
+        Else
+            Me.Targetdata.Dispose()
+        End If
+        If IsNothing(Me.TargetDataTable) Then
+        Else
+            Me.TargetDataTable.Dispose()
+        End If
+        If IsNothing(Me.TargetIndex) Then
+        Else
+            Me.TargetIndex.Dispose()
+        End If
+        If IsNothing(Me.Sourcedata) Then
+        Else
+            Me.Sourcedata.Dispose()
+        End If
+        If IsNothing(Me.SourceIndex) Then
+        Else
+            Me.SourceIndex.Dispose()
+        End If
         NoRowsInTargetTable = False
         AllQueryBlocksFinished = False
         DataTransferFinished = False
