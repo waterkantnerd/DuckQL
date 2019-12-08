@@ -91,7 +91,20 @@ Public Class DataOperations
         Next
         '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         '----------------------------------------------------------------Import Source Data into virtual table-----------------------------------------------------------------------------------
-        Dim MyRows() As DataRow = DS.Tables(0).Select
+
+        Dim MySource As DataSet = DS.Copy
+
+        If MySource.Tables.Count > 0 Then
+            Dim ColOrd As Integer = 0
+            For ColOrd = 0 To MySource.Tables(0).Columns.Count - 1
+                For Each Mapping In Module1.Core.Mappings
+                    If Mapping.Sourcename = MySource.Tables(0).Columns(ColOrd).ColumnName Then
+                        MySource.Tables(0).Columns(ColOrd).ColumnName = Mapping.Targetname
+                    End If
+                Next
+            Next
+        End If
+        Dim MyRows() As DataRow = MySource.Tables(0).Select
         For Each Row In MyRows
             Core.Sourcedata.ImportRow(Row)
         Next
@@ -99,19 +112,19 @@ Public Class DataOperations
 
         '----------------------------------------------------------------Get target Data for matching--------------------------------------------------------------------------------------------
         SQLrq = CreateSelectStatement("target")
-        DS = TargetSQL.CreateDataAdapter(SQLrq)
+        Core.Targetdataset = TargetSQL.CreateDataAdapter(SQLrq)
         If IsNothing(DS) = True Then
             Log.Write(0, "No results found. Is the filter correct?")
             Exit Sub
         End If
-        Core.Targetdata = DS.Tables(0)
+        Core.Targetdata = Core.Targetdataset.Tables(0)
         '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         '--------------------------------------------------------------------Setting Row State depending if data had been found------------------------------------------------------------------ 
         MyRows = Core.Sourcedata.Select()
         Log.Write(1, "Matching Source- and Targetdata started...")
         If Target.Servertype = "MSSQL" Or Target.Servertype = "MS-SQL" Then
-            If Target.BatchQueryAllowed = True Then
+            If Target.TmpTableAllowed = True Then
                 Module1.Core.TargetDataTable = Core.Sourcedata
                 Module1.Core.LoadProccessHasFinished = True
                 Exit Sub
@@ -119,6 +132,32 @@ Public Class DataOperations
         Else
 
         End If
+
+
+        Try
+            Dim ChangeReader As New DataTableReader(Core.Sourcedata)
+            'ToDo TEST!!!
+            If Target.UpdateAllowed = True And Target.InsertAllowed = True Then
+                'INSERT AND UPDATE ALLOWED
+                Core.Targetdataset.Tables(0).Load(ChangeReader, LoadOption.Upsert)
+            Else
+                If Target.InsertAllowed = True Then
+                    'INSERT ALLOWED UPDATE NOT
+                    Core.Targetdataset.Tables(0).Load(ChangeReader, LoadOption.PreserveChanges)
+                End If
+
+                If Target.UpdateAllowed = True Then
+                    'UPDATE ALLOWED INSERT NOT
+                    Core.Targetdataset.Tables(0).Load(ChangeReader, LoadOption.OverwriteChanges)
+                End If
+            End If
+            Module1.Core.LoadProccessHasFinished = True
+            Exit Sub
+        Catch ex As Exception
+            Log.Write(0, "Error while merging datasets! " & ex.Message)
+            Exit Sub
+        End Try
+
 
         For Each Row In MyRows
             If Core.Targetdata.Rows.Count = 0 Then
@@ -750,6 +789,39 @@ Public Class DataOperations
     End Function
 
     Private Sub WriteSQL()
+        While Module1.Core.LoadProccessHasFinished = False
+            Log.Write(1, "Waiting 5 Seconds to finish loading process")
+            System.Threading.Thread.Sleep(5000)
+        End While
+
+        Log.Write(1, "Writing to Target...")
+        If ENV.IDLessBatch = True Then
+            Log.Write(1, "NOTE: IDless Batch Mode is enabled")
+        Else
+            Log.Write(1, "NOTE: IDless Batch Mode is disabled")
+        End If
+
+        If SQL.Setting.Servertype = "MS-SQL" Or SQL.Setting.Servertype = "MSSQL" Then
+            'Just use the virtual data table and send it directly to the SQL Server. 
+            'MS-SQL ist Using Upsert Methods to Merge Data into Targettable
+            If SQL.Setting.TmpTableAllowed = True Then
+                SQL.CopyDataToMSSQL()
+                Module1.Core.DataTransferFinished = True
+                Exit Sub
+            End If
+        End If
+
+
+
+        Dim ChangedRows As Integer = SQL.WriteDataset(Core.Targetdataset)
+        Log.Write(1, ChangedRows)
+
+    End Sub
+
+    Private Sub WriteSQL_old()
+        '-----------------------------------> Dead code
+
+
         Dim SQLrq As String = ""
 
         'ToDo: UPDATE Handling of Query Blocks for MySQL + INSERT & UPDATE Handling for MS-SQL
@@ -775,11 +847,16 @@ Public Class DataOperations
             Log.Write(1, "NOTE: Target Table is empty --> Only INSERT Statements will be used")
         End If
 
+
+
+
         If SQL.Setting.Servertype = "MS-SQL" Or SQL.Setting.Servertype = "MSSQL" Then
             If Module1.Core.Sourcedata.Rows.Count > 0 Then
                 'Just use the virtual data table and send it directly to the SQL Server. 
                 'MS-SQL ist Using Upsert Methods to Merge Data into Targettable
-                SQL.CopyDataToMSSQL()
+                If SQL.Setting.TmpTableAllowed = True Then
+                    SQL.CopyDataToMSSQL()
+                End If
             Else
                 Dim i As Long = 0
                 While Module1.Core.Reihen.Count > 0

@@ -29,6 +29,7 @@ Public Class Core : Implements IDisposable
     Public LoadProccessHasFinished As Boolean = False
     Public Sourcedata As New DataTable
     Public Targetdata As DataTable
+    Public Targetdataset As DataSet
 
     Public Async Sub QueryBlockHandler()
         While DataTransferFinished = False
@@ -149,6 +150,10 @@ Public Class Core : Implements IDisposable
         If IsNothing(Me.SourceIndex) Then
         Else
             Me.SourceIndex.Dispose()
+        End If
+        If IsNothing(Me.Targetdataset) Then
+        Else
+            Me.Targetdataset.Dispose()
         End If
         NoRowsInTargetTable = False
         AllQueryBlocksFinished = False

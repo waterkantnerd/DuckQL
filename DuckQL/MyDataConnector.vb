@@ -547,7 +547,8 @@ Public Class MyDataConnector
 
         Using BulkCopy As New SqlBulkCopy(SQLCon) With {
             .NotifyAfter = Me.Setting.NotificationRows,
-            .BatchSize = Me.Setting.Max_Paket
+            .BatchSize = Me.Setting.Max_Paket,
+            .BulkCopyTimeout = 0
         }
 
             If Me.Setting.UpdateAllowed = True Then
