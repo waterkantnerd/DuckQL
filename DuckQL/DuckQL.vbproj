@@ -115,6 +115,7 @@
   <ItemGroup>
     <Compile Include="ColumnSchema.vb" />
     <Compile Include="Core.vb" />
+    <Compile Include="CURLProcessor.vb" />
     <Compile Include="DataDefinitions.vb" />
     <Compile Include="DataOperations.vb" />
     <Compile Include="Daten.vb" />
