@@ -138,6 +138,7 @@ Public Class Core : Implements IDisposable
         If IsNothing(Me.TargetDataTable) Then
         Else
             Me.TargetDataTable.Dispose()
+            Me.TargetDataTable.Columns.Clear()
         End If
         If IsNothing(Me.TargetIndex) Then
         Else
@@ -146,6 +147,7 @@ Public Class Core : Implements IDisposable
         If IsNothing(Me.Sourcedata) Then
         Else
             Me.Sourcedata.Dispose()
+            Me.Sourcedata.Columns.Clear()
         End If
         If IsNothing(Me.SourceIndex) Then
         Else
