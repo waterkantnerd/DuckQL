@@ -548,7 +548,8 @@ Public Class MyDataConnector
 
         Using BulkCopy As New SqlBulkCopy(SQLCon) With {
             .NotifyAfter = Me.Setting.NotificationRows,
-            .BatchSize = Me.Setting.Max_Paket
+            .BatchSize = Me.Setting.Max_Paket,
+            .BulkCopyTimeout = 0
         }
 
             If Me.Setting.UpdateAllowed = True Then
@@ -617,9 +618,13 @@ Public Class MyDataConnector
         Dim i As Integer = 0
         For Each Column In ENV.Mappings
             If i + 1 = ENV.Mappings.Count Then
-                SB.Append("Target.[" & Column.Targetname & "] <> " & "SOURCE.[" & Column.Targetname & "]")
+                SB.Append("Target.[" & Column.Targetname & "] <>" & "SOURCE.[" & Column.Targetname & "] OR ")
+                SB.Append("Source.[" & Column.Targetname & "] IS NULL OR ")
+                SB.Append("Target.[" & Column.Targetname & "] IS NULL ")
             Else
                 SB.Append("Target.[" & Column.Targetname & "] <>" & "SOURCE.[" & Column.Targetname & "] OR ")
+                SB.Append("Source.[" & Column.Targetname & "] IS NULL OR ")
+                SB.Append("Target.[" & Column.Targetname & "] IS NULL OR ")
             End If
             i = i + 1
         Next
@@ -1063,6 +1068,7 @@ Public Class MyDataConnector
                 End If
                 SQLCon.Open()
                 myCmd.Connection = SQLCon
+                myCmd.CommandTimeout = 0
                 myCmd.CommandText = "SELECT * FROM " & Setting.SQLTable
                 myReader = myCmd.ExecuteReader
                 DT = myReader.GetSchemaTable

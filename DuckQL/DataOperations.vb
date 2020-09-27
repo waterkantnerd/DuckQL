@@ -92,7 +92,20 @@ Public Class DataOperations
         Next
         '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         '----------------------------------------------------------------Import Source Data into virtual table-----------------------------------------------------------------------------------
-        Dim MyRows() As DataRow = DS.Tables(0).Select
+
+        Dim MySource As DataSet = DS.Copy
+
+        If MySource.Tables.Count > 0 Then
+            Dim ColOrd As Integer = 0
+            For ColOrd = 0 To MySource.Tables(0).Columns.Count - 1
+                For Each Mapping In Module1.Core.Mappings
+                    If Mapping.Sourcename = MySource.Tables(0).Columns(ColOrd).ColumnName Then
+                        MySource.Tables(0).Columns(ColOrd).ColumnName = Mapping.Targetname
+                    End If
+                Next
+            Next
+        End If
+        Dim MyRows() As DataRow = MySource.Tables(0).Select
         For Each Row In MyRows
             Core.Sourcedata.ImportRow(Row)
         Next
@@ -100,19 +113,19 @@ Public Class DataOperations
 
         '----------------------------------------------------------------Get target Data for matching--------------------------------------------------------------------------------------------
         SQLrq = CreateSelectStatement("target")
-        DS = TargetSQL.CreateDataAdapter(SQLrq)
+        Core.Targetdataset = TargetSQL.CreateDataAdapter(SQLrq)
         If IsNothing(DS) = True Then
             Log.Write(0, "No results found. Is the filter correct?")
             Exit Sub
         End If
-        Core.Targetdata = DS.Tables(0)
+        Core.Targetdata = Core.Targetdataset.Tables(0)
         '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         '--------------------------------------------------------------------Setting Row State depending if data had been found------------------------------------------------------------------ 
         MyRows = Core.Sourcedata.Select()
         Log.Write(1, "Matching Source- and Targetdata started...")
         If Target.Servertype = "MSSQL" Or Target.Servertype = "MS-SQL" Then
-            If Target.BatchQueryAllowed = True Then
+            If Target.TmpTableAllowed = True Then
                 Module1.Core.TargetDataTable = Core.Sourcedata
                 Module1.Core.LoadProccessHasFinished = True
                 Exit Sub
@@ -121,85 +134,31 @@ Public Class DataOperations
 
         End If
 
-        For Each Row In MyRows
-            If Core.Targetdata.Rows.Count = 0 Then
-                'If the target table is empty no checkup needed
-                Row.SetAdded()
+
+        Try
+            Dim ChangeReader As New DataTableReader(Core.Sourcedata)
+            'ToDo TEST!!!
+            If Target.UpdateAllowed = True And Target.InsertAllowed = True Then
+                'INSERT AND UPDATE ALLOWED
+                Core.Targetdataset.Tables(0).Load(ChangeReader, LoadOption.Upsert)
             Else
-                Dim TRows() As DataRow = Core.Targetdata.Select(Target.IDColumn & "=" & Row(Target.IDColumn))
-                If TRows.Count = 0 Then
-                    Row.SetAdded()
-                Else
-                    Row.SetModified()
+                If Target.InsertAllowed = True Then
+                    'INSERT ALLOWED UPDATE NOT
+                    Core.Targetdataset.Tables(0).Load(ChangeReader, LoadOption.PreserveChanges)
+                End If
+
+                If Target.UpdateAllowed = True Then
+                    'UPDATE ALLOWED INSERT NOT
+                    Core.Targetdataset.Tables(0).Load(ChangeReader, LoadOption.OverwriteChanges)
                 End If
             End If
-            Core.Targetdata.ImportRow(Row)
-            Log.Write(1, Row.RowState)
-        Next
+            Module1.Core.LoadProccessHasFinished = True
+            Exit Sub
+        Catch ex As Exception
+            Log.Write(0, "Error while merging datasets! " & ex.Message)
+            Exit Sub
+        End Try
         '----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        DS.Tables(0).Merge(Core.Targetdata)
-
-        Dim Column As DataColumn
-        Dim Columns(0) As DataColumn
-        For Each Column In DS.Tables(0).Columns
-            If Core.CurrentENV.HasMultipleIdentifiers = False Then
-                If Column.ColumnName = Target.IDColumn Then
-                    'Column.Unique = True
-                    'Columns(0) = Column
-                    'DS.Tables(0).PrimaryKey = Columns
-                End If
-            Else
-                For Each Mapping In Core.Mappings
-                    If Column.ColumnName.ToLower = Mapping.Targetname.ToLower Then
-
-                    End If
-                Next
-            End If
-        Next
-
-        MyRows = Core.Targetdata.Select()
-
-        For Each Row In MyRows
-            Log.Write(1, Row.RowState)
-        Next
-        '----> Muss das nicht zum Fire????
-        Dim ChangedRows As Integer = TargetSQL.WriteDataset(DS)
-        Core.LoadProccessHasFinished = True
-        'Module1.Core.SourceIndex = DS
-        'Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Module1.Core.LoadChecker))
-        'Dim Max As Long = DS.Tables(0).Rows.Count - 1
-        'Log.Write(1, Max & " rows found")
-        'Try
-        'For Each Row In DS.Tables(0).Rows
-        'Dim ResultRow As DataRow = Row
-        'If IsDBNull(ResultRow(Setting.IDColumn)) = True Then
-        'Log.Write(1, "Filtering empty row.")
-        'Else
-        'Dim Reihe As New Reihe
-        'Reihe.SetUp(SQL, TargetSQL)
-        'ToDo: Multiple Identifier!!!
-        'If Target.MapTargetIDColumnValue = True Then ' If the Identifier has to be modified before matching with the target 
-        'Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
-        'Reihe.MapIdentifier()
-        'Else
-        'Reihe.IDValue = ResultRow(Setting.IDColumn).ToString
-        'End If
-        'Reihe.IDValueDataType = Setting.IDColumnDataType
-        'Dim RowObj As New RowObj
-        'RowObj.SetUp(Reihe, DS.Tables(0).Columns, ResultRow, Max, i)
-        'Log.Write(1, "Row " & i & " has ID value " & Reihe.IDValue)
-        'Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf SetUpSQLRow), RowObj)
-
-        'Dim t As New Threading.Thread(AddressOf SetUpSQLRow)
-        't.Start(RowObj)
-        'End If
-        'i = i + 1
-        'Next
-        '------------------------------------------------------------------------------------------------------------------------------------------------
-        'Catch ex As Exception
-        'Log.Write(0, "Error while searching for ID: " & ex.Message)
-        'End Try
     End Sub
 
     Private Sub GetTargetIDList()
@@ -255,191 +214,6 @@ Public Class DataOperations
             i = i + 1
         Next
     End Sub
-
-    Private Class RowObj
-        Public Reihe As Reihe
-        Public Columns As DataColumnCollection
-        Public ResultRow As DataRow
-        Public MaxRows As Long
-        Public CurrentRow As Long
-
-        Public Sub SetUp(Reihe As Reihe, Columns As DataColumnCollection, ResultRow As DataRow, ByVal MaxRows As Long, ByVal CurrentRow As Long)
-            Me.Reihe = Reihe
-            Me.Columns = Columns
-            Me.ResultRow = ResultRow
-            Me.MaxRows = MaxRows
-            Me.CurrentRow = CurrentRow
-        End Sub
-    End Class
-    Private Sub SetUpSQLRow(RowObj As RowObj)
-        Dim TargetSQL As MyDataConnector
-        TargetSQL = GetTargetSQL()
-        Dim Target As SQLServerSettings
-        Target = GetTargetSetting()
-        Dim Reihe As Reihe = RowObj.Reihe
-        Dim Columns As DataColumnCollection = RowObj.Columns
-        Dim ResultRow As DataRow = RowObj.ResultRow
-        Dim MaxRows As Long = RowObj.MaxRows
-        Dim CurrentRow As Long = RowObj.CurrentRow
-        Dim i As Integer
-
-        For i = 0 To Columns.Count - 1
-
-            Dim Daten As New Daten
-            With Daten
-                .SetUp(SQL, TargetSQL)
-                If Module1.Core.CurrentENV.HasMultipleIdentifiers = False Then
-                    .IdentifierCol = Setting.IDColumn
-                    .IdentifierVal = ResultRow(Setting.IDColumn).ToString
-                End If
-
-
-                .SourceKey = Columns(i).ToString
-                If ResultRow(.SourceKey).ToString = "" Or IsNothing(ResultRow(.SourceKey).ToString) Or IsDBNull(ResultRow(.SourceKey).ToString) Or ResultRow(.SourceKey).ToString = " " Then
-                    Log.Write(1, "Filtering empty value in row " & Columns(i).ToString & " with identifier " & Setting.IDColumn & "=" & .IdentifierCol)
-                    .Wert = ""
-                Else
-                    .Wert = ResultRow(Columns(i)).ToString
-                End If
-
-                .Mapping = Module1.Core.Mappings(i)
-                .MapDaten()
-                If Module1.Core.CurrentENV.HasMultipleIdentifiers = True Then
-                    If Module1.Core.Mappings(i).UseAsIdentifier = True Then
-                        Reihe.IDSpalten.AddLast(Daten)
-                    End If
-                End If
-                Log.Write(1, "Tupel " & .SourceKey & " with value of " & .Wert & " and Mapping " & .Mapping.Sourcename & " created")
-
-                'If Daten.GetMapping() = True Then
-                'Daten.MapDaten()
-                'Log.Write(1, "Tupel has been added to row.")
-                'Reihe.Spalten.AddLast(Daten)
-                'End If
-            End With
-
-            Reihe.Spalten.AddLast(Daten)
-        Next
-
-        If Module1.Core.NoRowsInTargetTable = True Then
-            Reihe.LookedUp = True
-        Else
-            Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.FindInTarget))
-
-            'Dim t As New System.Threading.Thread(AddressOf Reihe.FindInTarget)
-            't.Start()
-        End If
-
-
-        If Module1.Core.NoSourceMappings.Count > 0 Then
-            For Each Mapping In Module1.Core.NoSourceMappings
-                If Mapping.NoSource = True Then
-                    Dim Daten As New Daten
-                    Daten.SetUp(SQL, TargetSQL)
-                    Daten.IdentifierCol = Setting.IDColumn
-                    Daten.IdentifierVal = ResultRow(Setting.IDColumn).ToString
-                    Daten.Wert = Mapping.StaticValue
-                    Daten.Mapping = Mapping
-                    Daten.TargetDatatype = Mapping.Targettype
-                    Log.Write(1, "Static Tupel for " & Mapping.Targetname & " with value of " & Mapping.StaticValue & " created")
-                    Reihe.Spalten.AddLast(Daten)
-                End If
-            Next
-        Else
-        End If
-
-        If Target.SessionTimestampField <> "" Then
-            Dim Daten As New Daten
-            Daten.SetUp(SQL, TargetSQL)
-            Daten.IdentifierCol = Setting.IDColumn
-            Daten.IdentifierVal = ResultRow(Setting.IDColumn).ToString
-            Daten.SourceKey = Target.SessionTimestampField
-            Daten.Wert = Module1.Core.TimeStamp
-            Dim Mapping As New Mapping With {
-                .Sourcename = Target.SessionTimestampField,
-                .Sourcetype = "DateTime",
-                .Targettype = "DateTime",
-                .Targetname = Target.SessionTimestampField
-            }
-            Daten.Mapping = Mapping
-            Reihe.Spalten.AddLast(Daten)
-        End If
-
-        'If Target is XML, the SourceTablenme will define the Startelement of the XML
-        If Reihe.Table = "" Then
-            If Target.Servertype = "XML" Then
-                Reihe.Table = SQL.Setting.SQLTable
-            End If
-        End If
-
-        'Wait for Lookup on Target to finish
-        While Reihe.LookedUp = False
-            System.Threading.Thread.Sleep(100)
-        End While
-
-        Select Case Target.Servertype
-            Case "MSSQL"
-                If Reihe.Found = False Then
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    't.Start()
-                Else
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    't.Start()
-                End If
-            Case "MS-SQL"
-                If Reihe.Found = False Then
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    't.Start()
-                Else
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    't.Start()
-                End If
-            Case "MySQL"
-                If Reihe.Found = False Then
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    't.Start()
-                Else
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    't.Start()
-                End If
-
-            Case "Access"
-                If Reihe.Found = False Then
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeInsertString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeInsertString)
-                    't.Start()
-                Else
-                    Threading.ThreadPool.QueueUserWorkItem(New Threading.WaitCallback(AddressOf Reihe.MakeUpdateString))
-                    'Dim t As New System.Threading.Thread(AddressOf Reihe.MakeUpdateString)
-                    't.Start()
-                End If
-            Case Else
-
-        End Select
-
-        'Wait for Reihe to finish it Insert/Update Strings
-        While Reihe.StringsDone = False
-            System.Threading.Thread.Sleep(100)
-        End While
-
-        'Setting Proccessed bit to Signal that this row is complete
-        Reihe.Proccessed = True
-        Log.Write(1, "Row " & CurrentRow & " from " & MaxRows & " has beend added to data core")
-        If IsNothing(Reihe) Then
-            Log.Write(0, "WARNING empty row detected on " & CurrentRow & " !!")
-        Else
-            Module1.Core.Reihen.Enqueue(Reihe)
-        End If
-
-
-    End Sub
-
 
     Private Sub LoadHTML()
         Dim i As Long
@@ -751,6 +525,39 @@ Public Class DataOperations
     End Function
 
     Private Sub WriteSQL()
+        While Module1.Core.LoadProccessHasFinished = False
+            Log.Write(1, "Waiting 5 Seconds to finish loading process")
+            System.Threading.Thread.Sleep(5000)
+        End While
+
+        Log.Write(1, "Writing to Target...")
+        If ENV.IDLessBatch = True Then
+            Log.Write(1, "NOTE: IDless Batch Mode is enabled")
+        Else
+            Log.Write(1, "NOTE: IDless Batch Mode is disabled")
+        End If
+
+        If SQL.Setting.Servertype = "MS-SQL" Or SQL.Setting.Servertype = "MSSQL" Then
+            'Just use the virtual data table and send it directly to the SQL Server. 
+            'MS-SQL ist Using Upsert Methods to Merge Data into Targettable
+            If SQL.Setting.TmpTableAllowed = True Then
+                SQL.CopyDataToMSSQL()
+                Module1.Core.DataTransferFinished = True
+                Exit Sub
+            End If
+        End If
+
+
+
+        Dim ChangedRows As Integer = SQL.WriteDataset(Core.Targetdataset)
+        Log.Write(1, ChangedRows)
+
+    End Sub
+
+    Private Sub WriteSQL_old()
+        '-----------------------------------> Dead code
+
+
         Dim SQLrq As String = ""
 
         'ToDo: UPDATE Handling of Query Blocks for MySQL + INSERT & UPDATE Handling for MS-SQL
@@ -776,11 +583,16 @@ Public Class DataOperations
             Log.Write(1, "NOTE: Target Table is empty --> Only INSERT Statements will be used")
         End If
 
+
+
+
         If SQL.Setting.Servertype = "MS-SQL" Or SQL.Setting.Servertype = "MSSQL" Then
             If Module1.Core.Sourcedata.Rows.Count > 0 Then
                 'Just use the virtual data table and send it directly to the SQL Server. 
                 'MS-SQL ist Using Upsert Methods to Merge Data into Targettable
-                SQL.CopyDataToMSSQL()
+                If SQL.Setting.TmpTableAllowed = True Then
+                    SQL.CopyDataToMSSQL()
+                End If
             Else
                 Dim i As Long = 0
                 While Module1.Core.Reihen.Count > 0
