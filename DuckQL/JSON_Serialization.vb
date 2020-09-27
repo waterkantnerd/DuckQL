@@ -108,7 +108,7 @@ Public Class JSON_Serialization
     End Function
 
 
-    Private Function getRows(JSONData As Object) As DataTable
+    Private Function GetRows(JSONData As Object) As DataTable
         Dim DataHits As Object = JSONData("hits")
         Dim HitList() As Object = DataHits("hits")
         Dim Keys As New List(Of String)
@@ -122,10 +122,11 @@ Public Class JSON_Serialization
             Dim i As Integer = 0
             For Each Item In SourceList
                 Dim Pair As System.Collections.Generic.KeyValuePair(Of String, Object) = Item
-                Dim Data As New Daten
-                Data.SourceKey = Pair.Key.ToString
-                Data.Wert = Pair.Value.ToString
-                Data.Target = Module1.Core.GetTarget
+                Dim Data As New Daten With {
+                    .SourceKey = Pair.Key.ToString,
+                    .Wert = Pair.Value.ToString,
+                    .Target = Module1.Core.GetTarget
+                }
                 If Data.GetMapping(True) = True Then
                     MyRow.Spalten.AddLast(Data)
                 End If

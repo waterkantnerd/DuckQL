@@ -82,9 +82,10 @@ Public Class DataOperations
         For i = 0 To DS.Tables(0).Columns.Count - 1
             For Each Mapping In Module1.Core.Mappings
                 If Mapping.Sourcename = DS.Tables(0).Columns(i).ColumnName Then
-                    Dim DC As New DataColumn
-                    DC.ColumnName = Mapping.Targetname
-                    DC.DataType = System.Type.GetType("System." & Mapping.Targettype)
+                    Dim DC As New DataColumn With {
+                        .ColumnName = Mapping.Targetname,
+                        .DataType = System.Type.GetType("System." & Mapping.Targettype)
+                    }
                     Core.Sourcedata.Columns.Add(DC)
                 End If
             Next

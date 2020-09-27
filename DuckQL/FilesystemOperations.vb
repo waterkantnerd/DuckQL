@@ -1,6 +1,6 @@
 ﻿Imports System.IO
 Public Class FilesystemOperations
-    Private Log As LOG
+    Protected Log As LOG
 
     Public Function FileExists(sPath As String) As Boolean
         If FileIO.FileSystem.FileExists(sPath) = True Then

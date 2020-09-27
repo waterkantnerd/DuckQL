@@ -491,10 +491,11 @@ Public Class MyDataConnector
                     Return Nothing
                 End Try
                 Try
-                    Dim builder As SqlCommandBuilder = New SqlCommandBuilder(CurrentSQLDataadapter)
-                    builder.QuotePrefix = "["
-                    builder.QuoteSuffix = "]"
-                    builder.SetAllValues = True
+                    Dim builder As SqlCommandBuilder = New SqlCommandBuilder(CurrentSQLDataadapter) With {
+                        .QuotePrefix = "[",
+                        .QuoteSuffix = "]",
+                        .SetAllValues = True
+                    }
                     SQLLog.Write(1, builder.GetInsertCommand().CommandText)
                     CurrentSQLDataadapter.TableMappings.Add(Setting.SQLTable, DS.Tables(0).TableName)
                     RowsChanged = CurrentSQLDataadapter.Update(DS, Setting.SQLTable)
